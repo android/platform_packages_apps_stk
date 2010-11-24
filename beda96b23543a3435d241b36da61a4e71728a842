@@ -16,6 +16,24 @@
       "revId": "beda96b23543a3435d241b36da61a4e71728a842",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///As\u003d",
+        "filename": "res/values-mcc214-mnc076/strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002951
+      },
+      "writtenOn": "2010-11-24T07:54:38Z",
+      "side": 1,
+      "message": "We are not really clear on the why here, it is how operators request it (it is consistent with the naming on http://en.wikipedia.org/wiki/Mobile_Network_Code)",
+      "parentUuid": "AAAA9n///Dw\u003d",
+      "revId": "beda96b23543a3435d241b36da61a4e71728a842",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
