@@ -36,6 +36,8 @@ import android.widget.TextView;
  */
 public class StkDialogActivity extends Activity implements View.OnClickListener {
     // members
+    private boolean mIsResponseSent = false;
+
     TextMessage mTextMsg;
 
     Handler mTimeoutHandler = new Handler() {
@@ -137,6 +139,14 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (!mIsResponseSent) {
+            sendResponse(StkAppService.RES_ID_TIMEOUT);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
@@ -156,6 +166,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         args.putInt(StkAppService.RES_ID, resId);
         args.putBoolean(StkAppService.CONFIRMATION, confirmed);
         startService(new Intent(this, StkAppService.class).putExtras(args));
+        mIsResponseSent = true;
     }
 
     private void sendResponse(int resId) {
