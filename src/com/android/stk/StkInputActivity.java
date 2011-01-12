@@ -268,7 +268,9 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         int inTypeId = R.string.alphabet;
 
         // set the prompt.
-        mPromptView.setText(mStkInput.text);
+        if (!mStkInput.iconSelfExplanatory || mStkInput.icon == null) {
+            mPromptView.setText(mStkInput.text);
+        }
 
         // Set input type (alphabet/digit) info close to the InText form.
         if (mStkInput.digitOnly) {
