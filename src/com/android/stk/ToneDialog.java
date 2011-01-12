@@ -82,6 +82,9 @@ public class ToneDialog extends Activity {
             iv.setImageBitmap(toneMsg.icon);
         }
 
+        // Ensure that the activity is visible during the complete duration
+        setVisible(true);
+
         // Start playing tone and vibration
         player = new TonePlayer();
         player.play(settings.tone);
