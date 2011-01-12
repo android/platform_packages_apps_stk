@@ -270,7 +270,8 @@ public class StkMenuActivity extends ListActivity {
             } else {
                 mTitleIconView.setVisibility(View.GONE);
             }
-            if (!mStkMenu.titleIconSelfExplanatory) {
+            if (!mStkMenu.titleIconSelfExplanatory ||
+                    mStkMenu.titleIcon == null) {
                 mTitleTextView.setVisibility(View.VISIBLE);
                 if (mStkMenu.title == null) {
                     mTitleTextView.setText(R.string.app_name);

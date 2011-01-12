@@ -670,7 +670,7 @@ public class StkAppService extends Service implements Runnable {
         } else {
             iv.setVisibility(View.GONE);
         }
-        if (!msg.iconSelfExplanatory) {
+        if (!msg.iconSelfExplanatory || msg.icon == null) {
             tv.setText(msg.text);
         }
 
@@ -774,7 +774,7 @@ public class StkAppService extends Service implements Runnable {
             notification.flags |= Notification.FLAG_NO_CLEAR;
             notification.icon = com.android.internal.R.drawable.stat_notify_sim_toolkit;
             // Set text and icon for the status bar and notification body.
-            if (!msg.iconSelfExplanatory) {
+            if (!msg.iconSelfExplanatory || msg.icon == null) {
                 notification.tickerText = msg.text;
                 contentView.setTextViewText(com.android.internal.R.id.text,
                         msg.text);
