@@ -37,6 +37,10 @@ public class StkCmdReceiver extends BroadcastReceiver {
             handleCommandMessage(context, intent);
         } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION)) {
             handleSessionEnd(context, intent);
+        } else if (action.equals(AppInterface.BROWSER_TERMINATE_ACTION)) {
+            handleBrowserTerminationEvent(context,intent);
+	} else if (action.equals(Intent.ACTION_LOCALE_CHANGED)) {
+            handleLocaleChange(context);
         }
     }
 
@@ -52,6 +56,20 @@ public class StkCmdReceiver extends BroadcastReceiver {
     private void handleSessionEnd(Context context, Intent intent) {
         Bundle args = new Bundle();
         args.putInt(StkAppService.OPCODE, StkAppService.OP_END_SESSION);
+        context.startService(new Intent(context, StkAppService.class)
+                .putExtras(args));
+    }
+
+    private void handleBrowserTerminationEvent(Context context,Intent intent) {
+        Bundle args = new Bundle();
+        args.putInt(StkAppService.OPCODE, StkAppService.OP_BROWSER_TERMINATION);
+        context.startService(new Intent(context, StkAppService.class)
+                .putExtras(args));
+    }
+
+    private void handleLocaleChange(Context context) {
+        Bundle args = new Bundle();
+        args.putInt(StkAppService.OPCODE, StkAppService.OP_LOCALE_CHANGED);
         context.startService(new Intent(context, StkAppService.class)
                 .putExtras(args));
     }

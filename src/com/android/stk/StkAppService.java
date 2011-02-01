@@ -44,11 +44,15 @@ import com.android.internal.telephony.cat.Input;
 import com.android.internal.telephony.cat.ResultCode;
 import com.android.internal.telephony.cat.CatCmdMessage;
 import com.android.internal.telephony.cat.CatCmdMessage.BrowserSettings;
+import com.android.internal.telephony.cat.CatCmdMessage.SetupEventListSettings;
 import com.android.internal.telephony.cat.CatLog;
 import com.android.internal.telephony.cat.CatResponseMessage;
 import com.android.internal.telephony.cat.TextMessage;
+import com.android.internal.telephony.GsmAlphabet;
 
 import java.util.LinkedList;
+
+import static com.android.internal.telephony.cat.CatCmdMessage.SetupEventListConstants.*;
 
 /**
  * SIM toolkit application level service. Interacts with Telephopny messages,
@@ -74,6 +78,8 @@ public class StkAppService extends Service implements Runnable {
     private boolean launchBrowser = false;
     private BrowserSettings mBrowserSettings = null;
     static StkAppService sInstance = null;
+    private SetupEventListSettings mSetupEventListSettings = null;
+    private CatCmdMessage mCurrentSetupEventCmd = null;
 
     // Used for setting FLAG_ACTIVITY_NO_USER_ACTION when
     // creating an intent.
@@ -98,6 +104,11 @@ public class StkAppService extends Service implements Runnable {
     static final int OP_END_SESSION = 4;
     static final int OP_BOOT_COMPLETED = 5;
     private static final int OP_DELAYED_MSG = 6;
+    static final int OP_BROWSER_TERMINATION = 7;
+    static final int OP_LOCALE_CHANGED = 8;
+
+    //Invalid SetupEvent
+    static final int INVALID_SETUP_EVENT = 0xFF;
 
     // Response ids
     static final int RES_ID_MENU_SELECTION = 11;
@@ -181,6 +192,8 @@ public class StkAppService extends Service implements Runnable {
             msg.obj = args.getParcelable(CMD_MSG);
             break;
         case OP_RESPONSE:
+        case OP_BROWSER_TERMINATION:
+        case OP_LOCALE_CHANGED:
             msg.obj = args;
             /* falls through */
         case OP_LAUNCH_APP:
@@ -311,6 +324,14 @@ public class StkAppService extends Service implements Runnable {
             case OP_DELAYED_MSG:
                 handleDelayedCmd();
                 break;
+            case OP_BROWSER_TERMINATION:
+	        CatLog.d(this, "Browser Closed");
+                checkForSetupEvent(BROWSER_TERMINATION_EVENT,(Bundle) msg.obj);
+                break;
+            case OP_LOCALE_CHANGED:
+                CatLog.d(this, "Locale Changed");
+                checkForSetupEvent(LANGUAGE_SELECTION_EVENT,(Bundle) msg.obj);
+                break;
             }
         }
     }
@@ -323,6 +344,7 @@ public class StkAppService extends Service implements Runnable {
         case SEND_USSD:
         case SET_UP_IDLE_MODE_TEXT:
         case SET_UP_MENU:
+        case SET_UP_EVENT_LIST:
             return false;
         }
 
@@ -437,6 +459,11 @@ public class StkAppService extends Service implements Runnable {
             break;
         case PLAY_TONE:
             launchToneDialog();
+            break;
+        case SET_UP_EVENT_LIST:
+            mSetupEventListSettings = mCurrentCmd.getSetEventList();
+            mCurrentSetupEventCmd = mCurrentCmd;
+            mCurrentCmd = mMainCmd;
             break;
         }
 
@@ -603,6 +630,88 @@ public class StkAppService extends Service implements Runnable {
                 | getFlagActivityNoUserAction(InitiatedByUserAction.unknown));
         newIntent.putExtra("TEXT", mCurrentCmd.geTextMessage());
         startActivity(newIntent);
+    }
+
+    private void sendSetUpEventResponse(int event, byte[] addedInfo) {
+        CatLog.d(this, "sendSetUpEventResponse: event : " + event);
+
+        if (mCurrentSetupEventCmd == null){
+            return;
+        }
+
+        CatResponseMessage resMsg = new CatResponseMessage(mCurrentSetupEventCmd);
+
+        resMsg.setResultCode(ResultCode.OK);
+        resMsg.setEventDownload(event, addedInfo);
+
+        mStkService.onCmdResponse(resMsg);
+    }
+
+    private void checkForSetupEvent(int event, Bundle args) {
+        boolean eventPresent = false;
+        CatLog.d(this, "Event :" + event);
+
+        if (mSetupEventListSettings != null) {
+            /* Checks if the event is present in the EventList updated by last
+             * SetupEventList Proactive Command */
+            for (int i = 0; i < mSetupEventListSettings.eventList.length; i++) {
+                 if (event == mSetupEventListSettings.eventList[i]) {
+                     eventPresent =  true;
+                     break;
+                 }
+            }
+
+            /* If Event is present send the response to ICC */
+            if (eventPresent == true) {
+                CatLog.d(this, " Event " + event + "exists in the EventList");
+                byte[] addedInfo = null;
+
+                switch (event) {
+                    case BROWSER_TERMINATION_EVENT:
+                        int browserTerminationCause = args.getInt(AppInterface.BROWSER_TERMINATION_CAUSE);
+                        CatLog.d(this, "BrowserTerminationCause: "+ browserTerminationCause);
+                        //Single byte is sufficient to represent browser termination cause.
+                        addedInfo = new byte[1];
+                        addedInfo[0] = (byte) browserTerminationCause;
+                        sendSetUpEventResponse(event, addedInfo);
+                        break;
+                    case IDLE_SCREEN_AVAILABLE_EVENT:
+                        sendSetUpEventResponse(event, addedInfo);
+                        removeSetUpEvent(event);
+                        break;
+                    case LANGUAGE_SELECTION_EVENT:
+                        String language =  mContext.getResources().getConfiguration().locale.getLanguage();
+                        CatLog.d(this, "language: " + language);
+                        // Each language code is a pair of alpha-numeric characters. Each alpha-numeric
+                        // character shall be coded on one byte using the SMS default 7-bit coded alphabet
+                        addedInfo = GsmAlphabet.stringToGsm8BitPacked(language);
+                        sendSetUpEventResponse(event, addedInfo);
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                CatLog.d(this, " Event does not exist in the EventList");
+            }
+        } else {
+            CatLog.d(this, "SetupEventList is not received. Ignoring the event: " + event);
+        }
+    }
+
+    private void  removeSetUpEvent(int event) {
+        CatLog.d(this, "Remove Event :" + event);
+
+        if (mSetupEventListSettings != null) {
+            /*
+             * Make new  Eventlist without the event
+             */
+            for (int i = 0; i < mSetupEventListSettings.eventList.length; i++) {
+                if (event == mSetupEventListSettings.eventList[i]) {
+                    mSetupEventListSettings.eventList[i] = INVALID_SETUP_EVENT;
+                    break;
+                }
+            }
+        }
     }
 
     private void launchEventMessage() {
