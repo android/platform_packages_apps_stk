@@ -432,6 +432,16 @@ public class StkAppService extends Service implements Runnable {
         case LAUNCH_BROWSER:
             launchConfirmationDialog(mCurrentCmd.geTextMessage());
             break;
+        case CLOSE_CHANNEL:
+        case RECEIVE_DATA:
+        case SEND_DATA:
+        case GET_CHANNEL_STATUS:
+            waitForUsersResponse = false;
+            launchEventMessage();
+            break;
+        case OPEN_CHANNEL:
+            launchConfirmationDialog(mCurrentCmd.getCallSettings().confirmMsg);
+            break;
         case SET_UP_CALL:
             launchConfirmationDialog(mCurrentCmd.getCallSettings().confirmMsg);
             break;
