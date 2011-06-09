@@ -16,6 +16,7 @@
 
 package com.android.stk;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -90,6 +91,7 @@ public class StkAppService extends Service implements Runnable {
     static final String INPUT = "input";
     static final String HELP = "help";
     static final String CONFIRMATION = "confirm";
+    static final String SCREEN_STATUS = "screen status";
 
     // operations ids for different service functionality.
     static final int OP_CMD = 1;
@@ -98,6 +100,7 @@ public class StkAppService extends Service implements Runnable {
     static final int OP_END_SESSION = 4;
     static final int OP_BOOT_COMPLETED = 5;
     private static final int OP_DELAYED_MSG = 6;
+    static final int OP_IDLE_SCREEN = 7;
 
     // Response ids
     static final int RES_ID_MENU_SELECTION = 11;
@@ -118,6 +121,10 @@ public class StkAppService extends Service implements Runnable {
 
     // Notification id used to display Idle Mode text in NotificationManager.
     private static final int STK_NOTIFICATION_ID = 333;
+    private CatCmdMessage mIdleModeTextCmd = null;
+    private boolean mDisplayText = false;
+    private boolean mScreenIdle = true;
+
 
     // Inner class used for queuing telephony messages (proactive commands,
     // session end) while the service is busy processing a previous message.
@@ -180,6 +187,7 @@ public class StkAppService extends Service implements Runnable {
         case OP_CMD:
             msg.obj = args.getParcelable(CMD_MSG);
             break;
+        case OP_IDLE_SCREEN:
         case OP_RESPONSE:
             msg.obj = args;
             /* falls through */
@@ -311,7 +319,66 @@ public class StkAppService extends Service implements Runnable {
             case OP_DELAYED_MSG:
                 handleDelayedCmd();
                 break;
+            case OP_IDLE_SCREEN:
+                handleScreenStatus((Bundle) msg.obj);
+                break;
             }
+        }
+    }
+
+    private void handleScreenStatus(Bundle args) {
+        mScreenIdle = args.getBoolean(SCREEN_STATUS);
+
+        if (mIdleModeTextCmd != null) {
+           launchIdleText();
+        }
+        if (mDisplayText) {
+            /*
+             * Check if the screen is NOT idle and also to check if the top most
+             * activity visible is not 'us'. We are never busy to ourselves.
+             */
+            if (!mScreenIdle && !isTopOfStack()) {
+                sendScreenBusyResponse();
+            } else {
+                launchTextDialog();
+            }
+            mDisplayText = false;
+            // If an idle text proactive command is set then the
+            // request for getting screen status still holds true.
+            if (mIdleModeTextCmd == null) {
+                Intent StkIntent = new Intent(AppInterface.CHECK_SCREEN_IDLE_ACTION);
+                StkIntent.putExtra("SCREEN_STATUS_REQUEST", false);
+                sendBroadcast(StkIntent);
+            }
+        }
+    }
+
+    private boolean isTopOfStack() {
+        ActivityManager mAcivityManager = (ActivityManager) mContext
+                .getSystemService(ACTIVITY_SERVICE);
+        String currentPackageName = mAcivityManager.getRunningTasks(1).get(0).topActivity
+                .getPackageName();
+        if (null != currentPackageName) {
+            return currentPackageName.equals(PACKAGE_NAME);
+        }
+
+        return false;
+    }
+
+    private void sendScreenBusyResponse() {
+        if (mCurrentCmd == null) {
+            return;
+        }
+        CatResponseMessage resMsg = new CatResponseMessage(mCurrentCmd);
+        CatLog.d(this, "SCREEN_BUSY");
+        resMsg.setResultCode(ResultCode.TERMINAL_CRNTLY_UNABLE_TO_PROCESS);
+        mStkService.onCmdResponse(resMsg);
+        // reset response needed state var to its original value.
+        responseNeeded = true;
+        if (mCmdsQ.size() != 0) {
+            callDelayedMsg();
+        } else {
+            mCmdInProgress = false;
         }
     }
 
@@ -393,7 +460,21 @@ public class StkAppService extends Service implements Runnable {
                 // TODO: get the carrier name from the SIM
                 msg.title = "";
             }
-            launchTextDialog();
+
+            /* If the device is not in idlescreen and a low priority display
+             * text message command arrives then send screen busy terminal
+             * response with out displaying the message. Otherwise
+             * display the message.
+             */
+            if (!(msg.isHighPriority || mMenuIsVisibile )) {
+                Intent StkIntent =
+                       new Intent(AppInterface.CHECK_SCREEN_IDLE_ACTION);
+                StkIntent.putExtra("SCREEN_STATUS_REQUEST",true);
+                sendBroadcast(StkIntent);
+                mDisplayText = true;
+            } else {
+                launchTextDialog();
+            }
             break;
         case SELECT_ITEM:
             mCurrentMenu = cmdMsg.getMenu();
@@ -420,7 +501,22 @@ public class StkAppService extends Service implements Runnable {
             break;
         case SET_UP_IDLE_MODE_TEXT:
             waitForUsersResponse = false;
-            launchIdleText();
+            mIdleModeTextCmd = mCurrentCmd;
+            TextMessage idleModeText = mCurrentCmd.geTextMessage();
+            // Send intent to ActivityManagerService to get the screen status
+            Intent idleStkIntent  = new Intent(AppInterface.CHECK_SCREEN_IDLE_ACTION);
+            if (idleModeText != null) {
+                if (idleModeText.text != null) {
+                    idleStkIntent.putExtra("SCREEN_STATUS_REQUEST",true);
+                } else {
+                    idleStkIntent.putExtra("SCREEN_STATUS_REQUEST",false);
+                    launchIdleText();
+                    mIdleModeTextCmd = null;
+                }
+            }
+            CatLog.d(this, "set up idle mode");
+            mCurrentCmd = mMainCmd;
+            sendBroadcast(idleStkIntent);
             break;
         case SEND_DTMF:
         case SEND_SMS:
@@ -697,8 +793,8 @@ public class StkAppService extends Service implements Runnable {
     }
 
     private void launchIdleText() {
-        TextMessage msg = mCurrentCmd.geTextMessage();
-        if (msg.text == null) {
+        TextMessage msg = mIdleModeTextCmd.geTextMessage();
+        if (msg.text == null || mScreenIdle == false) {
             mNotificationManager.cancel(STK_NOTIFICATION_ID);
         } else {
             Notification notification = new Notification();
@@ -719,9 +815,9 @@ public class StkAppService extends Service implements Runnable {
                         msg.icon);
             } else {
                 contentView
-                        .setImageViewResource(
-                                com.android.internal.R.id.icon,
-                                com.android.internal.R.drawable.stat_notify_sim_toolkit);
+                .setImageViewResource(
+                        com.android.internal.R.id.icon,
+                        com.android.internal.R.drawable.stat_notify_sim_toolkit);
             }
             notification.contentView = contentView;
             notification.contentIntent = PendingIntent.getService(mContext, 0,

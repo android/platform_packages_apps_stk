@@ -28,6 +28,7 @@ import android.os.Bundle;
  *
  */
 public class StkCmdReceiver extends BroadcastReceiver {
+    private boolean mScreenIdle = true;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -37,6 +38,9 @@ public class StkCmdReceiver extends BroadcastReceiver {
             handleCommandMessage(context, intent);
         } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION)) {
             handleSessionEnd(context, intent);
+        } else if (action.equals(AppInterface.CAT_IDLE_SCREEN_ACTION)) {
+            mScreenIdle = intent.getBooleanExtra("SCREEN_IDLE",true);
+            handleScreenStatus(context);
         }
     }
 
@@ -54,5 +58,13 @@ public class StkCmdReceiver extends BroadcastReceiver {
         args.putInt(StkAppService.OPCODE, StkAppService.OP_END_SESSION);
         context.startService(new Intent(context, StkAppService.class)
                 .putExtras(args));
+    }
+
+    private void handleScreenStatus(Context context) {
+        Bundle args = new Bundle();
+        args.putInt(StkAppService.OPCODE, StkAppService.OP_IDLE_SCREEN);
+        args.putBoolean(StkAppService.SCREEN_STATUS,  mScreenIdle);
+        context.startService(new Intent(context, StkAppService.class)
+        .putExtras(args));
     }
 }
