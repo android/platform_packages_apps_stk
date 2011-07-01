@@ -37,6 +37,8 @@ public class StkCmdReceiver extends BroadcastReceiver {
             handleCommandMessage(context, intent);
         } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION)) {
             handleSessionEnd(context, intent);
+        } else if (action.equals(AppInterface.CAT_ALPHA_NOTIFY_ACTION)) {
+            handleAlphaNotify(context, intent);
         }
     }
 
@@ -52,6 +54,16 @@ public class StkCmdReceiver extends BroadcastReceiver {
     private void handleSessionEnd(Context context, Intent intent) {
         Bundle args = new Bundle();
         args.putInt(StkAppService.OPCODE, StkAppService.OP_END_SESSION);
+        context.startService(new Intent(context, StkAppService.class)
+                .putExtras(args));
+    }
+
+    private void handleAlphaNotify(Context context, Intent intent) {
+        Bundle args = new Bundle();
+        String alphaString = intent.getStringExtra(AppInterface.ALPHA_STRING);
+
+        args.putInt(StkAppService.OPCODE, StkAppService.OP_ALPHA_NOTIFY);
+        args.putString(AppInterface.ALPHA_STRING, alphaString);
         context.startService(new Intent(context, StkAppService.class)
                 .putExtras(args));
     }

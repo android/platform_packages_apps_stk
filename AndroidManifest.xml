@@ -77,6 +77,7 @@
             <intent-filter>
                 <action android:name= "android.intent.action.stk.command" />
                 <action android:name= "android.intent.action.stk.session_end" />
+                <action android:name= "android.intent.action.stk.alpha_notify" />
             </intent-filter>
         </receiver>
 
