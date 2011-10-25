@@ -38,6 +38,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     // members
     TextMessage mTextMsg;
 
+    private boolean mIsResponseSent = false;
     Handler mTimeoutHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -137,6 +138,14 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (!mIsResponseSent) {
+            sendResponse(StkAppService.RES_ID_TIMEOUT);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
@@ -156,6 +165,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         args.putInt(StkAppService.RES_ID, resId);
         args.putBoolean(StkAppService.CONFIRMATION, confirmed);
         startService(new Intent(this, StkAppService.class).putExtras(args));
+        mIsResponseSent = true;
     }
 
     private void sendResponse(int resId) {
