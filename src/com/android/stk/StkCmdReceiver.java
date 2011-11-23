@@ -23,6 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import static com.android.internal.telephony.cat.CatCmdMessage.SetupEventListConstants.*;
+import static com.android.internal.telephony.cat.CatCmdMessage.BrowserTerminationCauses.*;
+
 /**
  * Receiver class to get STK intents, broadcasted by telephony layer.
  *
@@ -37,6 +40,10 @@ public class StkCmdReceiver extends BroadcastReceiver {
             handleCommandMessage(context, intent);
         } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION)) {
             handleSessionEnd(context, intent);
+        } else if (action.equals(AppInterface.CAT_IDLE_SCREEN_ACTION)) {
+            handleScreenStatus(context, intent.getBooleanExtra("SCREEN_IDLE",true));
+        } else if (action.equals(Intent.ACTION_LOCALE_CHANGED)) {
+            handleLocaleChange(context);
         }
     }
 
@@ -52,6 +59,21 @@ public class StkCmdReceiver extends BroadcastReceiver {
     private void handleSessionEnd(Context context, Intent intent) {
         Bundle args = new Bundle();
         args.putInt(StkAppService.OPCODE, StkAppService.OP_END_SESSION);
+        context.startService(new Intent(context, StkAppService.class)
+                .putExtras(args));
+    }
+
+    private void handleScreenStatus(Context context, boolean mScreenIdle) {
+        Bundle args = new Bundle();
+        args.putInt(StkAppService.OPCODE, StkAppService.OP_IDLE_SCREEN);
+        args.putBoolean(StkAppService.SCREEN_STATUS,  mScreenIdle);
+        context.startService(new Intent(context, StkAppService.class)
+                .putExtras(args));
+    }
+
+    private void handleLocaleChange(Context context) {
+        Bundle args = new Bundle();
+        args.putInt(StkAppService.OPCODE, StkAppService.OP_LOCALE_CHANGED);
         context.startService(new Intent(context, StkAppService.class)
                 .putExtras(args));
     }
