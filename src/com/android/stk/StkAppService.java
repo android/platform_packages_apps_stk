@@ -462,7 +462,10 @@ public class StkAppService extends Service implements Runnable {
                     break;
                 }
             }
-            launchTransientEventMessage();
+            /*
+             * Display indication in the form of a toast to the user if required.
+             */
+            launchEventMessage();
             break;
         }
 
@@ -492,6 +495,7 @@ public class StkAppService extends Service implements Runnable {
 
         // set result code
         boolean helpRequired = args.getBoolean(HELP, false);
+        boolean confirmed    = false;
 
         switch(args.getInt(RES_ID)) {
         case RES_ID_MENU_SELECTION:
@@ -529,7 +533,7 @@ public class StkAppService extends Service implements Runnable {
             break;
         case RES_ID_CONFIRM:
             CatLog.d(this, "RES_ID_CONFIRM");
-            boolean confirmed = args.getBoolean(CONFIRMATION);
+            confirmed = args.getBoolean(CONFIRMATION);
             switch (mCurrentCmd.getCmdType()) {
             case DISPLAY_TEXT:
                 resMsg.setResultCode(confirmed ? ResultCode.OK
@@ -583,12 +587,19 @@ public class StkAppService extends Service implements Runnable {
             switch (choice) {
                 case YES:
                     resMsg.setResultCode(ResultCode.OK);
+                    confirmed = true;
                     break;
                 case NO:
                     resMsg.setResultCode(ResultCode.USER_NOT_ACCEPT);
                     break;
             }
+
+            if (mCurrentCmd.getCmdType().value() == AppInterface.CommandType.OPEN_CHANNEL
+                    .value()) {
+                resMsg.setConfirmation(confirmed);
+            }
             break;
+
         default:
             CatLog.d(this, "Unknown result id");
             return;
@@ -698,7 +709,7 @@ public class StkAppService extends Service implements Runnable {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        Uri data;
+        Uri data = null;
         if (settings.url != null) {
             CatLog.d(this, "settings.url = " + settings.url);
             if ((settings.url.startsWith("http://") || (settings.url.startsWith("https://")))) {
@@ -708,18 +719,10 @@ public class StkAppService extends Service implements Runnable {
                 CatLog.d(this, "modifiedUrl = " + modifiedUrl);
                 data = Uri.parse(modifiedUrl);
             }
-        } else {
-            // If no URL specified, just bring up the "home page".
-            //
-            // (Note we need to specify *something* in the intent's data field
-            // here, since if you fire off a VIEW intent with no data at all
-            // you'll get an activity chooser rather than the browser.  There's
-            // no specific URI that means "use the default home page", so
-            // instead let's just explicitly bring up http://google.com.)
-            data = Uri.parse("http://google.com/");
         }
-        intent.setData(data);
-
+        if (data != null) {
+            intent.setData(data);
+        }
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         switch (settings.mode) {
         case USE_EXISTING_BROWSER:
@@ -729,6 +732,9 @@ public class StkAppService extends Service implements Runnable {
             intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             break;
         case LAUNCH_IF_NOT_ALREADY_LAUNCHED:
+            if (data != null) {
+                intent.setAction(Intent.ACTION_VIEW);
+            }
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             break;
         }
