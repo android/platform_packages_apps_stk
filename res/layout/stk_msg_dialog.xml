@@ -18,6 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    style="?android:attr/buttonBarStyle"
     android:orientation="vertical" >
 
     <LinearLayout android:id="@+id/messagePanel"
@@ -50,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@color/ltgrey"
+            style="?android:attr/buttonBarStyle"
             android:paddingTop="4dip"
             android:paddingLeft="2dip"
             android:paddingRight="2dip" >
@@ -61,6 +62,7 @@
                 android:layout_gravity="left"
                 android:layout_weight="1"
                 android:maxLines="2"
+                style="?android:attr/buttonBarStyle"
                 android:text="@string/button_cancel" />
             <Button
                 android:id="@+id/button_ok"
@@ -69,6 +71,7 @@
                 android:layout_gravity="right"
                 android:layout_weight="1"
                 android:maxLines="2"
+                style="?android:attr/buttonBarStyle"
                 android:text="@string/button_ok" />
            </LinearLayout>
     </LinearLayout>

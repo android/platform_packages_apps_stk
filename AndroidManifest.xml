@@ -80,7 +80,7 @@
         </activity>
         <activity android:name="StkDialogActivity"
             android:configChanges="orientation|locale|screenSize|keyboardHidden"
-            android:theme="@android:style/Theme.Dialog"
+            android:theme="@android:style/Theme.Holo.Dialog"
             android:taskAffinity="android.task.stk.StkLauncherActivity">
         </activity>
 
