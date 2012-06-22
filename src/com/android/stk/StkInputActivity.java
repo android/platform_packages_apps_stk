@@ -165,8 +165,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     @Override
     public void onPause() {
         super.onPause();
-
-        cancelTimeOut();
     }
 
     @Override

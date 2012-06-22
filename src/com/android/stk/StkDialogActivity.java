@@ -132,8 +132,6 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     @Override
     public void onPause() {
         super.onPause();
-
-        cancelTimeOut();
     }
 
     @Override

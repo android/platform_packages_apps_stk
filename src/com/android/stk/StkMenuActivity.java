@@ -170,7 +170,6 @@ public class StkMenuActivity extends ListActivity {
         super.onPause();
 
         appService.indicateMenuVisibility(false);
-        cancelTimeOut();
     }
 
     @Override
