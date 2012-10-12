@@ -287,6 +287,7 @@ public class StkMenuActivity extends ListActivity {
             setListAdapter(adapter);
             // Set default item
             setSelection(mStkMenu.defaultItem);
+            adapter.setDefaultItem(mStkMenu.defaultItem);
         }
     }
 

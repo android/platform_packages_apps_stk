@@ -34,12 +34,17 @@ import java.util.List;
 public class StkMenuAdapter extends ArrayAdapter<Item> {
     private final LayoutInflater mInflater;
     private boolean mIcosSelfExplanatory = false;
+    private int mDefaultItem;
 
     public StkMenuAdapter(Context context, List<Item> items,
             boolean icosSelfExplanatory) {
         super(context, 0, items);
         mInflater = LayoutInflater.from(context);
         mIcosSelfExplanatory = icosSelfExplanatory;
+    }
+
+    public void setDefaultItem(int defaultItem) {
+        mDefaultItem = defaultItem;
     }
 
     @Override
@@ -60,6 +65,10 @@ public class StkMenuAdapter extends ArrayAdapter<Item> {
         } else {
             imageView.setImageBitmap(item.icon);
             imageView.setVisibility(View.VISIBLE);
+        }
+
+        if (mDefaultItem >= 0 && mDefaultItem == position) {
+            convertView.setBackgroundResource(android.R.color.holo_blue_light);
         }
 
         return convertView;
