@@ -744,15 +744,39 @@ public class StkAppService extends Service implements Runnable {
 
     private void launchCallMsg() {
         TextMessage msg = mCurrentCmd.getCallSettings().callMsg;
-        if (msg.text == null || msg.text.length() == 0) {
+        LayoutInflater inflate = (LayoutInflater) mContext
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        if (msg.text == null || msg.text.length() == 0 || inflate == null) {
             return;
         }
-        msg.title = lastSelectedItem;
 
-        Toast toast = Toast.makeText(mContext.getApplicationContext(), msg.text,
-                Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.BOTTOM, 0, 0);
-        toast.show();
+        msg.title = lastSelectedItem;
+        View v = inflate.inflate(R.layout.stk_event_msg, null);
+        TextView tv = (TextView) v
+                .findViewById(com.android.internal.R.id.message);
+        ImageView iv = (ImageView) v
+                .findViewById(com.android.internal.R.id.icon);
+
+        if (iv != null) {
+            if (msg.icon != null) {
+                iv.setImageBitmap(msg.icon);
+            } else {
+                iv.setVisibility(View.GONE);
+            }
+        }
+
+        if (tv != null && !msg.iconSelfExplanatory) {
+            tv.setText(msg.text);
+        }
+
+        Toast toast = new Toast(mContext.getApplicationContext());
+        if (toast != null) {
+            toast.setView(v);
+            toast.setDuration(Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
+            toast.show();
+        }
     }
 
     private void launchIdleText() {
