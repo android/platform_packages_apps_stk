@@ -221,6 +221,13 @@ public class StkAppService extends Service implements Runnable {
     }
 
     /*
+     * Package api used by StkDialogActivity to indicate if its on the foreground.
+     */
+    void indicateDisplayTextDlgVisibility(boolean visibility) {
+        mDisplayTextDlgIsVisibile = visibility;
+    }
+
+    /*
      * Package api used by StkMenuActivity to get its Menu parameter.
      */
     Menu getMenu() {
@@ -396,7 +403,21 @@ public class StkAppService extends Service implements Runnable {
                 // TODO: get the carrier name from the SIM
                 msg.title = "";
             }
-            launchTextDialog();
+
+            //If the device is not in idlescreen and a low priority display
+            //text message command arrives then send screen busy terminal
+            //response with out displaying the message. Otherwise display the
+            //message. The existing displayed message shall be updated with the
+            //new display text proactive command (Refer to ETSI TS 102 384
+            //section 27.22.4.1.4.4.2).
+            if (!(msg.isHighPriority || mMenuIsVisibile || mDisplayTextDlgIsVisibile)) {
+                Intent StkIntent = new Intent(AppInterface.CHECK_SCREEN_IDLE_ACTION);
+                StkIntent.putExtra("SCREEN_STATUS_REQUEST",true);
+                sendBroadcast(StkIntent);
+                mDisplayText = true;
+            } else {
+                launchTextDialog();
+            }
             break;
         case SELECT_ITEM:
             mCurrentMenu = cmdMsg.getMenu();
@@ -644,7 +665,7 @@ public class StkAppService extends Service implements Runnable {
     private void launchTextDialog() {
         Intent newIntent = new Intent(this, StkDialogActivity.class);
         newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 | getFlagActivityNoUserAction(InitiatedByUserAction.unknown));
