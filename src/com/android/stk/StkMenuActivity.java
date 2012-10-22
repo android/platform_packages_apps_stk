@@ -112,6 +112,7 @@ public class StkMenuActivity extends ListActivity {
         if (item == null) {
             return;
         }
+        cancelTimeOut();
         sendResponse(StkAppService.RES_ID_MENU_SELECTION, item.id, false);
         mAcceptUsersInput = false;
         mProgressView.setVisibility(View.VISIBLE);

@@ -99,13 +99,14 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
 
     public void onClick(View v) {
         String input = null;
-
         switch (v.getId()) {
         case OK_BUTTON:
+            cancelTimeOut();
             sendResponse(StkAppService.RES_ID_CONFIRM, true);
             finish();
             break;
         case CANCEL_BUTTON:
+            cancelTimeOut();
             sendResponse(StkAppService.RES_ID_CONFIRM, false);
             finish();
             break;
@@ -116,6 +117,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
+            cancelTimeOut();
             sendResponse(StkAppService.RES_ID_BACKWARD);
             finish();
             break;
