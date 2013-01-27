@@ -252,6 +252,31 @@ public class StkAppService extends Service implements Runnable {
         }
     }
 
+    // message id for time out
+    private static final int MSG_ID_TIMEOUT = 1;
+    Handler mTimeoutHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+                case MSG_ID_TIMEOUT:
+                    CatLog.d(this, "SELECT ITEM EXPIRED");
+                    handleSessionEnd();
+                    break;
+            }
+        }
+    };
+
+    private void cancelTimeOut() {
+        mTimeoutHandler.removeMessages(MSG_ID_TIMEOUT);
+    }
+
+    private void startTimeOut() {
+        // Reset timeout.
+        cancelTimeOut();
+        mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
+                .obtainMessage(MSG_ID_TIMEOUT), StkApp.SELECT_ITEM_TIMEOUT);
+    }
+
     private final class ServiceHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -267,6 +292,9 @@ public class StkAppService extends Service implements Runnable {
                 break;
             case OP_CMD:
                 CatCmdMessage cmdMsg = (CatCmdMessage) msg.obj;
+                //Cancel the timer if it is set.
+                cancelTimeOut();
+
                 // There are two types of commands:
                 // 1. Interactive - user's response is required.
                 // 2. Informative - display a message, no interaction with the user.
@@ -361,6 +389,7 @@ public class StkAppService extends Service implements Runnable {
     private void handleSessionEnd() {
         mCurrentCmd = mMainCmd;
         lastSelectedItem = null;
+        cancelTimeOut();
         // In case of SET UP MENU command which removed the app, don't
         // update the current menu member.
         if (mCurrentMenu != null && mMainCmd != null) {
@@ -518,6 +547,7 @@ public class StkAppService extends Service implements Runnable {
                     resMsg.setResultCode(ResultCode.OK);
                 }
                 resMsg.setMenuSelection(menuSelection);
+                startTimeOut();
                 break;
             }
             break;

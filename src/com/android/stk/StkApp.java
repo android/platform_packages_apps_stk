@@ -44,6 +44,11 @@ abstract class StkApp extends Application {
 
     public static final String TAG = "STK App";
 
+    // SELECT ITEM timeout, 10 seconds - used to clear SELECT ITEM.
+    // This is used to erase SELECT_ITEM when SELECT_ITEM response is
+    // delayed from the network.
+    static final int SELECT_ITEM_TIMEOUT = (10 * 1000);
+
     /**
      * This function calculate the time in MS from a duration instance.
      * returns zero when duration is null.
