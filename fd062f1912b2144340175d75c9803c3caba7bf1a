@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "Qo8hYo2w",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-03-04T21:33:12Z",
+      "side": 1,
+      "message": "Add \"Bug: 8312291\"",
+      "revId": "fd062f1912b2144340175d75c9803c3caba7bf1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
