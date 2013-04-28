@@ -146,6 +146,11 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             finish();
         }
         mContext = getBaseContext();
+// add by huaqin --start
+        if(mTextIn ! = null){
+            mTextIn.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        }
+// add by huaqin --end
     }
 
     @Override
