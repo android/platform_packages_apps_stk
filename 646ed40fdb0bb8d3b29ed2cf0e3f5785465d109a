@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "UQGJflic",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-04-29T14:48:43Z",
+      "side": 1,
+      "message": "Change this so we have a short title (i.e. the first line) and then a \"body\" with the remainder of the text.\n\nWhat happens if this text box isn\u0027t a password and can accept something other than number?",
+      "revId": "646ed40fdb0bb8d3b29ed2cf0e3f5785465d109a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "UQCJljvE",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-04-29T14:48:43Z",
+      "side": 1,
+      "message": "Remove comments.",
+      "revId": "646ed40fdb0bb8d3b29ed2cf0e3f5785465d109a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "UQIJamjU",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-04-29T14:48:43Z",
+      "side": 1,
+      "message": "Line is too long, max 100 chars.\n\nIt seems this should be in configInputDisplay and that we can\u0027t always assume its a number/password.",
+      "revId": "646ed40fdb0bb8d3b29ed2cf0e3f5785465d109a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
