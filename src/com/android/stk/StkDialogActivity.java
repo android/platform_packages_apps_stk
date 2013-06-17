@@ -38,6 +38,9 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     // members
     TextMessage mTextMsg;
 
+    StkAppService appService = StkAppService.getInstance();
+    private int mSlotId = 0;
+
     Handler mTimeoutHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -126,6 +129,8 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     @Override
     public void onResume() {
         super.onResume();
+
+        appService.setDisplayTextDlgVisibility(true, mSlotId);
         startTimeOut(mTextMsg.userClear);
     }
 
@@ -134,6 +139,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         super.onPause();
 
         cancelTimeOut();
+        appService.setDisplayTextDlgVisibility(false, mSlotId);
     }
 
     @Override
@@ -155,6 +161,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
         args.putInt(StkAppService.RES_ID, resId);
         args.putBoolean(StkAppService.CONFIRMATION, confirmed);
+        args.putInt(StkAppService.SLOT_ID, mSlotId);
         startService(new Intent(this, StkAppService.class).putExtras(args));
     }
 
@@ -166,6 +173,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
 
         if (intent != null) {
             mTextMsg = intent.getParcelableExtra("TEXT");
+            mSlotId = intent.getIntExtra(StkAppService.SLOT_ID, 0);
         } else {
             finish();
         }
