@@ -29,15 +29,15 @@ import android.content.pm.PackageManager;
 abstract class StkAppInstaller {
     private StkAppInstaller() {}
 
-    static void install(Context context) {
-        setAppState(context, true);
+    static void install(Context context, int slotId) {
+        setAppState(context, true, slotId);
     }
 
-    static void unInstall(Context context) {
-        setAppState(context, false);
+    static void unInstall(Context context, int slotId) {
+        setAppState(context, false, slotId);
     }
 
-    private static void setAppState(Context context, boolean install) {
+    private static void setAppState(Context context, boolean install, int slotId) {
         if (context == null) {
             return;
         }
@@ -45,9 +45,16 @@ abstract class StkAppInstaller {
         if (pm == null) {
             return;
         }
+        ComponentName cName;
+        String[] launcherActivity = {
+            "com.android.stk.StkLauncherActivity",
+            "com.android.stk.StkLauncherActivity2",
+            "com.android.stk.StkLauncherActivity3"
+        };
         // check that STK app package is known to the PackageManager
-        ComponentName cName = new ComponentName("com.android.stk",
-                "com.android.stk.StkLauncherActivity");
+        cName = new ComponentName("com.android.stk",
+                    launcherActivity[slotId]);
+
         int state = install ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                 : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 
