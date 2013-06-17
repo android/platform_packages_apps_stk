@@ -38,6 +38,24 @@
 			</intent-filter>
 		</activity>
 
+                <activity android:name="StkLauncherActivity2"
+                        android:label="@string/app_name2"
+                        android:enabled="false" >
+                        <intent-filter>
+                                <action android:name="android.intent.action.MAIN" />
+                                <category android:name="android.intent.category.LAUNCHER" />
+                        </intent-filter>
+                </activity>
+
+                <activity android:name="StkLauncherActivity3"
+                        android:label="@string/app_name3"
+                        android:enabled="false" >
+                        <intent-filter>
+                                <action android:name="android.intent.action.MAIN" />
+                                <category android:name="android.intent.category.LAUNCHER" />
+                        </intent-filter>
+                </activity>
+
 		<activity android:name="StkMenuActivity"
              android:launchMode="singleTop">
 	         <intent-filter>
