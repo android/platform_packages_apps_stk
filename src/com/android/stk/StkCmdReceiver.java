@@ -45,6 +45,8 @@ public class StkCmdReceiver extends BroadcastReceiver {
         args.putInt(StkAppService.OPCODE, StkAppService.OP_CMD);
         args.putParcelable(StkAppService.CMD_MSG, intent
                 .getParcelableExtra("STK CMD"));
+        args.putInt(StkAppService.SLOT_ID, intent
+                .getIntExtra("SLOT_ID",0));
         context.startService(new Intent(context, StkAppService.class)
                 .putExtras(args));
     }
@@ -52,6 +54,8 @@ public class StkCmdReceiver extends BroadcastReceiver {
     private void handleSessionEnd(Context context, Intent intent) {
         Bundle args = new Bundle();
         args.putInt(StkAppService.OPCODE, StkAppService.OP_END_SESSION);
+        args.putInt(StkAppService.SLOT_ID, intent
+                .getIntExtra("SLOT_ID",0));
         context.startService(new Intent(context, StkAppService.class)
                 .putExtras(args));
     }
