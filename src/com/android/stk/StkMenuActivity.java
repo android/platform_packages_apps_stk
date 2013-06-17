@@ -46,6 +46,7 @@ public class StkMenuActivity extends ListActivity {
     private Menu mStkMenu = null;
     private int mState = STATE_MAIN;
     private boolean mAcceptUsersInput = true;
+    private int mSlotId = 0;
 
     private TextView mTitleTextView = null;
     private ImageView mTitleIconView = null;
@@ -145,8 +146,7 @@ public class StkMenuActivity extends ListActivity {
     public void onResume() {
         super.onResume();
 
-        appService.indicateMenuVisibility(true);
-        mStkMenu = appService.getMenu();
+        appService.indicateMenuVisibility(true, mSlotId);
         if (mStkMenu == null) {
             finish();
             return;
@@ -169,8 +169,8 @@ public class StkMenuActivity extends ListActivity {
     public void onPause() {
         super.onPause();
 
-        appService.indicateMenuVisibility(false);
         cancelTimeOut();
+        appService.indicateMenuVisibility(false, mSlotId);
     }
 
     @Override
@@ -294,6 +294,13 @@ public class StkMenuActivity extends ListActivity {
 
         if (intent != null) {
             mState = intent.getIntExtra("STATE", STATE_MAIN);
+            mSlotId = intent.getIntExtra(StkAppService.SLOT_ID, 0);
+
+            if (mState == STATE_SECONDARY) {
+                mStkMenu = intent.getParcelableExtra("MENU");
+            } else {
+                mStkMenu = appService.getMenu(mSlotId);
+            }
         } else {
             finish();
         }
@@ -327,6 +334,7 @@ public class StkMenuActivity extends ListActivity {
         args.putInt(StkAppService.RES_ID, resId);
         args.putInt(StkAppService.MENU_SELECTION, itemId);
         args.putBoolean(StkAppService.HELP, help);
+        args.putInt(StkAppService.SLOT_ID, mSlotId);
         mContext.startService(new Intent(mContext, StkAppService.class)
                 .putExtras(args));
     }
