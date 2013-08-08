@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8e864cc_50395ce9",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-08-08T15:46:15Z",
+      "side": 1,
+      "message": "remove extra white space",
+      "revId": "73081bb4f54727c437fe6ea362fc8fe29cb1d7dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8e864cc_30d05044",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 925,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-08-08T15:46:15Z",
+      "side": 1,
+      "message": "Strange, I don\u0027t see AppInterface.ALPHA_STRING defined in my local copy of AOSP, is there another related change for frameworks/opt/telephony ?",
+      "revId": "73081bb4f54727c437fe6ea362fc8fe29cb1d7dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
