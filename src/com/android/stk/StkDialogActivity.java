@@ -126,6 +126,23 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
     @Override
     public void onResume() {
         super.onResume();
+
+        /*
+         * If an immediate response is required and userClear flag is set and
+         * no dialog duration is set, display Text should be displayed to user
+         * for ever until some high priority event occurs (incoming call, MMI
+         * code execution etc as mentioned under section ETSI 102.223, 6.4.1)
+         * In that specific case, don't set the timeout.  If an immediate
+         * response is required from the card, then it has already been sent,
+         * and no further response is necessary from Android.
+         */
+        if (!mTextMsg.responseNeeded &&
+                StkApp.calculateDurationInMilis(mTextMsg.duration) == 0 &&
+                mTextMsg.userClear) {
+            CatLog.d(this, "User should clear text..show message for ever");
+            return;
+        }
+
         startTimeOut(mTextMsg.userClear);
     }
 
