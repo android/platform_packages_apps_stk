@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8776e1c3_73d4600b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-09-10T01:20:53Z",
+      "side": 1,
+      "message": "Please add:\n\n  Bug: 10490429",
+      "revId": "df296fc1e3dfb89a1c296d192ce19e1559bbb865",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8776e1c3_d3c9b467",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-09-10T01:20:53Z",
+      "side": 1,
+      "message": "Rename to mDialogDuration",
+      "revId": "df296fc1e3dfb89a1c296d192ce19e1559bbb865",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8776e1c3_93c33c44",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2013-09-10T01:20:53Z",
+      "side": 1,
+      "message": "Rename to mStkAppService",
+      "revId": "df296fc1e3dfb89a1c296d192ce19e1559bbb865",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
