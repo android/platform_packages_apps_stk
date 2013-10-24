@@ -53,6 +53,25 @@ import com.android.internal.telephony.cat.CatCmdMessage.BrowserSettings;
 import com.android.internal.telephony.cat.CatLog;
 import com.android.internal.telephony.cat.CatResponseMessage;
 import com.android.internal.telephony.cat.TextMessage;
+import com.android.internal.telephony.RILConstants.SimCardID;
+import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.telephony.TelephonyIntents;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
+import java.util.Locale;
+import android.content.BroadcastReceiver;
+import android.os.RemoteException;
+import android.os.Bundle;
+import android.os.SystemProperties;
+import java.io.ByteArrayOutputStream;
+import android.view.KeyEvent;
+
+import android.app.ActivityManager;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.ArrayList;
 
 import java.util.LinkedList;
 
@@ -70,6 +89,7 @@ public class StkAppService extends Service implements Runnable {
     private Context mContext = null;
     private CatCmdMessage mMainCmd = null;
     private CatCmdMessage mCurrentCmd = null;
+    private CatCmdMessage mEventListCmd = null;
     private Menu mCurrentMenu = null;
     private String lastSelectedItem = null;
     private boolean mMenuIsVisibile = false;
@@ -98,6 +118,11 @@ public class StkAppService extends Service implements Runnable {
     static final String CONFIRMATION = "confirm";
     static final String CHOICE = "choice";
 
+    static final String EVENT_DOWNLOAD_ID = "event";
+    static final String EVENT_ADDITIONINFO = "eventadditionalInfo";
+    static final String EVENT_SOURCE_ID = "sourceId";
+    static final String EVENT_DESTINATION_ID = "destinationId";
+
     // operations ids for different service functionality.
     static final int OP_CMD = 1;
     static final int OP_RESPONSE = 2;
@@ -105,6 +130,8 @@ public class StkAppService extends Service implements Runnable {
     static final int OP_END_SESSION = 4;
     static final int OP_BOOT_COMPLETED = 5;
     private static final int OP_DELAYED_MSG = 6;
+    static final int OP_REMOVE_APP = 7;
+    private static final int OP_STK_IDLESCREEN = 8;
 
     // Response ids
     static final int RES_ID_MENU_SELECTION = 11;
@@ -112,6 +139,7 @@ public class StkAppService extends Service implements Runnable {
     static final int RES_ID_CONFIRM = 13;
     static final int RES_ID_DONE = 14;
     static final int RES_ID_CHOICE = 15;
+    static final int RES_ID_EVENTDOWNLOAD = 16;
 
     static final int RES_ID_TIMEOUT = 20;
     static final int RES_ID_BACKWARD = 21;
@@ -130,6 +158,32 @@ public class StkAppService extends Service implements Runnable {
     // Notification id used to display Idle Mode text in NotificationManager.
     private static final int STK_NOTIFICATION_ID = 333;
 
+    static final String TOP_ACTIVE_PACKAGE_CAMERA_NAME ="com.android.camera";
+    static final String TOP_ACTIVE_PACKAGE_CONTACTS_NAME ="com.android.contacts";
+    static final String TOP_ACTIVE_PACKAGE_BROWSER_NAME ="com.android.browser";
+    static final String TOP_ACTIVE_PACKAGE_PHONE_NAME ="com.android.phone";
+    private boolean mscreenbusy = false;
+
+    static final int SCREEN_IS_BUSY=0x01;
+
+    static final int EVENTLIST_USER_ACTIVITY          = 0x04;
+    static final int EVENTLIST_IDLE_SCREEN_AVAILABLE  = 0x05;
+    static final int EVENTLIST_LANGUAGE_SELECTION     = 0x07;
+    static final int EVENTLIST_DATA_AVAILABLE     = 0x09;
+    static final int EVENTLIST_CHANNEL_STATUS     = 0x0A;
+
+    static final int DI_DISPLAY = 0x02;
+    static final int DI_ME = 0x82;
+    static final int DI_SIM = 0x81;
+
+    private BroadcastReceiver mLanguageEventReceiver = null;
+    private BroadcastReceiver mIdleScreenReceiver = null;
+    private BroadcastReceiver mUserActivityReceiver = null;
+    private String mCurrentLanguage = null;
+    private byte[] mEventList = null;
+    private int mEvenvalueIndex = 0;
+    private int mEvenvalueLen = 0;
+
     // Inner class used for queuing telephony messages (proactive commands,
     // session end) while the service is busy processing a previous message.
     private class DelayedCmd {
@@ -146,6 +200,11 @@ public class StkAppService extends Service implements Runnable {
     @Override
     public void onCreate() {
         // Initialize members
+        // NOTE mStkService is a singleton and continues to exist even if the GSMPhone is disposed
+        //   after the radio technology change from GSM to CDMA so the PHONE_TYPE_CDMA check is
+        //   needed. In case of switching back from CDMA to GSM the GSMPhone constructor updates
+        //   the instance. (TODO: test).
+
         mCmdsQ = new LinkedList<DelayedCmd>();
         Thread serviceThread = new Thread(null, this, "Stk App Service");
         serviceThread.start();
@@ -157,7 +216,6 @@ public class StkAppService extends Service implements Runnable {
 
     @Override
     public void onStart(Intent intent, int startId) {
-
         mStkService = com.android.internal.telephony.cat.CatService
                 .getInstance();
 
@@ -169,15 +227,16 @@ public class StkAppService extends Service implements Runnable {
         }
 
         waitForLooper();
-        // onStart() method can be passed a null intent
-        // TODO: replace onStart() with onStartCommand()
+
         if (intent == null) {
+            CatLog.d(this, " onStart intent null");
             return;
         }
 
         Bundle args = intent.getExtras();
 
         if (args == null) {
+            CatLog.d(this, " onStart  args null");
             return;
         }
 
@@ -193,6 +252,7 @@ public class StkAppService extends Service implements Runnable {
         case OP_LAUNCH_APP:
         case OP_END_SESSION:
         case OP_BOOT_COMPLETED:
+        case OP_REMOVE_APP:
             break;
         default:
             return;
@@ -202,6 +262,21 @@ public class StkAppService extends Service implements Runnable {
 
     @Override
     public void onDestroy() {
+        if (mLanguageEventReceiver != null) {
+            unregisterReceiver(mLanguageEventReceiver);
+            mLanguageEventReceiver = null;
+        }
+
+        if (mIdleScreenReceiver != null) {
+            unregisterReceiver(mIdleScreenReceiver);
+            mIdleScreenReceiver = null;
+        }
+
+        if (mUserActivityReceiver != null) {
+            unregisterReceiver(mUserActivityReceiver);
+            mUserActivityReceiver = null;
+        }
+
         waitForLooper();
         mServiceLooper.quit();
     }
@@ -257,7 +332,7 @@ public class StkAppService extends Service implements Runnable {
         @Override
         public void handleMessage(Message msg) {
             int opcode = msg.arg1;
-
+            CatLog.d(this, "handleMessage opcode: "+opcode);
             switch (opcode) {
             case OP_LAUNCH_APP:
                 if (mMainCmd == null) {
@@ -312,11 +387,19 @@ public class StkAppService extends Service implements Runnable {
             case OP_BOOT_COMPLETED:
                 CatLog.d(this, "OP_BOOT_COMPLETED");
                 if (mMainCmd == null) {
+                    CatLog.d(this, "OP_BOOT_COMPLETED mMainCmd NULL unInstall");
                     StkAppInstaller.unInstall(mContext);
                 }
                 break;
             case OP_DELAYED_MSG:
                 handleDelayedCmd();
+                break;
+            case OP_REMOVE_APP:
+                android.util.Log.d("StkAppService", "Removing STK App");
+                StkAppInstaller.unInstall(mContext);
+                break;
+            case OP_STK_IDLESCREEN:
+                processIdleScreen();
                 break;
             }
         }
@@ -333,6 +416,8 @@ public class StkAppService extends Service implements Runnable {
         case CLOSE_CHANNEL:
         case RECEIVE_DATA:
         case SEND_DATA:
+        case SET_UP_EVENT_LIST:
+        case REFRESH:
             return false;
         }
 
@@ -404,7 +489,32 @@ public class StkAppService extends Service implements Runnable {
                 // TODO: get the carrier name from the SIM
                 msg.title = "";
             }
+            ActivityManager manager= (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+            String getTopPackageName = manager.getRunningTasks(30).get(0).topActivity.getPackageName();
+            CatLog.d(this, "DISPLAY_TEXT topActivity="+getTopPackageName);
+
+            if ((getTopPackageName.equals(TOP_ACTIVE_PACKAGE_CAMERA_NAME)) || (getTopPackageName.equals(TOP_ACTIVE_PACKAGE_PHONE_NAME)) || (getTopPackageName.equals(TOP_ACTIVE_PACKAGE_BROWSER_NAME)) || (getTopPackageName.equals(TOP_ACTIVE_PACKAGE_CONTACTS_NAME))) {
+                mscreenbusy =true;
+                CatLog.d(this, "Screen is busy");
+            }
+
+            if (msg.isHighPriority == false) {
+                if (mscreenbusy == true) {
+                    CatLog.d(this, "ME send to SIM Screen is busy");
+                    CatResponseMessage resMsg = new CatResponseMessage(cmdMsg);
+                    resMsg.setResultCode(ResultCode.TERMINAL_CRNTLY_UNABLE_TO_PROCESS);
+                    resMsg.setincludeAdditionalInfo(true);
+                    resMsg.setAdditionalInfo(SCREEN_IS_BUSY);
+                    mscreenbusy = false;
+                    waitForUsersResponse = false;
+                    mStkService.onCmdResponse(resMsg);
+                } else {
+                    CatLog.d(this, "launchTextDialog");
             launchTextDialog();
+                }
+            } else {
+            launchTextDialog();
+            }
             break;
         case SELECT_ITEM:
             mCurrentMenu = cmdMsg.getMenu();
@@ -429,9 +539,70 @@ public class StkAppService extends Service implements Runnable {
         case GET_INKEY:
             launchInputActivity();
             break;
+        case REFRESH:
+            waitForUsersResponse = false;
+            CatLog.d(this, "handleCmd REFRESH");
+            mNotificationManager.cancel(STK_NOTIFICATION_ID);
+            break;
         case SET_UP_IDLE_MODE_TEXT:
             waitForUsersResponse = false;
             launchIdleText();
+            break;
+        case SET_UP_EVENT_LIST:
+            CatLog.d(this, "handleCmd(), SET_UP_EVENT_LIST");
+            mEventList = cmdMsg.getEventList();
+            mEvenvalueIndex = cmdMsg.getEvenvalueIndex();
+            mEvenvalueLen = cmdMsg.getEvenvalueLen();
+            CatLog.d( this, "mEvenvalueIndex: " + mEvenvalueIndex +"mEvenvalueLen"+mEvenvalueLen );
+
+            if (mEventList != null) {
+                if(mEvenvalueLen == 0) {
+                CatLog.d(this, "Disable Setup Event List");
+
+                if (mLanguageEventReceiver != null) {
+                    CatLog.d(this, "unregisterReceiver(), mLanguageEventReceiver");
+                    unregisterReceiver(mLanguageEventReceiver);
+                    mLanguageEventReceiver = null;
+                }
+
+                if (mUserActivityReceiver != null) {
+                    CatLog.d(this, "unregisterReceiver(), mUserActivityReceiver");
+                    unregisterReceiver(mUserActivityReceiver);
+                    mUserActivityReceiver = null;
+                }
+
+                if (mIdleScreenReceiver != null) {
+                    CatLog.d(this, "unregisterReceiver(), mIdleScreenReceiver");
+                    unregisterReceiver(mIdleScreenReceiver);
+                    mIdleScreenReceiver = null;
+                }
+                mEventListCmd = null;
+            } else {
+                    for (int i = mEvenvalueIndex ; i < (mEvenvalueIndex + mEvenvalueLen) ; i++) {
+                        CatLog.d("ValueParser", "index="+ i +", mEventList[i]:"+ mEventList[i]);
+                        int EventValue = (int) mEventList[i];
+                        switch (EventValue) {
+                    case EVENTLIST_USER_ACTIVITY:
+                        CatLog.d(this, "EVENTLIST_USER_ACTIVITY");
+                        launchUserActivityListener();
+                        break;
+                    case EVENTLIST_IDLE_SCREEN_AVAILABLE:
+                        CatLog.d(this, "EVENTLIST_IDLE_SCREEN_AVAILABLE");
+                        launchIdleScreenListener();
+                        break;
+                    case EVENTLIST_LANGUAGE_SELECTION:
+                        CatLog.d(this, "EVENTLIST_LANGUAGE_SELECTION");
+                        launchLanguageListener();
+                        break;
+                    default:
+                            CatLog.d(this, "Don't Support EventId="+EventValue);
+                        break;
+                    }
+                }
+            }
+            }
+            waitForUsersResponse = false;
+            mEventListCmd = cmdMsg;
             break;
         case SEND_DTMF:
         case SEND_SMS:
@@ -450,7 +621,8 @@ public class StkAppService extends Service implements Runnable {
             launchToneDialog();
             break;
         case OPEN_CHANNEL:
-            launchOpenChannelDialog();
+            //launchOpenChannelDialog();
+            launchConfirmationDialog(mCurrentCmd.geTextMessage());
             break;
         case CLOSE_CHANNEL:
         case RECEIVE_DATA:
@@ -487,11 +659,31 @@ public class StkAppService extends Service implements Runnable {
     }
 
     private void handleCmdResponse(Bundle args) {
+     if (args.getInt(RES_ID)== RES_ID_EVENTDOWNLOAD){
+          CatResponseMessage resMsg = new CatResponseMessage(mEventListCmd);
+          int eventId = args.getInt(EVENT_DOWNLOAD_ID);
+          resMsg.setResultCode(ResultCode.EVENT_DOWNLOAD);
+          resMsg.setEvent(eventId);
+          int sourceId = args.getInt(EVENT_SOURCE_ID);
+          int destinationId = args.getInt(EVENT_DESTINATION_ID);
+          resMsg.setstkevetdownload (true);
+          CatLog.d(this, "handleCmdResponse(), eventId="+eventId+", sourceId="+sourceId+", destinationId="+destinationId);
+          resMsg.setSourceAndDestination(sourceId, destinationId);
+          if ( eventId == EVENTLIST_LANGUAGE_SELECTION ) {
+               byte[] eventadditionalInfo= args.getByteArray(EVENT_ADDITIONINFO);
+               resMsg.setAdditionalInfo(eventadditionalInfo);
+          }
+          CatLog.d(this, "Send Response to StkService");
+          mStkService.onCmdResponse(resMsg);
+            return;
+     }
+
         if (mCurrentCmd == null) {
+            CatLog.d(this, "mCurrentCmd == null");
             return;
         }
         if (mStkService == null) {
-            mStkService = com.android.internal.telephony.cat.CatService.getInstance();
+            mStkService = com.android.internal.telephony.cat.CatService.getInstance(SimCardID.ID_ZERO);
             if (mStkService == null) {
                 // This should never happen (we should be responding only to a message
                 // that arrived from StkService). It has to exist by this time
@@ -562,6 +754,11 @@ public class StkAppService extends Service implements Runnable {
                     launchEventMessage(mCurrentCmd.getCallSettings().callMsg);
                 }
                 break;
+            case OPEN_CHANNEL:
+                resMsg.setResultCode(confirmed ? ResultCode.OK
+                                     : ResultCode.USER_NOT_ACCEPT);
+                resMsg.setConfirmation(confirmed);
+                break;
             }
             break;
         case RES_ID_DONE:
@@ -607,7 +804,6 @@ public class StkAppService extends Service implements Runnable {
                 resMsg.setConfirmation(confirmed);
             }
             break;
-
         default:
             CatLog.d(this, "Unknown result id");
             return;
@@ -717,17 +913,18 @@ public class StkAppService extends Service implements Runnable {
         if (settings == null) {
             return;
         }
+        // Set browser launch mode
+        Intent intent = new Intent();
+        intent.setClassName("com.android.browser",
+                            "com.android.browser.BrowserActivity");
 
-        Intent intent = null;
         Uri data = null;
-
         if (settings.url != null) {
             CatLog.d(this, "settings.url = " + settings.url);
             if ((settings.url.startsWith("http://") || (settings.url.startsWith("https://")))) {
                 data = Uri.parse(settings.url);
             } else {
                 String modifiedUrl = "http://" + settings.url;
-                CatLog.d(this, "modifiedUrl = " + modifiedUrl);
                 data = Uri.parse(modifiedUrl);
             }
         }
@@ -742,15 +939,19 @@ public class StkAppService extends Service implements Runnable {
                     Intent.CATEGORY_APP_BROWSER);
         }
 
+        intent.setData(data);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         switch (settings.mode) {
         case USE_EXISTING_BROWSER:
+            intent.setAction(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             break;
         case LAUNCH_NEW_BROWSER:
+            intent.setAction(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             break;
         case LAUNCH_IF_NOT_ALREADY_LAUNCHED:
+            intent.setAction(Intent.ACTION_VIEW); //for default action, view
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             break;
         }
@@ -785,10 +986,7 @@ public class StkAppService extends Service implements Runnable {
                     .setSmallIcon(com.android.internal.R.drawable.stat_notify_sim_toolkit);
             notificationBuilder.setContentIntent(pendingIntent);
             notificationBuilder.setOngoing(true);
-            // Set text and icon for the status bar and notification body.
-            if (!msg.iconSelfExplanatory) {
-                notificationBuilder.setContentText(msg.text);
-            }
+
             if (msg.icon != null) {
                 notificationBuilder.setLargeIcon(msg.icon);
             } else {
@@ -919,5 +1117,215 @@ public class StkAppService extends Service implements Runnable {
             return true;
         }
         return false;
+    }
+
+    private void launchUserActivityListener() {
+
+        if (mUserActivityReceiver == null) {
+            mUserActivityReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+
+                    int mStkUserActivity = SystemProperties.getInt(TelephonyProperties.PROPERTY_STK_USERACTIVITY, 0);
+                    CatLog.d(this, "mUserActivityReceiver Action="+action+"mStkUserActivity"+mStkUserActivity);
+                    if (mStkUserActivity ==1) {
+                        SystemProperties.set(TelephonyProperties.PROPERTY_STK_USERACTIVITY, "0");
+                        Bundle args = new Bundle();
+                        args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
+                        args.putInt(StkAppService.RES_ID, RES_ID_EVENTDOWNLOAD);
+                        args.putBoolean(StkAppService.CONFIRMATION, true);
+                        args.putInt(StkAppService.EVENT_DOWNLOAD_ID, EVENTLIST_USER_ACTIVITY);
+                        args.putInt(StkAppService.EVENT_SOURCE_ID, DI_ME);
+                        args.putInt(StkAppService.EVENT_DESTINATION_ID, DI_SIM);
+
+                        Message msg = mServiceHandler.obtainMessage();
+                        msg.arg1 = StkAppService.OP_RESPONSE;
+                        msg.obj = args;
+                        mServiceHandler.sendMessage(msg);
+
+                        if(mUserActivityReceiver != null) {
+                            unregisterReceiver(mUserActivityReceiver);
+                            mUserActivityReceiver = null;
+                        }
+                    }
+                }
+            };
+
+            IntentFilter iFilter = new IntentFilter();
+            iFilter.addAction(TelephonyIntents.ACTION_STK_KEYEVENT);
+            iFilter.addAction(TelephonyIntents.ACTION_STK_TOUCHEVENT);
+            iFilter.addAction(Intent.ACTION_SCREEN_ON);
+            registerReceiver(mUserActivityReceiver, iFilter);
+
+            SystemProperties.set(TelephonyProperties.PROPERTY_STK_USERACTIVITY, "1");
+            CatLog.d(this, "launchUserActivityListener finish");
+
+        } else {
+            CatLog.d(this, "mUserActivityReceiver has been lunched");
+        }
+    }
+
+    private void launchIdleScreenListener() {
+
+        if (mIdleScreenReceiver == null) {
+            mIdleScreenReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+
+                    String action = intent.getAction();
+                    CatLog.d(this, "mIdleScreenReceiver Action="+action);
+
+                    Message msg = mServiceHandler.obtainMessage();
+                    msg.arg1 = OP_STK_IDLESCREEN;
+                    mServiceHandler.sendMessageDelayed(msg,500);
+
+                }
+            };
+
+            IntentFilter iFilter = new IntentFilter();
+            iFilter.addAction(TelephonyIntents.ACTION_STK_KEYEVENT);
+            registerReceiver(mIdleScreenReceiver, iFilter);
+
+            SystemProperties.set(TelephonyProperties.PROPERTY_STK_IDLESCREEN, "1");
+            CatLog.d(this, "registerKeyEventListener finish");
+        } else {
+            CatLog.d(this, "mIdleScreenReceiver has been lunched");
+        }
+    }
+
+    private void processIdleScreen() {
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        String getTopPackageName = am.getRunningTasks(30).get(0).topActivity.getPackageName();
+
+        int mStkIdleScreen= SystemProperties.getInt(TelephonyProperties.PROPERTY_STK_IDLESCREEN, 0);
+        CatLog.d(this, "mIdleScreenReceiver topActivity="+getTopPackageName+"mStkIdleScreen="+mStkIdleScreen);
+        if((getTopPackageName.equals("com.android.launcher")) && (mStkIdleScreen == 1)) {
+            SystemProperties.set(TelephonyProperties.PROPERTY_STK_IDLESCREEN, "0");
+            CatLog.d(this,"processIdleScreen launcher");
+            Bundle args = new Bundle();
+            args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
+            args.putInt(StkAppService.RES_ID, RES_ID_EVENTDOWNLOAD);
+            args.putBoolean(StkAppService.CONFIRMATION, true);
+            args.putInt(StkAppService.EVENT_DOWNLOAD_ID, EVENTLIST_IDLE_SCREEN_AVAILABLE);
+            args.putInt(StkAppService.EVENT_SOURCE_ID, DI_DISPLAY);
+            args.putInt(StkAppService.EVENT_DESTINATION_ID, DI_SIM);
+
+            Message msg = mServiceHandler.obtainMessage();
+            msg.arg1 = StkAppService.OP_RESPONSE;
+            msg.obj = args;
+            mServiceHandler.sendMessage(msg);
+
+
+
+            if(mIdleScreenReceiver != null) {
+                unregisterReceiver(mIdleScreenReceiver);
+                mIdleScreenReceiver = null;
+            }
+        }
+    }
+
+    private void processDisableEventList() {
+
+        if (mLanguageEventReceiver != null) {
+            CatLog.d(this, "unregisterReceiver(), mLanguageEventReceiver");
+            unregisterReceiver(mLanguageEventReceiver);
+            mLanguageEventReceiver = null;
+        }
+
+        if (mUserActivityReceiver != null) {
+            CatLog.d(this, "unregisterReceiver(), mUserActivityReceiver");
+            unregisterReceiver(mUserActivityReceiver);
+            mUserActivityReceiver = null;
+        }
+
+        if (mIdleScreenReceiver != null) {
+            CatLog.d(this, "unregisterReceiver(), mIdleScreenReceiver");
+            unregisterReceiver(mIdleScreenReceiver);
+            mIdleScreenReceiver = null;
+        }
+    }
+
+    private void launchLanguageListener() {
+        if (mLanguageEventReceiver == null) {
+            mCurrentLanguage = null;
+            try {
+                IActivityManager am = ActivityManagerNative.getDefault();
+                Configuration config = am.getConfiguration();
+                mCurrentLanguage = config.locale.getLanguage();
+            } catch (RemoteException e) {
+                CatLog.d(this, "Caught Exception on");
+                return;
+            }
+
+            CatLog.d(this, "new mLanguageEventReceiver, mCurrentLanguage="+mCurrentLanguage);
+            mLanguageEventReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    CatLog.d(this, "mLanguageEventReceiver Action = "+action);
+
+                    if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                        CatLog.d(this, "Receive ACTION_CONFIGURATION_CHANGED Notify");
+                        try {
+                            IActivityManager am = ActivityManagerNative.getDefault();
+                            Configuration config = am.getConfiguration();
+                            String ConfigLanguage = config.locale.getLanguage();
+                            CatLog.d(this, "ConfigLanguage="+ConfigLanguage+" ,mCurrentLanguage="+mCurrentLanguage);
+
+                            if (ConfigLanguage != mCurrentLanguage) {
+
+                                Bundle args = new Bundle();
+                                args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
+                                args.putInt(StkAppService.RES_ID, RES_ID_EVENTDOWNLOAD);
+                                args.putBoolean(StkAppService.CONFIRMATION, true);
+                                args.putInt(StkAppService.EVENT_DOWNLOAD_ID, EVENTLIST_LANGUAGE_SELECTION);
+                                args.putInt(StkAppService.EVENT_SOURCE_ID, DI_ME);
+                                args.putInt(StkAppService.EVENT_DESTINATION_ID, DI_SIM);
+
+                                byte[] LanguageRawData = ConfigLanguage.getBytes();
+
+                                ByteArrayOutputStream buf = new ByteArrayOutputStream();
+                                buf.write(0x2d);
+                                buf.write(0x00);
+
+                                for (int i = 0; i < LanguageRawData.length; i++) {
+                                    buf.write(LanguageRawData[i]);
+                                }
+
+                                byte[] rawData = buf.toByteArray();
+                                int len = rawData.length - 2; // Header(0x2d)+ Length
+                                rawData[1] = (byte) len;
+
+                                StringBuilder sb = new StringBuilder();
+                                for (int j = 0; j < rawData.length; j++) {
+                                    String Data = String.format("%x",rawData[j]);
+                                    sb.append(Data);
+                                    sb.append(" ");
+                                }
+
+                                CatLog.d(this, "ADDITIONINFO="+sb.toString());
+                                args.putByteArray(StkAppService.EVENT_ADDITIONINFO,rawData);
+
+                                Message msg = mServiceHandler.obtainMessage();
+                                msg.arg1 = StkAppService.OP_RESPONSE;
+                                msg.obj = args;
+                                mServiceHandler.sendMessage(msg);
+                                mCurrentLanguage = ConfigLanguage;
+                            }
+                        } catch (RemoteException e) {
+                            CatLog.d(this, "Caught Exception");
+                            return;
+                        }
+                    }
+                }
+            };
+            IntentFilter iFilter = new IntentFilter();
+            iFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+            registerReceiver(mLanguageEventReceiver, iFilter);
+            CatLog.d(this, "registerLanguageListener finish");
+        } else {
+            CatLog.d(this, "mLanguageEventReceiver has been lunched !!!");
+        }
     }
 }

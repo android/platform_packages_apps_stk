@@ -22,6 +22,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import com.android.internal.telephony.RILConstants.SimCardID;
+import com.android.internal.telephony.cat.CatLog;
 
 /**
  * Receiver class to get STK intents, broadcasted by telephony layer.
@@ -31,6 +33,14 @@ public class StkCmdReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        if(intent.hasExtra(AppInterface.CAT_EXTRA_SIM_ID)) {
+            SimCardID objSimId = (SimCardID) (intent.getExtra(AppInterface.CAT_EXTRA_SIM_ID));
+            if (SimCardID.ID_ZERO.toInt() != objSimId.toInt()){
+                CatLog.d(this, "[STK]: Don't handle the broadcast to STK2");
+                return;
+            }
+        }
         String action = intent.getAction();
 
         if (action.equals(AppInterface.CAT_CMD_ACTION)) {

@@ -78,7 +78,10 @@ public class ToneDialog extends Activity {
         ImageView iv = (ImageView) findViewById(R.id.icon);
 
         // set text and icon
-        tv.setText(toneMsg.text);
+        if (!(toneMsg.iconSelfExplanatory && toneMsg.icon != null)) {
+            tv.setText(toneMsg.text);
+        }
+
         if (toneMsg.icon == null) {
             iv.setImageResource(com.android.internal.R.drawable.ic_volume);
         } else {
