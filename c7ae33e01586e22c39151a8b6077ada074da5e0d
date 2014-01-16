@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d37e9c2_89309970",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-01-16T23:53:53Z",
+      "side": 1,
+      "message": "MSimUiccCard is not defined anywhere.",
+      "range": {
+        "startLine": 58,
+        "startChar": 37,
+        "endLine": 58,
+        "endChar": 49
+      },
+      "revId": "c7ae33e01586e22c39151a8b6077ada074da5e0d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d37e9c2_493f8138",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-01-16T23:53:53Z",
+      "side": 1,
+      "message": "Not defined as well as many other things in this file, it seems this is incomplete.",
+      "range": {
+        "startLine": 178,
+        "startChar": 13,
+        "endLine": 178,
+        "endChar": 30
+      },
+      "revId": "c7ae33e01586e22c39151a8b6077ada074da5e0d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd43a132_cbb9b5d1",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-01-16T23:53:53Z",
+      "side": 1,
+      "message": "MSimUiccCard is not defined anywhere and MSimUiccController returns UiccCard. Further more UiccCard does not implement getCatService.",
+      "range": {
+        "startLine": 223,
+        "startChar": 36,
+        "endLine": 223,
+        "endChar": 48
+      },
+      "revId": "c7ae33e01586e22c39151a8b6077ada074da5e0d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
