@@ -26,7 +26,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.android.internal.telephony.cat.CatLog;
 import com.android.internal.telephony.cat.TextMessage;
 import com.android.internal.telephony.cat.ToneSettings;
 
@@ -38,7 +38,10 @@ public class ToneDialog extends Activity {
     TextMessage toneMsg = null;
     ToneSettings settings = null;
     TonePlayer player = null;
+    int mSimId = -1;
     boolean mIsResponseSent = false;
+
+    private static final String LOGTAG = "Stk-TD ";
 
     /**
      * Handler used to stop tones from playing when the duration ends.
@@ -64,6 +67,7 @@ public class ToneDialog extends Activity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        CatLog.d(LOGTAG, "onCreate");
         mVibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
 
         initFromIntent(getIntent());
@@ -78,7 +82,12 @@ public class ToneDialog extends Activity {
         ImageView iv = (ImageView) findViewById(R.id.icon);
 
         // set text and icon
-        tv.setText(toneMsg.text);
+        if ((null == toneMsg) || (null == toneMsg.text) || (toneMsg.text.equals(""))) {
+            CatLog.d(LOGTAG, "onCreate - null tone text");
+        } else {
+            tv.setText(toneMsg.text);
+        }
+
         if (toneMsg.icon == null) {
             iv.setImageResource(com.android.internal.R.drawable.ic_volume);
         } else {
@@ -86,6 +95,11 @@ public class ToneDialog extends Activity {
         }
 
         // Start playing tone and vibration
+        if (null == settings) {
+            CatLog.d(LOGTAG, "onCreate - null settings - finish");
+            finish();
+        }
+
         player = new TonePlayer();
         player.play(settings.tone);
         int timeout = StkApp.calculateDurationInMilis(settings.duration);
@@ -93,20 +107,32 @@ public class ToneDialog extends Activity {
             timeout = StkApp.TONE_DFEAULT_TIMEOUT;
         }
         mToneStopper.sendEmptyMessageDelayed(MSG_ID_STOP_TONE, timeout);
-        if (settings.vibrate) {
+        if (settings.vibrate && mVibrator != null) {
             mVibrator.vibrate(timeout);
+        } else {
+            CatLog.d(LOGTAG, "settings.vibrate = " + settings.vibrate);
+            CatLog.d(LOGTAG, "mVibrator is null " + (mVibrator == null));
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mIsResponseSent) {
-            mToneStopper.removeMessages(MSG_ID_STOP_TONE);
+
+        CatLog.d(LOGTAG, "onDestroy");
+
+        mToneStopper.removeMessages(MSG_ID_STOP_TONE);
+        if (!mIsResponseSent) {
+            sendResponse(StkAppService.RES_ID_END_SESSION);
         }
-        player.stop();
-        player.release();
-        mVibrator.cancel();
+
+        if (null != player) {
+            player.stop();
+            player.release();
+        }
+        if (null != mVibrator) {
+            mVibrator.cancel();
+        }
     }
 
     @Override
@@ -126,11 +152,15 @@ public class ToneDialog extends Activity {
         }
         toneMsg = intent.getParcelableExtra("TEXT");
         settings = intent.getParcelableExtra("TONE");
+        mSimId = intent.getIntExtra(StkAppService.CMD_SIM_ID, -1);
     }
 
     private void sendResponse(int resId) {
         Bundle args = new Bundle();
-        args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
+        int[] op = new int[2];
+        op[0] = StkAppService.OP_RESPONSE;
+        op[1] = mSimId;
+        args.putIntArray(StkAppService.OPCODE, op);
         args.putInt(StkAppService.RES_ID, resId);
         startService(new Intent(this, StkAppService.class).putExtras(args));
         mIsResponseSent = true;

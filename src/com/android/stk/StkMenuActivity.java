@@ -42,41 +42,18 @@ import com.android.internal.telephony.cat.CatLog;
  *
  */
 public class StkMenuActivity extends ListActivity {
-    private Context mContext;
-    private Menu mStkMenu = null;
-    private int mState = STATE_MAIN;
-    private boolean mAcceptUsersInput = true;
-
+    private StkMenuInstance mMenuInstance = new StkMenuInstance();
     private TextView mTitleTextView = null;
     private ImageView mTitleIconView = null;
     private ProgressBar mProgressView = null;
-
-    StkAppService appService = StkAppService.getInstance();
-
-    // Internal state values
-    static final int STATE_MAIN = 1;
-    static final int STATE_SECONDARY = 2;
-
-    // message id for time out
-    private static final int MSG_ID_TIMEOUT = 1;
-
-    Handler mTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-            case MSG_ID_TIMEOUT:
-                mAcceptUsersInput = false;
-                sendResponse(StkAppService.RES_ID_TIMEOUT);
-                break;
-            }
-        }
-    };
+    private static final String LOGTAG = "Stk-MA ";
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        CatLog.d(this, "onCreate");
+        CatLog.d(LOGTAG, "onCreate+");
+        mMenuInstance.parent = this;       
         // Remove the default title, customized one is used.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // Set the layout for this activity.
@@ -85,99 +62,64 @@ public class StkMenuActivity extends ListActivity {
         mTitleTextView = (TextView) findViewById(R.id.title_text);
         mTitleIconView = (ImageView) findViewById(R.id.title_icon);
         mProgressView = (ProgressBar) findViewById(R.id.progress_bar);
-        mContext = getBaseContext();
-
-        initFromIntent(getIntent());
-        mAcceptUsersInput = true;
+        mMenuInstance.handleOnCreate(getBaseContext(), getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        CatLog.d(this, "onNewIntent");
-        initFromIntent(intent);
-        mAcceptUsersInput = true;
+        CatLog.d(LOGTAG, "onNewIntent");
+        mMenuInstance.handleNewIntent(intent);
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        if (!mAcceptUsersInput) {
-            return;
-        }
-
-        Item item = getSelectedItem(position);
-        if (item == null) {
-            return;
-        }
-        sendResponse(StkAppService.RES_ID_MENU_SELECTION, item.id, false);
-        mAcceptUsersInput = false;
-        mProgressView.setVisibility(View.VISIBLE);
-        mProgressView.setIndeterminate(true);
+        mMenuInstance.handleListItemClick(position, mProgressView);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-        if (!mAcceptUsersInput) {
-            return true;
-        }
-
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_BACK:
-            switch (mState) {
-            case STATE_SECONDARY:
-                cancelTimeOut();
-                mAcceptUsersInput = false;
-                sendResponse(StkAppService.RES_ID_BACKWARD);
-                return true;
-            case STATE_MAIN:
-                break;
-            }
-            break;
-        }
-        return super.onKeyDown(keyCode, event);
+        boolean result = mMenuInstance.handleKeyDown(keyCode, event);
+        if (result)
+            return result;
+        else
+            return super.onKeyDown(keyCode, event);
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        appService.indicateMenuVisibility(true);
-        mStkMenu = appService.getMenu();
-        if (mStkMenu == null) {
-            finish();
-            return;
+        CatLog.d(LOGTAG, "onResume, sim id: " + mMenuInstance.mSimId);
+        int res = mMenuInstance.handleResume(mTitleIconView, mTitleTextView, this, mProgressView);
+        switch(res)
+        {
+            case StkMenuInstance.FINISH_CAUSE_NULL_MENU:
+                mMenuInstance.showTextToast(getApplicationContext(), getString(R.string.main_menu_not_initialized));
+                finish();
+                break;
+            case StkMenuInstance.FINISH_CAUSE_NULL_SERVICE:
+                CatLog.d(LOGTAG, "app service is null");                
+                finish();
+                break;
         }
-        displayMenu();
-        startTimeOut();
-        // whenever this activity is resumed after a sub activity was invoked
-        // (Browser, In call screen) switch back to main state and enable
-        // user's input;
-        if (!mAcceptUsersInput) {
-            mState = STATE_MAIN;
-            mAcceptUsersInput = true;
-        }
-        // make sure the progress bar is not shown.
-        mProgressView.setIndeterminate(false);
-        mProgressView.setVisibility(View.GONE);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        appService.indicateMenuVisibility(false);
-        cancelTimeOut();
+        CatLog.d(LOGTAG, "onPause, sim id: " + mMenuInstance.mSimId);
+        mMenuInstance.handlePause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        CatLog.d(this, "onDestroy");
+        CatLog.d(LOGTAG, "onDestroy");
     }
 
     @Override
@@ -191,143 +133,29 @@ public class StkMenuActivity extends ListActivity {
     @Override
     public boolean onPrepareOptionsMenu(android.view.Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        boolean helpVisible = false;
-        boolean mainVisible = false;
-
-        if (mState == STATE_SECONDARY) {
-            mainVisible = true;
-        }
-        if (mStkMenu != null) {
-            helpVisible = mStkMenu.helpAvailable;
-        }
-
-        menu.findItem(StkApp.MENU_ID_END_SESSION).setVisible(mainVisible);
-        menu.findItem(StkApp.MENU_ID_HELP).setVisible(helpVisible);
-
-        return true;
+        
+        return mMenuInstance.handlePrepareOptionMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (!mAcceptUsersInput) {
-            return true;
-        }
-        switch (item.getItemId()) {
-        case StkApp.MENU_ID_END_SESSION:
-            cancelTimeOut();
-            mAcceptUsersInput = false;
-            // send session end response.
-            sendResponse(StkAppService.RES_ID_END_SESSION);
-            return true;
-        case StkApp.MENU_ID_HELP:
-            cancelTimeOut();
-            mAcceptUsersInput = false;
-            int position = getSelectedItemPosition();
-            Item stkItem = getSelectedItem(position);
-            if (stkItem == null) {
-                break;
-            }
-            // send help needed response.
-            sendResponse(StkAppService.RES_ID_MENU_SELECTION, stkItem.id, true);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        boolean result = mMenuInstance.handleOptionItemSelected(item, mProgressView);
+        CatLog.d(LOGTAG, "onOptionsItemSelected, result: " + result);
+        if (result)
+            return result;
+        else
+            return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("STATE", mState);
-        outState.putParcelable("MENU", mStkMenu);
+        outState.putInt("STATE", mMenuInstance.mState);
+        outState.putParcelable("MENU", mMenuInstance.mStkMenu);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        mState = savedInstanceState.getInt("STATE");
-        mStkMenu = savedInstanceState.getParcelable("MENU");
-    }
-
-    private void cancelTimeOut() {
-        mTimeoutHandler.removeMessages(MSG_ID_TIMEOUT);
-    }
-
-    private void startTimeOut() {
-        if (mState == STATE_SECONDARY) {
-            // Reset timeout.
-            cancelTimeOut();
-            mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
-                    .obtainMessage(MSG_ID_TIMEOUT), StkApp.UI_TIMEOUT);
-        }
-    }
-
-    // Bind list adapter to the items list.
-    private void displayMenu() {
-
-        if (mStkMenu != null) {
-            // Display title & title icon
-            if (mStkMenu.titleIcon != null) {
-                mTitleIconView.setImageBitmap(mStkMenu.titleIcon);
-                mTitleIconView.setVisibility(View.VISIBLE);
-            } else {
-                mTitleIconView.setVisibility(View.GONE);
-            }
-            if (!mStkMenu.titleIconSelfExplanatory) {
-                mTitleTextView.setVisibility(View.VISIBLE);
-                if (mStkMenu.title == null) {
-                    mTitleTextView.setText(R.string.app_name);
-                } else {
-                    mTitleTextView.setText(mStkMenu.title);
-                }
-            } else {
-                mTitleTextView.setVisibility(View.INVISIBLE);
-            }
-            // create an array adapter for the menu list
-            StkMenuAdapter adapter = new StkMenuAdapter(this,
-                    mStkMenu.items, mStkMenu.itemsIconSelfExplanatory);
-            // Bind menu list to the new adapter.
-            setListAdapter(adapter);
-            // Set default item
-            setSelection(mStkMenu.defaultItem);
-        }
-    }
-
-    private void initFromIntent(Intent intent) {
-
-        if (intent != null) {
-            mState = intent.getIntExtra("STATE", STATE_MAIN);
-        } else {
-            finish();
-        }
-    }
-
-    private Item getSelectedItem(int position) {
-        Item item = null;
-        if (mStkMenu != null) {
-            try {
-                item = mStkMenu.items.get(position);
-            } catch (IndexOutOfBoundsException e) {
-                if (StkApp.DBG) {
-                    CatLog.d(this, "Invalid menu");
-                }
-            } catch (NullPointerException e) {
-                if (StkApp.DBG) {
-                    CatLog.d(this, "Invalid menu");
-                }
-            }
-        }
-        return item;
-    }
-
-    private void sendResponse(int resId) {
-        sendResponse(resId, 0, false);
-    }
-
-    private void sendResponse(int resId, int itemId, boolean help) {
-        Bundle args = new Bundle();
-        args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
-        args.putInt(StkAppService.RES_ID, resId);
-        args.putInt(StkAppService.MENU_SELECTION, itemId);
-        args.putBoolean(StkAppService.HELP, help);
-        mContext.startService(new Intent(mContext, StkAppService.class)
-                .putExtras(args));
+        mMenuInstance.mState = savedInstanceState.getInt("STATE");
+        mMenuInstance.mStkMenu = savedInstanceState.getParcelable("MENU");
     }
 }

@@ -16,12 +16,14 @@
 
 package com.android.stk;
 
-import com.android.internal.telephony.cat.AppInterface;
-
+import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.cat.CatLog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.android.internal.telephony.cat.AppInterface;
 
 /**
  * Receiver class to get STK intents, broadcasted by telephony layer.
@@ -34,25 +36,48 @@ public class StkCmdReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
         if (action.equals(AppInterface.CAT_CMD_ACTION)) {
-            handleCommandMessage(context, intent);
+            handleCommandMessage(context, intent, PhoneConstants.SIM_ID_1);
+        } else if (action.equals(AppInterface.CAT_CMD_ACTION_2)) {
+            handleCommandMessage(context, intent, PhoneConstants.SIM_ID_2);
+        } if (action.equals(AppInterface.CAT_CMD_ACTION_3)) {
+            handleCommandMessage(context, intent, PhoneConstants.SIM_ID_3);
+        } else if (action.equals(AppInterface.CAT_CMD_ACTION_4)) {
+            handleCommandMessage(context, intent, PhoneConstants.SIM_ID_4);
         } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION)) {
-            handleSessionEnd(context, intent);
+            handleSessionEnd(context, intent, PhoneConstants.SIM_ID_1);
+        } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION_2)) {
+            handleSessionEnd(context, intent, PhoneConstants.SIM_ID_2);
+        } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION_3)) {
+            handleSessionEnd(context, intent, PhoneConstants.SIM_ID_3);
+        } else if (action.equals(AppInterface.CAT_SESSION_END_ACTION_4)) {
+            handleSessionEnd(context, intent, PhoneConstants.SIM_ID_4);
         }
     }
 
-    private void handleCommandMessage(Context context, Intent intent) {
+    private void handleCommandMessage(Context context, Intent intent, int sim) {
         Bundle args = new Bundle();
-        args.putInt(StkAppService.OPCODE, StkAppService.OP_CMD);
+        int[] op = new int[2];
+        op[0] = StkAppService.OP_CMD;
+        op[1] = sim;
+        args.putIntArray(StkAppService.OPCODE, op);
         args.putParcelable(StkAppService.CMD_MSG, intent
                 .getParcelableExtra("STK CMD"));
-        context.startService(new Intent(context, StkAppService.class)
-                .putExtras(args));
+        CatLog.d("StkCmdReceiver", "handleCommandMessage, args: " + args);
+        CatLog.d("StkCmdReceiver", "handleCommandMessage, sim id: " + sim);
+        Intent toService = new Intent(context, StkAppService.class);
+        toService.putExtras(args);
+        context.startService(toService);
     }
 
-    private void handleSessionEnd(Context context, Intent intent) {
+    private void handleSessionEnd(Context context, Intent intent, int sim) {
         Bundle args = new Bundle();
-        args.putInt(StkAppService.OPCODE, StkAppService.OP_END_SESSION);
-        context.startService(new Intent(context, StkAppService.class)
-                .putExtras(args));
+        int[] op = new int[2];
+        op[0] = StkAppService.OP_END_SESSION;
+        op[1] = sim;
+        args.putIntArray(StkAppService.OPCODE, op);
+        CatLog.d("StkCmdReceiver", "handleSessionEnd, sim id: " + sim);
+        Intent toService = new Intent(context, StkAppService.class);
+        toService.putExtras(args);
+        context.startService(toService);
     }
 }

@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import com.android.internal.telephony.cat.CatLog;
 
 /**
  * AlretDialog used for DISPLAY TEXT commands.
@@ -36,36 +37,20 @@ import android.widget.TextView;
  */
 public class StkDialogActivity extends Activity implements View.OnClickListener {
     // members
-    TextMessage mTextMsg;
-
-    Handler mTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-            case MSG_ID_TIMEOUT:
-                sendResponse(StkAppService.RES_ID_TIMEOUT);
-                finish();
-                break;
-            }
-        }
-    };
-
+    private StkDialogInstance mDialogInstance = new StkDialogInstance();
+    private static final String LOGTAG = "Stk-DA";
     //keys) for saving the state of the dialog in the icicle
     private static final String TEXT = "text";
-
-    // message id for time out
-    private static final int MSG_ID_TIMEOUT = 1;
-
-    // buttons id
-    public static final int OK_BUTTON = R.id.button_ok;
-    public static final int CANCEL_BUTTON = R.id.button_cancel;
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        initFromIntent(getIntent());
-        if (mTextMsg == null) {
+        CatLog.d(LOGTAG, "onCreate");
+        mDialogInstance.parent = this;
+
+        mDialogInstance.initFromIntent(getIntent());
+        if (mDialogInstance.mTextMsg == null) {
             finish();
             return;
         }
@@ -83,112 +68,67 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         okButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);
 
-        setTitle(mTextMsg.title);
-        if (!(mTextMsg.iconSelfExplanatory && mTextMsg.icon != null)) {
-            mMessageView.setText(mTextMsg.text);
+        setTitle(mDialogInstance.mTextMsg.title);
+        if (!(mDialogInstance.mTextMsg.iconSelfExplanatory && mDialogInstance.mTextMsg.icon != null)) {
+            mMessageView.setText(mDialogInstance.mTextMsg.text);
         }
 
-        if (mTextMsg.icon == null) {
+        if (mDialogInstance.mTextMsg.icon == null) {
+            CatLog.d(LOGTAG, "onCreate icon is null");
             window.setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
                     com.android.internal.R.drawable.stat_notify_sim_toolkit);
         } else {
             window.setFeatureDrawable(Window.FEATURE_LEFT_ICON,
-                    new BitmapDrawable(mTextMsg.icon));
+                    new BitmapDrawable(mDialogInstance.mTextMsg.icon));
         }
     }
 
     public void onClick(View v) {
-        String input = null;
+        mDialogInstance.handleOnClick(v);
+    }
 
-        switch (v.getId()) {
-        case OK_BUTTON:
-            sendResponse(StkAppService.RES_ID_CONFIRM, true);
-            finish();
-            break;
-        case CANCEL_BUTTON:
-            sendResponse(StkAppService.RES_ID_CONFIRM, false);
-            finish();
-            break;
-        }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mDialogInstance.handleOnNewIntent(intent);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_BACK:
-            sendResponse(StkAppService.RES_ID_BACKWARD);
-            finish();
-            break;
-        }
-        return false;
+        return mDialogInstance.handleOnKeyDown(keyCode, event);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        startTimeOut(mTextMsg.userClear);
+        mDialogInstance.handleOnResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mDialogInstance.handleOnPause();
+    }
 
-        cancelTimeOut();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDialogInstance.handleOnDestroy();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+        CatLog.d(LOGTAG, "onSaveInstanceState");
 
-        outState.putParcelable(TEXT, mTextMsg);
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(TEXT, mDialogInstance.mTextMsg);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        mTextMsg = savedInstanceState.getParcelable(TEXT);
-    }
-
-    private void sendResponse(int resId, boolean confirmed) {
-        Bundle args = new Bundle();
-        args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
-        args.putInt(StkAppService.RES_ID, resId);
-        args.putBoolean(StkAppService.CONFIRMATION, confirmed);
-        startService(new Intent(this, StkAppService.class).putExtras(args));
-    }
-
-    private void sendResponse(int resId) {
-        sendResponse(resId, true);
-    }
-
-    private void initFromIntent(Intent intent) {
-
-        if (intent != null) {
-            mTextMsg = intent.getParcelableExtra("TEXT");
-        } else {
-            finish();
-        }
-    }
-
-    private void cancelTimeOut() {
-        mTimeoutHandler.removeMessages(MSG_ID_TIMEOUT);
-    }
-
-    private void startTimeOut(boolean waitForUserToClear) {
-        // Reset timeout.
-        cancelTimeOut();
-        int dialogDuration = StkApp.calculateDurationInMilis(mTextMsg.duration);
-        // If duration is specified, this has priority. If not, set timeout
-        // according to condition given by the card.
-        if (dialogDuration == 0) {
-            if (waitForUserToClear) {
-                dialogDuration = StkApp.DISP_TEXT_WAIT_FOR_USER_TIMEOUT;
-            } else {
-                dialogDuration = StkApp.DISP_TEXT_CLEAR_AFTER_DELAY_TIMEOUT;
-            }
-        }
-        mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
-                .obtainMessage(MSG_ID_TIMEOUT), dialogDuration);
+        mDialogInstance.mTextMsg = savedInstanceState.getParcelable(TEXT);
+        CatLog.d(LOGTAG, "onRestoreInstanceState - [" + mDialogInstance.mTextMsg + "]");
     }
 }
