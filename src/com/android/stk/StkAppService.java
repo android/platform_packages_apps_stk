@@ -42,6 +42,8 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 
 import com.android.internal.telephony.cat.AppInterface;
 import com.android.internal.telephony.cat.Menu;
@@ -53,6 +55,9 @@ import com.android.internal.telephony.cat.CatCmdMessage.BrowserSettings;
 import com.android.internal.telephony.cat.CatLog;
 import com.android.internal.telephony.cat.CatResponseMessage;
 import com.android.internal.telephony.cat.TextMessage;
+import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.IccCardConstants;
 
 import java.util.LinkedList;
 
@@ -64,23 +69,30 @@ import java.util.LinkedList;
 public class StkAppService extends Service implements Runnable {
 
     // members
+    protected class StkContext {
+        protected CatCmdMessage mMainCmd = null;
+        protected CatCmdMessage mCurrentCmd = null;
+        protected CatCmdMessage mCurrentMenuCmd = null;
+        protected Menu mCurrentMenu = null;
+        protected String lastSelectedItem = null;
+        protected boolean mMenuIsVisible = false;
+        protected boolean responseNeeded = true;
+        protected boolean launchBrowser = false;
+        protected BrowserSettings mBrowserSettings = null;
+        protected boolean mSetupMenuCalled = false; 
+        protected int mAvailable = STK_AVAIL_INIT;
+        protected LinkedList<DelayedCmd> mCmdsQ = null;
+        protected boolean mCmdInProgress = false;
+    }
+
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
-    private AppInterface mStkService;
     private Context mContext = null;
-    private CatCmdMessage mMainCmd = null;
-    private CatCmdMessage mCurrentCmd = null;
-    private Menu mCurrentMenu = null;
-    private String lastSelectedItem = null;
-    private boolean mMenuIsVisibile = false;
-    private boolean responseNeeded = true;
-    private boolean mCmdInProgress = false;
     private NotificationManager mNotificationManager = null;
-    private LinkedList<DelayedCmd> mCmdsQ = null;
-    private boolean launchBrowser = false;
-    private BrowserSettings mBrowserSettings = null;
     static StkAppService sInstance = null;
-
+    private AppInterface[] mStkService = null;
+    private StkContext[] mStkContext = null;
+    private int mSimCount = 0;
     // Used for setting FLAG_ACTIVITY_NO_USER_ACTION when
     // creating an intent.
     private enum InitiatedByUserAction {
@@ -97,6 +109,7 @@ public class StkAppService extends Service implements Runnable {
     static final String HELP = "help";
     static final String CONFIRMATION = "confirm";
     static final String CHOICE = "choice";
+    static final String CMD_SIM_ID = "sim id";
 
     // operations ids for different service functionality.
     static final int OP_CMD = 1;
@@ -122,50 +135,115 @@ public class StkAppService extends Service implements Runnable {
     static final int NO = 0;
 
     private static final String PACKAGE_NAME = "com.android.stk";
-    private static final String MENU_ACTIVITY_NAME =
-                                        PACKAGE_NAME + ".StkMenuActivity";
-    private static final String INPUT_ACTIVITY_NAME =
-                                        PACKAGE_NAME + ".StkInputActivity";
+    private static final String STK1_MENU_ACTIVITY_NAME = PACKAGE_NAME + ".StkMenuActivity";
+    private static final String STK2_MENU_ACTIVITY_NAME = PACKAGE_NAME + ".StkMenuActivityII";
+    private static final String STK3_MENU_ACTIVITY_NAME = PACKAGE_NAME + ".StkMenuActivityIII";
+    private static final String STK4_MENU_ACTIVITY_NAME = PACKAGE_NAME + ".StkMenuActivityIV";
+    private static final String STK1_INPUT_ACTIVITY_NAME = PACKAGE_NAME + ".StkInputActivity";
+    private static final String STK2_INPUT_ACTIVITY_NAME = PACKAGE_NAME + ".StkInputActivityII";
+    private static final String STK3_INPUT_ACTIVITY_NAME = PACKAGE_NAME + ".StkInputActivityIII";
+    private static final String STK4_INPUT_ACTIVITY_NAME = PACKAGE_NAME + ".StkInputActivityIV";
 
     // Notification id used to display Idle Mode text in NotificationManager.
-    private static final int STK_NOTIFICATION_ID = 333;
+    private static final int STK1_NOTIFICATION_ID = 333;
+    private static final int STK2_NOTIFICATION_ID = 334;
+    private static final int STK3_NOTIFICATION_ID = 335;
+    private static final int STK4_NOTIFICATION_ID = 336;
+    private static final String LOGTAG = "Stk-SAS ";
 
+    public static final int STK_AVAIL_INIT = -1;
+    public static final int STK_AVAIL_NOT_AVAILABLE = 0;
+    public static final int STK_AVAIL_AVAILABLE = 1;    
+    Thread serviceThread = null;
     // Inner class used for queuing telephony messages (proactive commands,
     // session end) while the service is busy processing a previous message.
     private class DelayedCmd {
         // members
         int id;
         CatCmdMessage msg;
+        int sim_id;
 
-        DelayedCmd(int id, CatCmdMessage msg) {
+        DelayedCmd(int id, CatCmdMessage msg, int sim_id) {
             this.id = id;
             this.msg = msg;
+            this.sim_id = sim_id;
         }
     }
 
     @Override
     public void onCreate() {
+        CatLog.d(LOGTAG, " onCreate()+");
         // Initialize members
-        mCmdsQ = new LinkedList<DelayedCmd>();
-        Thread serviceThread = new Thread(null, this, "Stk App Service");
-        serviceThread.start();
+        int i = 0;
+        int sim_id = PhoneConstants.SIM_ID_1;
         mContext = getBaseContext();
+        mSimCount = TelephonyManager.from(mContext).getSimCount();
+        CatLog.d(LOGTAG, " simCount: "+mSimCount);
+        mStkService = new AppInterface[mSimCount];
+        mStkContext = new StkContext[mSimCount];
+        for (i = 0; i < mSimCount; i++)
+        {
+            switch (i)
+            {
+                case 1:
+                    sim_id = PhoneConstants.SIM_ID_2;
+                    break;
+                case 2:
+                    sim_id = PhoneConstants.SIM_ID_3;
+                    break;
+                case 3:
+                    sim_id = PhoneConstants.SIM_ID_4;
+                    break;
+                default:
+                    break;
+            }
+            mStkService[i] = com.android.internal.telephony.cat.CatService.getInstance(sim_id);
+
+            mStkContext[i] = new StkContext();
+            mStkContext[i].mAvailable = STK_AVAIL_INIT;
+            mStkContext[i].mCmdsQ = new LinkedList<DelayedCmd>();
+        }
+        
+        serviceThread = new Thread(null, this, "Stk App Service");
+        serviceThread.start();
         mNotificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         sInstance = this;
+        IntentFilter mSIMStateChangeFilter = new IntentFilter(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        registerReceiver(mSIMStateChangeReceiver, mSIMStateChangeFilter);
     }
 
     @Override
     public void onStart(Intent intent, int startId) {
-
-        mStkService = com.android.internal.telephony.cat.CatService
-                .getInstance();
-
-        if (mStkService == null) {
-            stopSelf();
-            CatLog.d(this, " Unable to get Service handle");
-            StkAppInstaller.unInstall(mContext);
+        if (intent == null) {
+            CatLog.d(this, "StkAppService onStart intent is null so return");
             return;
+        }
+
+        Bundle args = intent.getExtras();
+        if (args == null) {
+            CatLog.d(this, "StkAppService onStart args is null so return");
+            return;
+        }
+
+        int[] op = args.getIntArray(OPCODE);
+        if (op == null)
+        {
+            CatLog.d(this, "StkAppService onStart op is null  return. args: " + args);
+            return;
+        }
+        int sim_id = op[1];
+        CatLog.d(this, "StkAppService onStart sim id: " + sim_id + ", op: " + op[0] + ", " + args);
+        if ((sim_id >= 0 && sim_id < mSimCount) && mStkService[sim_id] == null)
+        {
+            mStkService[sim_id] = com.android.internal.telephony.cat.CatService.getInstance(sim_id);
+            if (mStkService[sim_id] == null) {
+                CatLog.d(this, "StkAppService onStart mStkService is null  return, please check op code. Make sure it did not come from CatService");
+                if (op[0] == OP_CMD) {
+                    stopSelf();
+                }
+                return;
+            }
         }
 
         waitForLooper();
@@ -175,14 +253,9 @@ public class StkAppService extends Service implements Runnable {
             return;
         }
 
-        Bundle args = intent.getExtras();
-
-        if (args == null) {
-            return;
-        }
-
         Message msg = mServiceHandler.obtainMessage();
-        msg.arg1 = args.getInt(OPCODE);
+        msg.arg1 = op[0];
+        msg.arg2 = sim_id;
         switch(msg.arg1) {
         case OP_CMD:
             msg.obj = args.getParcelable(CMD_MSG);
@@ -202,6 +275,8 @@ public class StkAppService extends Service implements Runnable {
 
     @Override
     public void onDestroy() {
+        CatLog.d(LOGTAG, " onDestroy()");
+        unregisterReceiver(mSIMStateChangeReceiver);
         waitForLooper();
         mServiceLooper.quit();
     }
@@ -223,15 +298,21 @@ public class StkAppService extends Service implements Runnable {
     /*
      * Package api used by StkMenuActivity to indicate if its on the foreground.
      */
-    void indicateMenuVisibility(boolean visibility) {
-        mMenuIsVisibile = visibility;
+    void indicateMenuVisibility(boolean visibility, int sim_id) {
+        if (sim_id >=0 && sim_id < mSimCount) {
+            mStkContext[sim_id].mMenuIsVisible = visibility;
+        }
     }
-
+    
     /*
      * Package api used by StkMenuActivity to get its Menu parameter.
      */
-    Menu getMenu() {
-        return mCurrentMenu;
+    Menu getMenu(int sim_id) {
+        CatLog.d(LOGTAG, "StkAppService, getMenu, sim id: " + sim_id);
+        if (sim_id >=0 && sim_id < mSimCount)
+            return mStkContext[sim_id].mCurrentMenu;
+        else
+            return null;
     }
 
     /*
@@ -256,17 +337,34 @@ public class StkAppService extends Service implements Runnable {
     private final class ServiceHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
+            if(null == msg)
+            {
+                CatLog.d(LOGTAG, "ServiceHandler handleMessage msg is null");
+                return;
+            }
             int opcode = msg.arg1;
+            int sim_id = msg.arg2;
+
+            CatLog.d(LOGTAG, "handleMessage opcode[" + opcode + "], sim id[" + sim_id + "]");
+            if (opcode == OP_CMD && msg.obj != null && ((CatCmdMessage)msg.obj).getCmdType() != null) {
+                CatLog.d(LOGTAG, "handleMessage cmdName[" + ((CatCmdMessage)msg.obj).getCmdType().name() + "]");
+            }
 
             switch (opcode) {
             case OP_LAUNCH_APP:
-                if (mMainCmd == null) {
+                if (mStkContext[sim_id].mMainCmd == null) {
                     // nothing todo when no SET UP MENU command didn't arrive.
                     return;
                 }
-                launchMenuActivity(null);
+                CatLog.d(LOGTAG, "handleMessage OP_LAUNCH_APP - mCmdInProgress[" + mStkContext[sim_id].mCmdInProgress + "]");
+                if(mStkContext[sim_id].mCurrentMenu == mStkContext[sim_id].mMainCmd.getMenu() ||  mStkContext[sim_id].mCurrentMenu == null) {
+                    launchMenuActivity(null, sim_id);
+                } else {
+                    launchMenuActivity(mStkContext[sim_id].mCurrentMenu, sim_id);
+                }
                 break;
             case OP_CMD:
+                CatLog.d(LOGTAG, "[OP_CMD]");
                 CatCmdMessage cmdMsg = (CatCmdMessage) msg.obj;
                 // There are two types of commands:
                 // 1. Interactive - user's response is required.
@@ -277,46 +375,48 @@ public class StkAppService extends Service implements Runnable {
                 // is already in progress, we need to queue the next command until
                 // the user has responded or a timeout expired.
                 if (!isCmdInteractive(cmdMsg)) {
-                    handleCmd(cmdMsg);
+                    handleCmd(cmdMsg, sim_id);
                 } else {
-                    if (!mCmdInProgress) {
-                        mCmdInProgress = true;
-                        handleCmd((CatCmdMessage) msg.obj);
+                    if (!mStkContext[sim_id].mCmdInProgress) {
+                        mStkContext[sim_id].mCmdInProgress = true;
+                        handleCmd((CatCmdMessage) msg.obj, sim_id);
                     } else {
-                        mCmdsQ.addLast(new DelayedCmd(OP_CMD,
-                                (CatCmdMessage) msg.obj));
+                        CatLog.d(LOGTAG, "[OP_CMD][Normal][Not DISPLAY_TEXT][Interactive][in progress]");
+                        mStkContext[sim_id].mCmdsQ.addLast(new DelayedCmd(OP_CMD,
+                                (CatCmdMessage) msg.obj, sim_id));
                     }
                 }
                 break;
             case OP_RESPONSE:
-                if (responseNeeded) {
-                    handleCmdResponse((Bundle) msg.obj);
+                if (mStkContext[sim_id].responseNeeded) {
+                    handleCmdResponse((Bundle) msg.obj, sim_id);
                 }
                 // call delayed commands if needed.
-                if (mCmdsQ.size() != 0) {
-                    callDelayedMsg();
+                if (mStkContext[sim_id].mCmdsQ.size() != 0) {
+                    callDelayedMsg(sim_id);
                 } else {
-                    mCmdInProgress = false;
+                    mStkContext[sim_id].mCmdInProgress = false;
                 }
                 // reset response needed state var to its original value.
-                responseNeeded = true;
+                mStkContext[sim_id].responseNeeded = true;
                 break;
             case OP_END_SESSION:
-                if (!mCmdInProgress) {
-                    mCmdInProgress = true;
-                    handleSessionEnd();
+                if (!mStkContext[sim_id].mCmdInProgress) {
+                    mStkContext[sim_id].mCmdInProgress = true;
+                    handleSessionEnd(sim_id);
                 } else {
-                    mCmdsQ.addLast(new DelayedCmd(OP_END_SESSION, null));
+                    mStkContext[sim_id].mCmdsQ.addLast(new DelayedCmd(OP_END_SESSION, null, sim_id));
                 }
                 break;
             case OP_BOOT_COMPLETED:
-                CatLog.d(this, "OP_BOOT_COMPLETED");
-                if (mMainCmd == null) {
-                    StkAppInstaller.unInstall(mContext);
-                }
+                CatLog.d(LOGTAG, " OP_BOOT_COMPLETED");
+                /*Do not need uninstall stk here, since we initiate and sync stk installed state in BootCompletedReceiver to fix non-sync stk installed state problem.*/
+//                if (mMainCmd == null) {
+//                    StkAppInstaller.unInstall(mContext);
+//                }
                 break;
             case OP_DELAYED_MSG:
-                handleDelayedCmd();
+                handleDelayedCmd(sim_id);
                 break;
             }
         }
@@ -339,123 +439,157 @@ public class StkAppService extends Service implements Runnable {
         return true;
     }
 
-    private void handleDelayedCmd() {
-        if (mCmdsQ.size() != 0) {
-            DelayedCmd cmd = mCmdsQ.poll();
-            switch (cmd.id) {
-            case OP_CMD:
-                handleCmd(cmd.msg);
-                break;
-            case OP_END_SESSION:
-                handleSessionEnd();
-                break;
+    private void handleDelayedCmd(int sim_id) {
+        CatLog.d(LOGTAG, "handleDelayedCmd, sim_id: " + sim_id);
+        if (mStkContext[sim_id].mCmdsQ.size() != 0) {
+            DelayedCmd cmd = mStkContext[sim_id].mCmdsQ.poll();
+            if (cmd != null)
+            {
+                CatLog.d(LOGTAG, "handleDelayedCmd - queue size: " + mStkContext[sim_id].mCmdsQ.size() + " id: " + cmd.id + "sim id: " + cmd.sim_id);
+                switch (cmd.id) {
+                case OP_CMD:
+                    handleCmd(cmd.msg, cmd.sim_id);
+                    break;
+                case OP_END_SESSION:
+                    handleSessionEnd(cmd.sim_id);
+                    break;
+                }
             }
         }
     }
 
-    private void callDelayedMsg() {
+    private void callDelayedMsg(int sim_id) {
         Message msg = mServiceHandler.obtainMessage();
         msg.arg1 = OP_DELAYED_MSG;
+        msg.arg2 = sim_id;
         mServiceHandler.sendMessage(msg);
     }
 
-    private void handleSessionEnd() {
-        mCurrentCmd = mMainCmd;
-        lastSelectedItem = null;
+    private void handleSessionEnd(int sim_id) {
+        mStkContext[sim_id].mCurrentCmd = mStkContext[sim_id].mMainCmd;
+        CatLog.d(LOGTAG, "handleSessionEnd - mCurrentCmd changed to mMainCmd!");
+        mStkContext[sim_id].mCurrentMenuCmd = mStkContext[sim_id].mMainCmd;
+        if (mStkContext[sim_id].mMainCmd == null){
+            CatLog.d(LOGTAG, "[handleSessionEnd][mMainCmd is null!]");
+        }
+        mStkContext[sim_id].lastSelectedItem = null;
         // In case of SET UP MENU command which removed the app, don't
         // update the current menu member.
-        if (mCurrentMenu != null && mMainCmd != null) {
-            mCurrentMenu = mMainCmd.getMenu();
+        if (mStkContext[sim_id].mCurrentMenu != null && mStkContext[sim_id].mMainCmd != null) {
+            mStkContext[sim_id].mCurrentMenu = mStkContext[sim_id].mMainCmd.getMenu();
         }
-        if (mMenuIsVisibile) {
-            launchMenuActivity(null);
+        if (mStkContext[sim_id].mMenuIsVisible) {
+            if(mStkContext[sim_id].mSetupMenuCalled == true) {
+                launchMenuActivity(null, sim_id);
+            } else {
+                // Only called when pass FTA test (154.1.1)            
+                CatLog.d(LOGTAG, "[handleSessionEnd][To finish menu activity]");
+                finishMenuActivity(sim_id);
+            }
         }
-        if (mCmdsQ.size() != 0) {
-            callDelayedMsg();
+        if (mStkContext[sim_id].mCmdsQ.size() != 0) {
+            callDelayedMsg(sim_id);
         } else {
-            mCmdInProgress = false;
+            mStkContext[sim_id].mCmdInProgress = false;
         }
         // In case a launch browser command was just confirmed, launch that url.
-        if (launchBrowser) {
-            launchBrowser = false;
-            launchBrowser(mBrowserSettings);
+        if (mStkContext[sim_id].launchBrowser) {
+            mStkContext[sim_id].launchBrowser = false;
+            launchBrowser(mStkContext[sim_id].mBrowserSettings);
         }
     }
 
-    private void handleCmd(CatCmdMessage cmdMsg) {
+    private void handleCmd(CatCmdMessage cmdMsg, int sim_id) {
+        StkAppInstaller appInstaller = StkAppInstaller.getInstance();
         if (cmdMsg == null) {
             return;
         }
         // save local reference for state tracking.
-        mCurrentCmd = cmdMsg;
+        mStkContext[sim_id].mCurrentCmd = cmdMsg;
         boolean waitForUsersResponse = true;
 
-        CatLog.d(this, cmdMsg.getCmdType().name());
+        CatLog.d(LOGTAG,"[handleCmd]" + cmdMsg.getCmdType().name());
         switch (cmdMsg.getCmdType()) {
         case DISPLAY_TEXT:
             TextMessage msg = cmdMsg.geTextMessage();
-            responseNeeded = msg.responseNeeded;
+            mStkContext[sim_id].responseNeeded = msg.responseNeeded;
             waitForUsersResponse = msg.responseNeeded;
-            if (lastSelectedItem != null) {
-                msg.title = lastSelectedItem;
-            } else if (mMainCmd != null){
-                msg.title = mMainCmd.getMenu().title;
+            if (mStkContext[sim_id].lastSelectedItem != null) {
+                msg.title = mStkContext[sim_id].lastSelectedItem;
+            } else if (mStkContext[sim_id].mMainCmd != null){
+                msg.title = mStkContext[sim_id].mMainCmd.getMenu().title;
             } else {
                 // TODO: get the carrier name from the SIM
                 msg.title = "";
             }
-            launchTextDialog();
+            launchTextDialog(sim_id);
             break;
         case SELECT_ITEM:
-            mCurrentMenu = cmdMsg.getMenu();
-            launchMenuActivity(cmdMsg.getMenu());
+            CatLog.d(LOGTAG, "SELECT_ITEM +");
+            mStkContext[sim_id].mCurrentMenuCmd = mStkContext[sim_id].mCurrentCmd;
+            mStkContext[sim_id].mCurrentMenu = cmdMsg.getMenu();
+            launchMenuActivity(cmdMsg.getMenu(), sim_id);
             break;
         case SET_UP_MENU:
-            mMainCmd = mCurrentCmd;
-            mCurrentMenu = cmdMsg.getMenu();
-            if (removeMenu()) {
-                CatLog.d(this, "Uninstall App");
-                mCurrentMenu = null;
-                StkAppInstaller.unInstall(mContext);
+            mStkContext[sim_id].mCmdInProgress = false;            
+            mStkContext[sim_id].mSetupMenuCalled = true;
+            mStkContext[sim_id].mMainCmd = mStkContext[sim_id].mCurrentCmd;
+            mStkContext[sim_id].mCurrentMenuCmd = mStkContext[sim_id].mCurrentCmd;
+            mStkContext[sim_id].mCurrentMenu = cmdMsg.getMenu();
+            CatLog.d(LOGTAG, "SET_UP_MENU [" + removeMenu(sim_id) + "]");
+
+            boolean radio_on = true;
+
+            if (removeMenu(sim_id)) {
+                CatLog.d(LOGTAG, "removeMenu() - Uninstall App");
+                mStkContext[sim_id].mCurrentMenu = null;                
+                mStkContext[sim_id].mSetupMenuCalled = false;
+                appInstaller.unInstall(mContext, sim_id);
+                StkAvailable(sim_id, STK_AVAIL_NOT_AVAILABLE);
+            } else if (!radio_on) {
+                CatLog.d(LOGTAG, "uninstall App - radio_on[" + radio_on +"]");
+                appInstaller.unInstall(mContext, sim_id);
+                StkAvailable(sim_id, STK_AVAIL_NOT_AVAILABLE);
             } else {
-                CatLog.d(this, "Install App");
-                StkAppInstaller.install(mContext);
+                CatLog.d(LOGTAG, "install App");
+                appInstaller.install(mContext, sim_id);
+                StkAvailable(sim_id, STK_AVAIL_AVAILABLE);
             }
-            if (mMenuIsVisibile) {
-                launchMenuActivity(null);
+            if (mStkContext[sim_id].mMenuIsVisible) {
+                launchMenuActivity(null, sim_id);
             }
             break;
         case GET_INPUT:
         case GET_INKEY:
-            launchInputActivity();
+            launchInputActivity(sim_id);
             break;
         case SET_UP_IDLE_MODE_TEXT:
             waitForUsersResponse = false;
-            launchIdleText();
+            launchIdleText(sim_id);
             break;
         case SEND_DTMF:
         case SEND_SMS:
         case SEND_SS:
         case SEND_USSD:
             waitForUsersResponse = false;
-            launchEventMessage();
+            launchEventMessage(sim_id);
             break;
         case LAUNCH_BROWSER:
-            launchConfirmationDialog(mCurrentCmd.geTextMessage());
+            launchConfirmationDialog(mStkContext[sim_id].mCurrentCmd.geTextMessage(), sim_id);
             break;
         case SET_UP_CALL:
-            launchConfirmationDialog(mCurrentCmd.getCallSettings().confirmMsg);
+            launchConfirmationDialog(mStkContext[sim_id].mCurrentCmd.getCallSettings().confirmMsg, sim_id);
             break;
         case PLAY_TONE:
-            launchToneDialog();
+            launchToneDialog(sim_id);
             break;
         case OPEN_CHANNEL:
-            launchOpenChannelDialog();
+            launchOpenChannelDialog(sim_id);
             break;
         case CLOSE_CHANNEL:
         case RECEIVE_DATA:
         case SEND_DATA:
-            TextMessage m = mCurrentCmd.geTextMessage();
+            TextMessage m = mStkContext[sim_id].mCurrentCmd.geTextMessage();
 
             if ((m != null) && (m.text == null)) {
                 switch(cmdMsg.getCmdType()) {
@@ -473,33 +607,36 @@ public class StkAppService extends Service implements Runnable {
             /*
              * Display indication in the form of a toast to the user if required.
              */
-            launchEventMessage();
+            launchEventMessage(sim_id);
             break;
         }
 
         if (!waitForUsersResponse) {
-            if (mCmdsQ.size() != 0) {
-                callDelayedMsg();
+            if (mStkContext[sim_id].mCmdsQ.size() != 0) {
+                callDelayedMsg(sim_id);
             } else {
-                mCmdInProgress = false;
+                mStkContext[sim_id].mCmdInProgress = false;
             }
         }
     }
 
-    private void handleCmdResponse(Bundle args) {
-        if (mCurrentCmd == null) {
+    private void handleCmdResponse(Bundle args, int sim_id) {
+        CatLog.d(LOGTAG, "handleCmdResponse, sim id: " + sim_id);
+        if (mStkContext[sim_id].mCurrentCmd == null) {
             return;
         }
-        if (mStkService == null) {
-            mStkService = com.android.internal.telephony.cat.CatService.getInstance();
-            if (mStkService == null) {
+
+        if (mStkService[sim_id] == null) {
+            mStkService[sim_id] = com.android.internal.telephony.cat.CatService.getInstance(sim_id);
+            if (mStkService[sim_id] == null) {
                 // This should never happen (we should be responding only to a message
                 // that arrived from StkService). It has to exist by this time
+                CatLog.d(LOGTAG, "handleCmdResponse exception! mStkService is null when we need to send response.");
                 throw new RuntimeException("mStkService is null when we need to send response");
             }
         }
 
-        CatResponseMessage resMsg = new CatResponseMessage(mCurrentCmd);
+        CatResponseMessage resMsg = new CatResponseMessage(mStkContext[sim_id].mCurrentCmd);
 
         // set result code
         boolean helpRequired = args.getBoolean(HELP, false);
@@ -509,10 +646,10 @@ public class StkAppService extends Service implements Runnable {
         case RES_ID_MENU_SELECTION:
             CatLog.d(this, "RES_ID_MENU_SELECTION");
             int menuSelection = args.getInt(MENU_SELECTION);
-            switch(mCurrentCmd.getCmdType()) {
+            switch(mStkContext[sim_id].mCurrentMenuCmd.getCmdType()) {
             case SET_UP_MENU:
             case SELECT_ITEM:
-                lastSelectedItem = getItemName(menuSelection);
+                mStkContext[sim_id].lastSelectedItem = getItemName(menuSelection, sim_id);
                 if (helpRequired) {
                     resMsg.setResultCode(ResultCode.HELP_INFO_REQUIRED);
                 } else {
@@ -525,10 +662,9 @@ public class StkAppService extends Service implements Runnable {
         case RES_ID_INPUT:
             CatLog.d(this, "RES_ID_INPUT");
             String input = args.getString(INPUT);
-            Input cmdInput = mCurrentCmd.geInput();
-            if (cmdInput != null && cmdInput.yesNo) {
+            if (input != null && (null != mStkContext[sim_id].mCurrentCmd.geInput())&&(mStkContext[sim_id].mCurrentCmd.geInput().yesNo)) {
                 boolean yesNoSelection = input
-                        .equals(StkInputActivity.YES_STR_RESPONSE);
+                        .equals(StkInputInstance.YES_STR_RESPONSE);
                 resMsg.setYesNo(yesNoSelection);
             } else {
                 if (helpRequired) {
@@ -542,7 +678,7 @@ public class StkAppService extends Service implements Runnable {
         case RES_ID_CONFIRM:
             CatLog.d(this, "RES_ID_CONFIRM");
             confirmed = args.getBoolean(CONFIRMATION);
-            switch (mCurrentCmd.getCmdType()) {
+            switch (mStkContext[sim_id].mCurrentCmd.getCmdType()) {
             case DISPLAY_TEXT:
                 resMsg.setResultCode(confirmed ? ResultCode.OK
                         : ResultCode.UICC_SESSION_TERM_BY_USER);
@@ -551,15 +687,15 @@ public class StkAppService extends Service implements Runnable {
                 resMsg.setResultCode(confirmed ? ResultCode.OK
                         : ResultCode.UICC_SESSION_TERM_BY_USER);
                 if (confirmed) {
-                    launchBrowser = true;
-                    mBrowserSettings = mCurrentCmd.getBrowserSettings();
+                    mStkContext[sim_id].launchBrowser = true;
+                    mStkContext[sim_id].mBrowserSettings = mStkContext[sim_id].mCurrentCmd.getBrowserSettings();
                 }
                 break;
             case SET_UP_CALL:
                 resMsg.setResultCode(ResultCode.OK);
                 resMsg.setConfirmation(confirmed);
                 if (confirmed) {
-                    launchEventMessage(mCurrentCmd.getCallSettings().callMsg);
+                    launchEventMessage(sim_id);
                 }
                 break;
             }
@@ -568,22 +704,22 @@ public class StkAppService extends Service implements Runnable {
             resMsg.setResultCode(ResultCode.OK);
             break;
         case RES_ID_BACKWARD:
-            CatLog.d(this, "RES_ID_BACKWARD");
+            CatLog.d(LOGTAG, "RES_ID_BACKWARD");
             resMsg.setResultCode(ResultCode.BACKWARD_MOVE_BY_USER);
             break;
         case RES_ID_END_SESSION:
-            CatLog.d(this, "RES_ID_END_SESSION");
+            CatLog.d(LOGTAG, "RES_ID_END_SESSION");
             resMsg.setResultCode(ResultCode.UICC_SESSION_TERM_BY_USER);
             break;
         case RES_ID_TIMEOUT:
-            CatLog.d(this, "RES_ID_TIMEOUT");
+            CatLog.d(LOGTAG, "RES_ID_TIMEOUT");
             // GCF test-case 27.22.4.1.1 Expected Sequence 1.5 (DISPLAY TEXT,
             // Clear message after delay, successful) expects result code OK.
             // If the command qualifier specifies no user response is required
             // then send OK instead of NO_RESPONSE_FROM_USER
-            if ((mCurrentCmd.getCmdType().value() == AppInterface.CommandType.DISPLAY_TEXT
+            if ((mStkContext[sim_id].mCurrentCmd.getCmdType().value() == AppInterface.CommandType.DISPLAY_TEXT
                     .value())
-                    && (mCurrentCmd.geTextMessage().userClear == false)) {
+                    && (mStkContext[sim_id].mCurrentCmd.geTextMessage().userClear == false)) {
                 resMsg.setResultCode(ResultCode.OK);
             } else {
                 resMsg.setResultCode(ResultCode.NO_RESPONSE_FROM_USER);
@@ -602,17 +738,21 @@ public class StkAppService extends Service implements Runnable {
                     break;
             }
 
-            if (mCurrentCmd.getCmdType().value() == AppInterface.CommandType.OPEN_CHANNEL
+            if (mStkContext[sim_id].mCurrentCmd.getCmdType().value() == AppInterface.CommandType.OPEN_CHANNEL
                     .value()) {
                 resMsg.setConfirmation(confirmed);
             }
             break;
 
         default:
-            CatLog.d(this, "Unknown result id");
+            CatLog.d(LOGTAG, "Unknown result id");
             return;
         }
-        mStkService.onCmdResponse(resMsg);
+        
+        if (null != mStkContext[sim_id].mCurrentCmd && null != mStkContext[sim_id].mCurrentCmd.getCmdType()) {
+            CatLog.d(LOGTAG, "handleCmdResponse- cmdName[" + mStkContext[sim_id].mCurrentCmd.getCmdType().name() + "]");
+        }
+        mStkService[sim_id].onCmdResponse(resMsg);
     }
 
     /**
@@ -626,59 +766,149 @@ public class StkAppService extends Service implements Runnable {
      *
      * @return 0 or FLAG_ACTIVITY_NO_USER_ACTION
      */
-    private int getFlagActivityNoUserAction(InitiatedByUserAction userAction) {
-        return ((userAction == InitiatedByUserAction.yes) | mMenuIsVisibile) ?
+    private int getFlagActivityNoUserAction(InitiatedByUserAction userAction, int sim_id) {
+        return ((userAction == InitiatedByUserAction.yes) | mStkContext[sim_id].mMenuIsVisible) ?
                                                     0 : Intent.FLAG_ACTIVITY_NO_USER_ACTION;
     }
-
-    private void launchMenuActivity(Menu menu) {
+    private void finishMenuActivity(int sim_id) {
         Intent newIntent = new Intent(Intent.ACTION_VIEW);
-        newIntent.setClassName(PACKAGE_NAME, MENU_ACTIVITY_NAME);
+        String targetActivity = STK1_MENU_ACTIVITY_NAME;
+        switch (sim_id)
+        {
+            case PhoneConstants.SIM_ID_1:
+                break;
+            case PhoneConstants.SIM_ID_2:
+                targetActivity = STK2_MENU_ACTIVITY_NAME;
+                break;
+            case PhoneConstants.SIM_ID_3:
+                targetActivity = STK3_MENU_ACTIVITY_NAME;
+                break;
+            case PhoneConstants.SIM_ID_4:
+                targetActivity = STK4_MENU_ACTIVITY_NAME;
+                break;
+            default:
+                break;
+        }
+        CatLog.d(LOGTAG, "finishMenuActivity, target: " + targetActivity); 
+        newIntent.setClassName(PACKAGE_NAME, targetActivity);
+        int intentFlags = Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP;
+
+        intentFlags |= getFlagActivityNoUserAction(InitiatedByUserAction.unknown, sim_id);
+        newIntent.putExtra("STATE", StkMenuInstance.STATE_END);         
+        newIntent.putExtra(CMD_SIM_ID, sim_id);
+        newIntent.setFlags(intentFlags);
+        mContext.startActivity(newIntent);
+    }
+    
+    private void launchMenuActivity(Menu menu, int sim_id) {
+        Intent newIntent = new Intent(Intent.ACTION_VIEW);
+        String targetActivity = STK1_MENU_ACTIVITY_NAME;
+        switch (sim_id)
+        {
+            case PhoneConstants.SIM_ID_1:
+                break;
+            case PhoneConstants.SIM_ID_2:
+                targetActivity = STK2_MENU_ACTIVITY_NAME;
+                break;
+            case PhoneConstants.SIM_ID_3:
+                targetActivity = STK3_MENU_ACTIVITY_NAME;
+                break;
+            case PhoneConstants.SIM_ID_4:
+                targetActivity = STK4_MENU_ACTIVITY_NAME;
+                break;
+            default:
+                break;
+        }
+        CatLog.d(LOGTAG, "launchMenuActivity, target: " + targetActivity); 
+        newIntent.setClassName(PACKAGE_NAME, targetActivity);
         int intentFlags = Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP;
         if (menu == null) {
             // We assume this was initiated by the user pressing the tool kit icon
-            intentFlags |= getFlagActivityNoUserAction(InitiatedByUserAction.yes);
+            intentFlags |= getFlagActivityNoUserAction(InitiatedByUserAction.yes, sim_id);
 
-            newIntent.putExtra("STATE", StkMenuActivity.STATE_MAIN);
+            newIntent.putExtra("STATE", StkMenuInstance.STATE_MAIN);
         } else {
             // We don't know and we'll let getFlagActivityNoUserAction decide.
-            intentFlags |= getFlagActivityNoUserAction(InitiatedByUserAction.unknown);
+            intentFlags |= getFlagActivityNoUserAction(InitiatedByUserAction.unknown, sim_id);
 
-            newIntent.putExtra("STATE", StkMenuActivity.STATE_SECONDARY);
+            newIntent.putExtra("STATE", StkMenuInstance.STATE_SECONDARY);
         }
+        newIntent.putExtra(CMD_SIM_ID, sim_id);
         newIntent.setFlags(intentFlags);
         mContext.startActivity(newIntent);
     }
 
-    private void launchInputActivity() {
+    private void launchInputActivity(int sim_id) {
         Intent newIntent = new Intent(Intent.ACTION_VIEW);
+        String targetActivity = STK1_INPUT_ACTIVITY_NAME;
+        switch (sim_id)
+        {
+            case PhoneConstants.SIM_ID_1:
+                break;
+            case PhoneConstants.SIM_ID_2:
+                targetActivity = STK2_INPUT_ACTIVITY_NAME;
+                break;
+            case PhoneConstants.SIM_ID_3:
+                targetActivity = STK3_INPUT_ACTIVITY_NAME;
+                break;
+            case PhoneConstants.SIM_ID_4:
+                targetActivity = STK4_INPUT_ACTIVITY_NAME;
+                break;
+            default:
+                break;
+        }
+        CatLog.d(LOGTAG, "launchInputActivity, target: " + targetActivity);
         newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | getFlagActivityNoUserAction(InitiatedByUserAction.unknown));
-        newIntent.setClassName(PACKAGE_NAME, INPUT_ACTIVITY_NAME);
-        newIntent.putExtra("INPUT", mCurrentCmd.geInput());
+                            | getFlagActivityNoUserAction(InitiatedByUserAction.unknown, sim_id));
+        newIntent.setClassName(PACKAGE_NAME, targetActivity);
+        newIntent.putExtra("INPUT", mStkContext[sim_id].mCurrentCmd.geInput());
+        newIntent.putExtra(CMD_SIM_ID, sim_id);
         mContext.startActivity(newIntent);
     }
 
-    private void launchTextDialog() {
-        Intent newIntent = new Intent(this, StkDialogActivity.class);
-        newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_NO_HISTORY
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                | getFlagActivityNoUserAction(InitiatedByUserAction.unknown));
-        newIntent.putExtra("TEXT", mCurrentCmd.geTextMessage());
-        startActivity(newIntent);
+    private void launchTextDialog(int sim_id) {
+        CatLog.d(LOGTAG, "launchTextDialog, sim id: " + sim_id);
+        Intent newIntent = null;
+        switch (sim_id)
+        {
+            case PhoneConstants.SIM_ID_1:
+                newIntent = new Intent(this, StkDialogActivity.class);
+                break;
+            case PhoneConstants.SIM_ID_2:
+                newIntent = new Intent(this, StkDialogActivityII.class);
+                break;
+            case PhoneConstants.SIM_ID_3:
+                newIntent = new Intent(this, StkDialogActivityIII.class);
+                break;
+            case PhoneConstants.SIM_ID_4:
+                newIntent = new Intent(this, StkDialogActivityIV.class);
+                break;
+            default:
+                break;
+        }
+        if (newIntent != null)
+        {
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_NO_HISTORY
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    | getFlagActivityNoUserAction(InitiatedByUserAction.unknown, sim_id));
+            TextMessage msg = mStkContext[sim_id].mCurrentCmd.geTextMessage();
+            newIntent.putExtra("TEXT", mStkContext[sim_id].mCurrentCmd.geTextMessage());
+            newIntent.putExtra(CMD_SIM_ID, sim_id);
+            startActivity(newIntent);
+        }
     }
 
-    private void launchEventMessage() {
-        launchEventMessage(mCurrentCmd.geTextMessage());
-    }
-
-    private void launchEventMessage(TextMessage msg) {
-        if (msg == null || msg.text == null) {
+    private void launchEventMessage(int sim_id) {
+        TextMessage msg = mStkContext[sim_id].mCurrentCmd.geTextMessage();
+        if (msg == null || (msg.text != null && msg.text.length() == 0)) {
+            CatLog.d(LOGTAG, "aaaaa [return] ");
             return;
         }
+
         Toast toast = new Toast(mContext.getApplicationContext());
         LayoutInflater inflate = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -702,15 +932,36 @@ public class StkAppService extends Service implements Runnable {
         toast.show();
     }
 
-    private void launchConfirmationDialog(TextMessage msg) {
-        msg.title = lastSelectedItem;
-        Intent newIntent = new Intent(this, StkDialogActivity.class);
-        newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_NO_HISTORY
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                | getFlagActivityNoUserAction(InitiatedByUserAction.unknown));
-        newIntent.putExtra("TEXT", msg);
-        startActivity(newIntent);
+    private void launchConfirmationDialog(TextMessage msg, int sim_id) {
+        msg.title = mStkContext[sim_id].lastSelectedItem;
+        Intent newIntent = null;
+        switch (sim_id)
+        {
+            case PhoneConstants.SIM_ID_1:
+                newIntent = new Intent(this, StkDialogActivity.class);
+                break;
+            case PhoneConstants.SIM_ID_2:
+                newIntent = new Intent(this, StkDialogActivityII.class);
+                break;
+            case PhoneConstants.SIM_ID_3:
+                newIntent = new Intent(this, StkDialogActivityIII.class);
+                break;
+            case PhoneConstants.SIM_ID_4:
+                newIntent = new Intent(this, StkDialogActivityIV.class);
+                break;
+            default:
+                break;
+        }
+        if (newIntent != null)
+        {
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_NO_HISTORY
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    | getFlagActivityNoUserAction(InitiatedByUserAction.unknown, sim_id));
+            newIntent.putExtra("TEXT", msg);
+            newIntent.putExtra(CMD_SIM_ID, sim_id);
+            startActivity(newIntent);
+        }
     }
 
     private void launchBrowser(BrowserSettings settings) {
@@ -764,17 +1015,23 @@ public class StkAppService extends Service implements Runnable {
         } catch (InterruptedException e) {}
     }
 
-    private void launchIdleText() {
-        TextMessage msg = mCurrentCmd.geTextMessage();
+    private void launchIdleText(int sim_id) {
+        TextMessage msg = mStkContext[sim_id].mCurrentCmd.geTextMessage();
+
+        CatLog.d(LOGTAG, "launchIdleText - text[" + msg.text 
+                         + "] iconSelfExplanatory[" + msg.iconSelfExplanatory
+                         + "] icon[" + msg.icon + "], sim id: " + sim_id);
 
         if (msg == null) {
             CatLog.d(this, "mCurrent.getTextMessage is NULL");
-            mNotificationManager.cancel(STK_NOTIFICATION_ID);
+            mNotificationManager.cancel(getNotificationId(sim_id));
             return;
         }
         if (msg.text == null) {
-            mNotificationManager.cancel(STK_NOTIFICATION_ID);
+            CatLog.d(LOGTAG, "cancel IdleMode text");
+            mNotificationManager.cancel(getNotificationId(sim_id));
         } else {
+            CatLog.d(LOGTAG, "Add IdleMode text");
             PendingIntent pendingIntent = PendingIntent.getService(mContext, 0,
                     new Intent(mContext, StkAppService.class), 0);
 
@@ -798,23 +1055,24 @@ public class StkAppService extends Service implements Runnable {
                 notificationBuilder.setLargeIcon(bitmapIcon);
             }
 
-            mNotificationManager.notify(STK_NOTIFICATION_ID, notificationBuilder.build());
+            mNotificationManager.notify(getNotificationId(sim_id), notificationBuilder.build());
         }
     }
 
-    private void launchToneDialog() {
+    private void launchToneDialog(int sim_id) {
         Intent newIntent = new Intent(this, ToneDialog.class);
         newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                | getFlagActivityNoUserAction(InitiatedByUserAction.unknown));
-        newIntent.putExtra("TEXT", mCurrentCmd.geTextMessage());
-        newIntent.putExtra("TONE", mCurrentCmd.getToneSettings());
+                | getFlagActivityNoUserAction(InitiatedByUserAction.unknown, sim_id));
+        newIntent.putExtra("TEXT", mStkContext[sim_id].mCurrentCmd.geTextMessage());
+        newIntent.putExtra("TONE", mStkContext[sim_id].mCurrentCmd.getToneSettings());
+        newIntent.putExtra(CMD_SIM_ID, sim_id);
         startActivity(newIntent);
     }
 
-    private void launchOpenChannelDialog() {
-        TextMessage msg = mCurrentCmd.geTextMessage();
+    private void launchOpenChannelDialog(int sim_id) {
+        TextMessage msg = mStkContext[sim_id].mCurrentCmd.geTextMessage();
         if (msg == null) {
             CatLog.d(this, "msg is null, return here");
             return;
@@ -865,8 +1123,8 @@ public class StkAppService extends Service implements Runnable {
         dialog.show();
     }
 
-    private void launchTransientEventMessage() {
-        TextMessage msg = mCurrentCmd.geTextMessage();
+    private void launchTransientEventMessage(int sim_id) {
+        TextMessage msg = mStkContext[sim_id].mCurrentCmd.geTextMessage();
         if (msg == null) {
             CatLog.d(this, "msg is null, return here");
             return;
@@ -895,8 +1153,51 @@ public class StkAppService extends Service implements Runnable {
         dialog.show();
     }
 
-    private String getItemName(int itemId) {
-        Menu menu = mCurrentCmd.getMenu();
+    private int getNotificationId(int sim_id)
+    {
+        int notify_id = STK1_NOTIFICATION_ID;
+        switch (sim_id)
+        {
+            case PhoneConstants.SIM_ID_2:
+                notify_id = STK2_NOTIFICATION_ID;
+                break;
+            case PhoneConstants.SIM_ID_3:
+                notify_id = STK3_NOTIFICATION_ID;
+                break;
+            case PhoneConstants.SIM_ID_4:
+                notify_id = STK4_NOTIFICATION_ID;
+                break;
+        }
+        CatLog.d(LOGTAG, "getNotificationId, sim_id: " + sim_id + ", notify_id: " + notify_id);
+        return notify_id;
+    }
+
+    private final BroadcastReceiver mSIMStateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
+                String simState = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
+                int simId = intent.getIntExtra(com.android.internal.telephony.PhoneConstants.SIM_ID_KEY, -1);
+                CatLog.d(LOGTAG, "mSIMStateChangeReceiver() - simId[" + simId + "]  state[" + simState + "]");
+                if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(simState)) {
+                    if (mStkContext[simId] != null)
+                    {
+                        mStkContext[simId].mCurrentMenu = null;
+                        if (mStkContext[simId].mCmdsQ != null && mStkContext[simId].mCmdsQ.size() != 0) {
+                            CatLog.d(LOGTAG, "There are commands in queue because SIM card was absent. size: " + mStkContext[simId].mCmdsQ.size());                            
+                            mStkContext[simId].mCmdsQ.clear();
+                        }
+                    }
+                    StkAppInstaller appInstaller = StkAppInstaller.getInstance();
+                    appInstaller.unInstall(mContext, simId);
+                    StkAvailable(simId, STK_AVAIL_NOT_AVAILABLE);                    
+                }
+            }
+        }
+    };
+
+    private String getItemName(int itemId, int sim_id) {
+        Menu menu = mStkContext[sim_id].mCurrentCmd.getMenu();
         if (menu == null) {
             return null;
         }
@@ -908,16 +1209,42 @@ public class StkAppService extends Service implements Runnable {
         return null;
     }
 
-    private boolean removeMenu() {
+    private boolean removeMenu(int sim_id) {
         try {
-            if (mCurrentMenu.items.size() == 1 &&
-                mCurrentMenu.items.get(0) == null) {
+            if (mStkContext[sim_id].mCurrentMenu.items.size() == 1 &&
+                mStkContext[sim_id].mCurrentMenu.items.get(0) == null) {
                 return true;
             }
         } catch (NullPointerException e) {
-            CatLog.d(this, "Unable to get Menu's items size");
+            CatLog.d(LOGTAG, "Unable to get Menu's items size");
             return true;
         }
         return false;
+    }
+
+    public void sendMessageToServiceHandler(int opCode, Object obj, int sim_id) {
+        CatLog.d(LOGTAG, "call sendMessageToServiceHandler: " + opCode);
+        if(mServiceHandler == null) {
+            waitForLooper();
+        }
+        Message msg = mServiceHandler.obtainMessage(0, opCode, sim_id, obj);
+        mServiceHandler.sendMessage(msg);
+    }
+
+    public void StkAvailable(int sim_id, int available)
+    {
+        if (mStkContext[sim_id] != null)
+        {
+            mStkContext[sim_id].mAvailable = available;
+        }
+        CatLog.d(LOGTAG, "sim_id: " + sim_id + ", available: " + available + ", StkAvailable: " + ((mStkContext[sim_id] != null)? mStkContext[sim_id].mAvailable : -1));
+    }
+
+    public int StkQueryAvailable(int sim_id)
+    {
+        int result = ((mStkContext[sim_id] != null)? mStkContext[sim_id].mAvailable : -1);
+        
+        CatLog.d(LOGTAG, "sim_id: " + sim_id + ", StkQueryAvailable: " + result);
+        return result;
     }
 }
