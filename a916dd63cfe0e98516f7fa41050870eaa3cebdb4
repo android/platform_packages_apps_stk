@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c78f56e_dc3425f6",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-03-25T18:58:04Z",
+      "side": 1,
+      "message": "Based on the comment this \"not\" looks wrong?",
+      "range": {
+        "startLine": 137,
+        "startChar": 12,
+        "endLine": 137,
+        "endChar": 13
+      },
+      "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
