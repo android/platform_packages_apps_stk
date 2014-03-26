@@ -22,6 +22,30 @@
       "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "392487a3_790b03f5",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1015668
+      },
+      "writtenOn": "2014-03-26T18:00:58Z",
+      "side": 1,
+      "message": "The comment is written with a specification perspective, while the variable in the code should be read as \"response still needed\", i.e. needed by Android and not an immediate response sent by the UIM driver.",
+      "parentUuid": "3c78f56e_dc3425f6",
+      "range": {
+        "startLine": 137,
+        "startChar": 12,
+        "endLine": 137,
+        "endChar": 13
+      },
+      "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
