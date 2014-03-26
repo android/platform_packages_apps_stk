@@ -46,6 +46,30 @@
       "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "590f7b24_6b44498c",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-03-26T22:19:53Z",
+      "side": 1,
+      "message": "I can be dim-witted at times, but could we add some additional comments to make it clear. Even your comment here isn\u0027t quite enough for me.\n\nThis is a three condition \u0026\u0026 statement please relate those items to what\u0027s in the comment? (I might be asking for the impossible, clarifying specifications and code but please try).",
+      "parentUuid": "392487a3_790b03f5",
+      "range": {
+        "startLine": 137,
+        "startChar": 12,
+        "endLine": 137,
+        "endChar": 13
+      },
+      "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
