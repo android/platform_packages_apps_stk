@@ -70,6 +70,30 @@
       "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "590f7b24_e3af5d0d",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1015668
+      },
+      "writtenOn": "2014-03-27T14:42:45Z",
+      "side": 1,
+      "message": "I\u0027ve tried to clarify a bit in the next patch set.",
+      "parentUuid": "590f7b24_6b44498c",
+      "range": {
+        "startLine": 137,
+        "startChar": 12,
+        "endLine": 137,
+        "endChar": 13
+      },
+      "revId": "a916dd63cfe0e98516f7fa41050870eaa3cebdb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
