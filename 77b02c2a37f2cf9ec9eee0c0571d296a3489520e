@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f91d8f5d_e8a73bcf",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-03-27T16:40:17Z",
+      "side": 1,
+      "message": "Hmmm, how about removing the above comment and something like this here:\n\nThe user should be shown the message forever or until some high priority\nevent occurs, such as incomming call, MMI code execution ... as mentioned in\nETSI 102.223, 6.4.1. Since mTextMsg.responseNeeded is false (because the\nresponse has already been sent) and duration of the dialog is zero and userClear\nis true.",
+      "revId": "77b02c2a37f2cf9ec9eee0c0571d296a3489520e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f91d8f5d_8810c737",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-03-27T16:40:17Z",
+      "side": 1,
+      "message": "One word \"forever\"",
+      "range": {
+        "startLine": 142,
+        "startChar": 65,
+        "endLine": 142,
+        "endChar": 73
+      },
+      "revId": "77b02c2a37f2cf9ec9eee0c0571d296a3489520e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
