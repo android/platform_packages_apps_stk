@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "590f7b24_3908e283",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1015668
+      },
+      "writtenOn": "2014-03-27T18:16:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f91d8f5d_e8a73bcf",
+      "revId": "77b02c2a37f2cf9ec9eee0c0571d296a3489520e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f91d8f5d_8810c737",
         "filename": "src/com/android/stk/StkDialogActivity.java",
         "patchSetId": 6
@@ -30,6 +48,30 @@
       "writtenOn": "2014-03-27T16:40:17Z",
       "side": 1,
       "message": "One word \"forever\"",
+      "range": {
+        "startLine": 142,
+        "startChar": 65,
+        "endLine": 142,
+        "endChar": 73
+      },
+      "revId": "77b02c2a37f2cf9ec9eee0c0571d296a3489520e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f91d8f5d_63b90ccc",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1015668
+      },
+      "writtenOn": "2014-03-27T18:16:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f91d8f5d_8810c737",
       "range": {
         "startLine": 142,
         "startChar": 65,
