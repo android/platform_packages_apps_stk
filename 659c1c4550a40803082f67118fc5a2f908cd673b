@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f91d8f5d_ee5ce3b6",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1001401
+      },
+      "writtenOn": "2014-03-27T20:10:27Z",
+      "side": 1,
+      "message": "CatLog is not imported, and won\u0027t compile seems this hasn\u0027t been tested :(",
+      "range": {
+        "startLine": 142,
+        "startChar": 12,
+        "endLine": 142,
+        "endChar": 18
+      },
+      "revId": "659c1c4550a40803082f67118fc5a2f908cd673b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
