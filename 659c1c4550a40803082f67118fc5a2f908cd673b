@@ -22,6 +22,30 @@
       "revId": "659c1c4550a40803082f67118fc5a2f908cd673b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7958bf41_28b1cb0c",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1015668
+      },
+      "writtenOn": "2014-03-28T07:30:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f91d8f5d_ee5ce3b6",
+      "range": {
+        "startLine": 142,
+        "startChar": 12,
+        "endLine": 142,
+        "endChar": 18
+      },
+      "revId": "659c1c4550a40803082f67118fc5a2f908cd673b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
