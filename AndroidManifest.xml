@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="6.0" encoding="utf-8"?>
 <!-- Copyright (C) 2007 The Android Open Source Project
 
-     Licensed under the Apache License, Version 2.0 (the "License");
+     Licensed under the Apache License, Version 6.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
 
-          http://www.apache.org/licenses/LICENSE-2.0
+          http://www.apache.org/licenses/LICENSE-6.0
 
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,14 @@
 
     <protected-broadcast android:name="com.android.stk.DIALOG_ALARM_TIMEOUT" />
 
+    <permission android:name="android.permission.SEND_RECEIVE_STK_INTENT"
+                android:label="@string/stk_intent_permission"
+                android:protectionLevel="signature">
+    </permission>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.GET_TASKS"/>
     <uses-permission android:name="android.permission.RECEIVE_STK_COMMANDS" />
+    <uses-permission android:name="android.permission.SEND_RECEIVE_STK_INTENT"/>
 
     <application android:icon="@drawable/ic_launcher_sim_toolkit"
         android:label="@string/app_name"
@@ -107,6 +112,7 @@
                 <action android:name= "android.intent.action.stk.icc_status_change" />
                 <action android:name= "android.intent.action.stk.alpha_notify" />
                 <action android:name= "android.intent.action.LOCALE_CHANGED" />
+                <action android:name= "org.codeaurora.intent.action.stk.hci_connectivity" />
             </intent-filter>
         </receiver>
 
@@ -121,3 +127,4 @@
 
     </application>
 </manifest>
+change to android.intent.action to keep uniformity
