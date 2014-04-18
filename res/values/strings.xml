@@ -62,4 +62,7 @@
     <string name="stk_dialog_accept">YES</string>
     <string name="stk_dialog_reject">NO</string>
     <string name="no_sim_card_inserted">Please insert SIM to launch SIM Toolkit.</string>
+
+    <!-- Permission required for receiving intents from StkAppService-->
+    <string name="stk_intent_permission">Allow STK Intents </string>
 </resources>
