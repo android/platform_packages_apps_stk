@@ -21,9 +21,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -53,6 +55,8 @@ import com.android.internal.telephony.cat.CatCmdMessage.BrowserSettings;
 import com.android.internal.telephony.cat.CatLog;
 import com.android.internal.telephony.cat.CatResponseMessage;
 import com.android.internal.telephony.cat.TextMessage;
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.TelephonyIntents;
 
 import java.util.LinkedList;
 
@@ -143,6 +147,24 @@ public class StkAppService extends Service implements Runnable {
         }
     }
 
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            CatLog.d(this, "got intent: " + intent);
+            String action = intent.getAction();
+            if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
+                String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
+                if (stateExtra != null
+                        && IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+                    if (!removeMenu()) {
+                        mCurrentMenu = null;
+                    }
+                    handleSessionEnd();
+                    StkAppInstaller.unInstall(mContext);
+                }
+            }
+        }
+    };
+
     @Override
     public void onCreate() {
         // Initialize members
@@ -153,6 +175,10 @@ public class StkAppService extends Service implements Runnable {
         mNotificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         sInstance = this;
+
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     @Override
@@ -204,6 +230,7 @@ public class StkAppService extends Service implements Runnable {
     public void onDestroy() {
         waitForLooper();
         mServiceLooper.quit();
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
