@@ -31,6 +31,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -231,12 +233,17 @@ public class StkAppService extends Service implements Runnable {
     static final int STATE_EXIST = 1;
 
     private static final String PACKAGE_NAME = "com.android.stk";
+    private static final String PACKAGE_NAME_HOME_SCREEN="com.android.launcher";
     private static final String STK_MENU_ACTIVITY_NAME = PACKAGE_NAME + ".StkMenuActivity";
     private static final String STK_INPUT_ACTIVITY_NAME = PACKAGE_NAME + ".StkInputActivity";
     private static final String STK_DIALOG_ACTIVITY_NAME = PACKAGE_NAME + ".StkDialogActivity";
     // Notification id used to display Idle Mode text in NotificationManager.
     private static final int STK_NOTIFICATION_ID = 333;
     private static final String LOG_TAG = new Object(){}.getClass().getEnclosingClass().getName();
+
+    // Broadcast sent from Launcher when the screen switched to idle state(home screen).
+    public static final String CAT_IDLE_SCREEN_ACTION =
+                                    "org.codeaurora.action.stk.idle_screen";
 
     // Inner class used for queuing telephony messages (proactive commands,
     // session end) while the service is busy processing a previous message.
@@ -655,11 +662,35 @@ public class StkAppService extends Service implements Runnable {
     }
 
     /*
-     * If the device is not in an interactive state, we can assume
+     * If the device is on home screen, we can assume
      * that the screen is idle.
      */
     private boolean isScreenIdle() {
-        return (!mPowerManager.isInteractive());
+        ActivityManager mAcivityManager = (ActivityManager) mContext
+                .getSystemService(ACTIVITY_SERVICE);
+        List<RunningTaskInfo> taskInfo = mAcivityManager.getRunningTasks(1);
+        if (taskInfo == null || taskInfo.isEmpty()) {
+            CatLog.e(this, "taskInfo is null");
+            return false;
+        }
+        String currentPackageName = taskInfo.get(0).topActivity.getPackageName();
+        CatLog.d(this, "isScreenIdle, package name : " + currentPackageName);
+        final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_HOME);
+        PackageManager pm = mContext.getPackageManager();
+
+        if (null != currentPackageName) {
+            List<ResolveInfo> actList = pm.queryIntentActivities(mainIntent, 0);
+            for (int i = 0; i < actList.size(); i++) {
+                ResolveInfo info = actList.get(i);
+
+                if (currentPackageName.equals(info.activityInfo.packageName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void handleIdleScreen(int slotId) {
@@ -920,6 +951,10 @@ public class StkAppService extends Service implements Runnable {
         case GET_CHANNEL_STATUS:
             waitForUsersResponse = false;
             launchEventMessage(slotId);
+            //Reset the mCurrentCmd to mMainCmd, to avoid wrong TR sent for
+            //SEND_SMS/SS/USSD, when user launches STK app next time and do
+            //a menu selection.
+            mStkContext[slotId].mCurrentCmd = mStkContext[slotId].mMainCmd;
             break;
         case LAUNCH_BROWSER:
             // The device setup process should not be interrupted by launching browser.
@@ -930,13 +965,10 @@ public class StkAppService extends Service implements Runnable {
                 break;
             }
             TextMessage alphaId = mStkContext[slotId].mCurrentCmd.geTextMessage();
-            if ((mStkContext[slotId].mCurrentCmd.getBrowserSettings().mode
-                    == LaunchBrowserMode.LAUNCH_IF_NOT_ALREADY_LAUNCHED) &&
-                    ((alphaId == null) || TextUtils.isEmpty(alphaId.text))) {
+            if ((alphaId == null) || TextUtils.isEmpty(alphaId.text)) {
                 // don't need user confirmation in this case
                 // just launch the browser or spawn a new tab
-                CatLog.d(this, "Browser mode is: launch if not already launched " +
-                        "and user confirmation is not currently needed.\n" +
+                CatLog.d(this, "user confirmation is not currently needed.\n" +
                         "supressing confirmation dialogue and confirming silently...");
                 mStkContext[slotId].launchBrowser = true;
                 mStkContext[slotId].mBrowserSettings =
@@ -1563,6 +1595,8 @@ public class StkAppService extends Service implements Runnable {
                     .setSmallIcon(com.android.internal.R.drawable.stat_notify_sim_toolkit);
             notificationBuilder.setContentIntent(pendingIntent);
             notificationBuilder.setOngoing(true);
+            notificationBuilder.setStyle(new Notification.BigTextStyle(notificationBuilder)
+                    .bigText(msg.text));
             // Set text and icon for the status bar and notification body.
             if (mStkContext[slotId].mIdleModeTextCmd.hasIconLoadFailed() ||
                     !msg.iconSelfExplanatory) {

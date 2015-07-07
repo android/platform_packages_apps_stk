@@ -107,6 +107,7 @@
                 <action android:name= "android.intent.action.stk.icc_status_change" />
                 <action android:name= "android.intent.action.stk.alpha_notify" />
                 <action android:name= "android.intent.action.LOCALE_CHANGED" />
+                <action android:name= "org.codeaurora.action.stk.idle_screen"/>
             </intent-filter>
         </receiver>
 

@@ -46,7 +46,7 @@ public class StkCmdReceiver extends BroadcastReceiver {
             handleLocaleChange(context);
         } else if (action.equals(AppInterface.CAT_ALPHA_NOTIFY_ACTION)) {
             handleAction(context, intent, StkAppService.OP_ALPHA_NOTIFY);
-        } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+        } else if (action.equals(StkAppService.CAT_IDLE_SCREEN_ACTION)) {
             handleIdleScreen(context);
         }
     }
