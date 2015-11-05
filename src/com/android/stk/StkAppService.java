@@ -797,8 +797,11 @@ public class StkAppService extends Service implements Runnable {
     private boolean isTopOfStack() {
         ActivityManager mAcivityManager = (ActivityManager) mContext
                 .getSystemService(ACTIVITY_SERVICE);
-        String currentPackageName = mAcivityManager.getRunningTasks(1).get(0).topActivity
-                .getPackageName();
+        List<RunningTaskInfo> taskInfo = mAcivityManager.getRunningTasks(1);
+        if (taskInfo == null || taskInfo.isEmpty()) {
+            return false;
+        }
+        String currentPackageName = taskInfo.get(0).topActivity.getPackageName();
         if (null != currentPackageName) {
             return currentPackageName.equals(PACKAGE_NAME);
         }
