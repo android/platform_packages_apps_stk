@@ -154,6 +154,11 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         mYesNoLayout = findViewById(R.id.yes_no_layout);
         mNormalLayout = findViewById(R.id.normal_layout);
         initFromIntent(getIntent());
+        if ((appService == null) || (appService.getStkContext(mSlotId) == null)) {
+            CatLog.d(LOG_TAG, "onCreate - " + ((appService == null) ?
+                    "appService is null" : "StkContext is null"));
+            finish();
+        }
         mContext = getBaseContext();
         mAcceptUsersInput = true;
     }
@@ -201,6 +206,9 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         super.onDestroy();
         CatLog.d(LOG_TAG, "onDestroy - before Send End Session mIsResponseSent[" +
                 mIsResponseSent + " , " + mSlotId + "]");
+        if ((appService == null) || (appService.getStkContext(mSlotId) == null)) {
+            return;
+        }
         //If the input activity is finished by stkappservice
         //when receiving OP_LAUNCH_APP from the other SIM, we can not send TR here
         //, since the input cmd is waiting user to process.
