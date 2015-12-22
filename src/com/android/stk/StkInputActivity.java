@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.telephony.SubscriptionManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -205,7 +206,13 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
 
         mYesNoLayout = findViewById(R.id.yes_no_layout);
         mNormalLayout = findViewById(R.id.normal_layout);
+
         initFromIntent(getIntent());
+        if (!SubscriptionManager.isValidSlotIndex(mSlotId)) {
+            finish();
+            return;
+        }
+
         mContext = getBaseContext();
         mAcceptUsersInput = true;
     }
@@ -253,7 +260,7 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         super.onDestroy();
         CatLog.d(LOG_TAG, "onDestroy - before Send End Session mIsResponseSent[" +
                 mIsResponseSent + " , " + mSlotId + "]");
-        if (appService == null) {
+        if (appService == null || !SubscriptionManager.isValidSlotIndex(mSlotId)) {
             return;
         }
         //If the input activity is finished by stkappservice
