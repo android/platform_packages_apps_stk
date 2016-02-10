@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d8e7442_54f16448",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-02-10T02:21:20Z",
+      "side": 1,
+      "message": "How is this related to missing slotId?\nShouldn\u0027t you instead call finish() in initFromIntent() if slotId is -1?",
+      "revId": "dc579ec377ce2e86756904ea9009bfc0c4229c71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
