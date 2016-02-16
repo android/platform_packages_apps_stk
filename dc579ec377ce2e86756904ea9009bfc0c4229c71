@@ -16,6 +16,24 @@
       "revId": "dc579ec377ce2e86756904ea9009bfc0c4229c71",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdb504dc_c33f5c6b",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1010077
+      },
+      "writtenOn": "2016-02-16T14:02:10Z",
+      "side": 1,
+      "message": "Checking that slotId is -1 is not enough, since you can do something like this:\n\n # will make slotId -1\n adb shell am start -n com.android.stk/.StkMenuActivity\n\n # will make slotId 1 which is fine with dual but not single SIM\n adb shell am start -n com.android.stk/.StkMenuActivity --ei SLOT_ID 1\n\nMoving the check to initFromIntent should be fine, but here in onCreate is more consistent with having the check in onDestroy (at least with regards to readability).",
+      "parentUuid": "3d8e7442_54f16448",
+      "revId": "dc579ec377ce2e86756904ea9009bfc0c4229c71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
