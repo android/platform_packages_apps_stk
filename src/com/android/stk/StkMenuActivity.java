@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -54,6 +55,8 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
     private int mSlotId = -1;
     private boolean mIsResponseSent = false;
     Activity mInstance = null;
+
+    private PowerManager.WakeLock mWakeLock = null;
 
     private TextView mTitleTextView = null;
     private ImageView mTitleIconView = null;
@@ -408,6 +411,15 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         if (mState == STATE_SECONDARY) {
             // Reset timeout.
             cancelTimeOut();
+
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm != null) {
+                mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "UITimerLock");
+                if (mWakeLock != null) {
+                    mWakeLock.acquire(StkApp.UI_TIMEOUT);
+                }
+            }
+
             CatLog.d(LOG_TAG, "startTimeOut: " + mSlotId);
             mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
                     .obtainMessage(MSG_ID_TIMEOUT), StkApp.UI_TIMEOUT);
@@ -480,6 +492,12 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
     private void sendResponse(int resId, int itemId, boolean help) {
         CatLog.d(LOG_TAG, "sendResponse resID[" + resId + "] itemId[" + itemId +
             "] help[" + help + "]");
+
+        if (mWakeLock != null) {
+            mWakeLock.release();
+            mWakeLock = null;
+        }
+
         mIsResponseSent = true;
         Bundle args = new Bundle();
         args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
