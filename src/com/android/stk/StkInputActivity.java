@@ -143,7 +143,7 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         }
 
         // Set the layout for this activity.
-        requestWindowFeature(Window.FEATURE_LEFT_ICON);
+        requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.stk_input);
 
         // Initialize members
