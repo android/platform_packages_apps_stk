@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c9d36d4_50af52a9",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-03-24T18:08:57Z",
+      "side": 1,
+      "message": "Use timeout duration with acquire().\nAlso, you need to release wakeLock when MSG_ID_TIMEOUT is received.",
+      "revId": "3f817405e378a0a39bbc0338b35c8828edeb9ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
