@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "e82ee08f_435d011a",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-04-18T19:39:00Z",
+      "side": 1,
+      "message": "It looks like sendResponse() may not be called always. You should leave this in (in addition to doing it in sendResponse()), and in fact also do the same in onPause() for safety.",
+      "revId": "3f817405e378a0a39bbc0338b35c8828edeb9ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c9d36d4_50af52a9",
         "filename": "src/com/android/stk/StkMenuActivity.java",
         "patchSetId": 1
