@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e82ee08f_c348d15a",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-04-18T19:39:21Z",
+      "side": 1,
+      "message": "Revert since there\u0027s no change",
+      "revId": "b19bd89981c46439e4f4574149abe3f606fee345",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
