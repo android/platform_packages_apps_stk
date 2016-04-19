@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "88d6440b_20848a94",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1010077
+      },
+      "writtenOn": "2016-04-19T14:43:56Z",
+      "side": 1,
+      "message": "You\u0027re right. Unfortunately that would make the whole CL void, which got us thinking about its merit in the first place and it seems we unconsciously relied on a patch not in AOSP currently, so we will have to rethink how to solve this issue. We will abandon this in the mean time. Really sorry for wasting your time on this.",
+      "parentUuid": "e82ee08f_435d011a",
+      "revId": "3f817405e378a0a39bbc0338b35c8828edeb9ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c9d36d4_50af52a9",
         "filename": "src/com/android/stk/StkMenuActivity.java",
         "patchSetId": 1
