@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9e9f9d0_9c58657d",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-06-01T22:34:33Z",
+      "side": 1,
+      "message": "Why just these? Shouldn\u0027t all Theme.* be changed to Theme.DeviceDefault.*?",
+      "revId": "b557300317540bec628f5db50ef6c06680194fd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
