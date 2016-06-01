@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d91e5959_0881570e",
+        "filename": "src/com/android/stk/StkLauncherActivity.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-06-01T21:11:19Z",
+      "side": 1,
+      "message": "Not declared anywhere",
+      "range": {
+        "startLine": 175,
+        "startChar": 31,
+        "endLine": 175,
+        "endChar": 41
+      },
+      "revId": "935f992855509b33fe1fe90eb3c0643786e62e21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
