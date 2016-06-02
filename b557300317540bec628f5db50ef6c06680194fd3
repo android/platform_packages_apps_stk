@@ -16,6 +16,24 @@
       "revId": "b557300317540bec628f5db50ef6c06680194fd3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19dab164_0e220bed",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1010077
+      },
+      "writtenOn": "2016-06-02T10:15:10Z",
+      "side": 1,
+      "message": "Simple answer is that others didn\u0027t stick out. There\u0027s no \u0027NoTitleBar\u0027 and \u0027NoDisplay\u0027 on DeviceDefault so it would probably just inherit from Theme, and nobody noticed Theme.Holo on StkInputActivity in the field which probably means that it just blended well with Material, which I know it really shouldn\u0027t (cause they are not exactly identical, right?), but it just didn\u0027t poke anyone\u0027s eye enough to report a problem with it. Do you want us to change that as well?",
+      "parentUuid": "d9e9f9d0_9c58657d",
+      "revId": "b557300317540bec628f5db50ef6c06680194fd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
