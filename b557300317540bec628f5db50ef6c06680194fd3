@@ -34,6 +34,24 @@
       "revId": "b557300317540bec628f5db50ef6c06680194fd3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9c499d4_67f9ec59",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-06-02T19:11:20Z",
+      "side": 1,
+      "message": "I think what you have is okay.",
+      "parentUuid": "19dab164_0e220bed",
+      "revId": "b557300317540bec628f5db50ef6c06680194fd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
