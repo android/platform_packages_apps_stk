@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba052000_57bdabdd",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1530,
+      "author": {
+        "id": 1054648
+      },
+      "writtenOn": "2016-07-11T18:53:05Z",
+      "side": 1,
+      "message": "Isn\u0027t this too low as compared to the earlier delay of 10s? Will this be long enough for all cases and on most if not all devices?",
+      "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
