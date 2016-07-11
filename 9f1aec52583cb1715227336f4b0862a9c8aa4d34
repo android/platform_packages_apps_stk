@@ -16,6 +16,24 @@
       "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7acc887d_45ca7c80",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1530,
+      "author": {
+        "id": 1002609
+      },
+      "writtenOn": "2016-07-11T22:24:23Z",
+      "side": 1,
+      "message": "I think we may be better served with a local \"browser last launched at\" timestamp.  Then other commands that need the browser can wait if needed (a common util function for this would be good) while other commands that are not browser dependent could run immediately.",
+      "parentUuid": "ba052000_57bdabdd",
+      "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
