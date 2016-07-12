@@ -34,6 +34,42 @@
       "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dac3b458_155fd45f",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1530,
+      "author": {
+        "id": 1097598
+      },
+      "writtenOn": "2016-07-12T08:59:05Z",
+      "side": 1,
+      "message": "Thanks for your comments, but please refer to the comment before sleep().\n\n\u003e // a small delay, let the browser start, before processing the next command.\n\u003e // this is good for scenarios where a related DISPLAY TEXT command is\n\u003e // followed immediately.\n\nIn our understanding, this sleep() was added just to wait for a browser application to be launched before processing next command. That means next command should not be processed regardless of dependency on browser.　Actually, there is no commands which specifically depend on browser - e.g. command which uses browser function.",
+      "parentUuid": "7acc887d_45ca7c80",
+      "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dac3b458_f57098ed",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1530,
+      "author": {
+        "id": 1097598
+      },
+      "writtenOn": "2016-07-12T08:59:05Z",
+      "side": 1,
+      "message": "Actually, we have not encountered any issues after changing to 1 sec, but we will change to 3 sec at next patch-set to have sufficient margin.",
+      "parentUuid": "ba052000_57bdabdd",
+      "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
