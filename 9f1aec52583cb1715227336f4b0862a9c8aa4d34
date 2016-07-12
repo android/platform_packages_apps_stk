@@ -70,6 +70,24 @@
       "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7acc887d_3305b7ba",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1530,
+      "author": {
+        "id": 1002609
+      },
+      "writtenOn": "2016-07-12T23:55:33Z",
+      "side": 1,
+      "message": "I think that stk can certainly process non-browser-related commands immediately while the browser is launching.  I think we would only need a delay for commands that have a dependence.  If you want to just reduce the delay that\u0027s probably easier.",
+      "parentUuid": "dac3b458_155fd45f",
+      "revId": "9f1aec52583cb1715227336f4b0862a9c8aa4d34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
