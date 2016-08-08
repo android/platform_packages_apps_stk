@@ -169,7 +169,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
                 return true;
             case STATE_MAIN:
                 CatLog.d(LOG_TAG, "STATE_MAIN");
-                appService.getStkContext(mSlotId).setMainActivityInstance(null);
                 cancelTimeOut();
                 finish();
                 return true;
@@ -201,12 +200,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             cancelTimeOut();
             finish();
             return;
-        }
-        //Set main menu instance here for clean up stack by other SIMs
-        //when receiving OP_LAUNCH_APP.
-        if (mState == STATE_MAIN) {
-            CatLog.d(LOG_TAG, "set main menu instance.");
-            appService.getStkContext(mSlotId).setMainActivityInstance(this);
         }
         displayMenu();
         startTimeOut();
@@ -291,13 +284,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         if (mState == STATE_SECONDARY && !mIsResponseSent && !appService.isMenuPending(mSlotId)) {
             CatLog.d(LOG_TAG, "handleDestroy - Send End Session");
             sendResponse(StkAppService.RES_ID_END_SESSION);
-        }
-        if (mState == STATE_MAIN) {
-            if (appService != null) {
-                appService.getStkContext(mSlotId).setMainActivityInstance(null);
-            } else {
-                CatLog.d(LOG_TAG, "onDestroy: null appService.");
-            }
         }
     }
 
