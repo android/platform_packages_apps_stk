@@ -171,6 +171,7 @@ public class StkLauncherActivity extends ListActivity {
         String stkItemName = null;
         int simCount = TelephonyManager.from(mContext).getSimCount();
         mStkMenuList = new ArrayList<Item>();
+        StkMenuConfig config = StkMenuConfig.getInstance(getApplicationContext());
 
         CatLog.d(LOG_TAG, "simCount: " + simCount);
         for (int i = 0; i < simCount; i++) {
@@ -181,7 +182,9 @@ public class StkLauncherActivity extends ListActivity {
                 stkMenuTitle = appService.getMainMenu(i).title;
                 stkItemName = new StringBuilder(stkMenuTitle == null ? appName : stkMenuTitle)
                     .append(" ").append(Integer.toString(i + 1)).toString();
-                Item item = new Item(i + 1, stkItemName, mBitMap);
+                // Replace the default icon resource with more appropriate one, if it is preset.
+                Bitmap icon = config.getIcon(i);
+                Item item = new Item(i + 1, stkItemName, (icon == null) ? mBitMap : icon);
                 item.id = i;
                 mStkMenuList.add(item);
             } else {
