@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.SystemProperties;
@@ -464,7 +465,24 @@ public class StkAppService extends Service implements Runnable {
     Menu getMainMenu(int slotId) {
         CatLog.d(LOG_TAG, "StkAppService, getMainMenu, sim id: " + slotId);
         if (slotId >=0 && slotId < mSimCount && (mStkContext[slotId].mMainCmd != null)) {
-            return mStkContext[slotId].mMainCmd.getMenu();
+            Menu menu = mStkContext[slotId].mMainCmd.getMenu();
+            if (menu != null && mSimCount > PhoneConstants.MAX_PHONE_COUNT_SINGLE_SIM) {
+                if (menu.title == null) {
+                    // Check whether title string for the current SIM card is preset
+                    // if no alpha identifier is provided by SET-UP MENU command.
+                    StkMenuConfig config = StkMenuConfig.getInstance(getApplicationContext());
+                    String label = config.getLabel(slotId);
+                    if (label != null) {
+                        Parcel parcel = Parcel.obtain();
+                        menu.writeToParcel(parcel, 0);
+                        parcel.setDataPosition(0);
+                        menu = Menu.CREATOR.createFromParcel(parcel);
+                        parcel.recycle();
+                        menu.title = label;
+                    }
+                }
+            }
+            return menu;
         } else {
             return null;
         }
