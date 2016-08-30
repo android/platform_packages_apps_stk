@@ -54,6 +54,8 @@ public class StkDialogActivity extends Activity {
 
     //keys) for saving the state of the dialog in the icicle
     private static final String TEXT = "text";
+    private static final String TIMEOUT_INTENT = "timeout";
+    private static final String SLOT_ID = "slotid";
 
     private AlertDialog mAlertDialog;
 
@@ -205,6 +207,13 @@ public class StkDialogActivity extends Activity {
         super.onStop();
         CatLog.d(LOG_TAG, "onStop - before Send CONFIRM false mIsResponseSent[" +
                 mIsResponseSent + "], sim id: " + mSlotId);
+
+        // Avoid calling finish() or setPendingDialogInstance()
+        // if the activity is being restarted now.
+        if (isChangingConfigurations()) {
+            return;
+        }
+
         if (!mTextMsg.responseNeeded) {
             return;
         }
@@ -235,10 +244,12 @@ public class StkDialogActivity extends Activity {
         // if dialog activity is finished by stkappservice
         // when receiving OP_LAUNCH_APP from the other SIM, we can not send TR here
         // , since the dialog cmd is waiting user to process.
-        if (!mIsResponseSent && !appService.isDialogPending(mSlotId)) {
-            sendResponse(StkAppService.RES_ID_CONFIRM, false);
+        if (!isChangingConfigurations()) {
+            if (!mIsResponseSent && appService != null && !appService.isDialogPending(mSlotId)) {
+                sendResponse(StkAppService.RES_ID_CONFIRM, false);
+            }
+            cancelTimeOut();
         }
-        cancelTimeOut();
         // Cleanup broadcast receivers to avoid leaks
         if (mBroadcastReceiver != null) {
             unregisterReceiver(mBroadcastReceiver);
@@ -252,6 +263,8 @@ public class StkDialogActivity extends Activity {
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(TEXT, mTextMsg);
+        outState.putParcelable(TIMEOUT_INTENT, mTimeoutIntent);
+        outState.putInt(SLOT_ID, mSlotId);
     }
 
     @Override
@@ -259,6 +272,9 @@ public class StkDialogActivity extends Activity {
         super.onRestoreInstanceState(savedInstanceState);
 
         mTextMsg = savedInstanceState.getParcelable(TEXT);
+        mTimeoutIntent = savedInstanceState.getParcelable(TIMEOUT_INTENT);
+        mSlotId = savedInstanceState.getInt(SLOT_ID);
+        appService.getStkContext(mSlotId).setPendingDialogInstance(this);
         CatLog.d(LOG_TAG, "onRestoreInstanceState - [" + mTextMsg + "]");
     }
 
