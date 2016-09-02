@@ -18,13 +18,16 @@ package com.android.stk;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -85,28 +88,18 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     private static final String ACCEPT_USERS_INPUT_KEY = "accept_users_input";
     private static final String RESPONSE_SENT_KEY = "response_sent";
     private static final String INPUT_STRING_KEY = "input_string";
+    private static final String TIMEOUT_INTENT = "timeout_intent";
 
-    // message id for time out
-    private static final int MSG_ID_TIMEOUT = 1;
     private StkAppService appService = StkAppService.getInstance();
 
     private boolean mIsResponseSent = false;
     private int mSlotId = -1;
     Activity mInstance = null;
 
-    Handler mTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-            case MSG_ID_TIMEOUT:
-                CatLog.d(LOG_TAG, "Msg timeout.");
-                mAcceptUsersInput = false;
-                appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
-                sendResponse(StkAppService.RES_ID_TIMEOUT);
-                break;
-            }
-        }
-    };
+    private PendingIntent mTimeoutIntent;
+    private IntentFilter mAlarmIntentFilter;
+    private AlarmManager mAlarmManager;
+    private final static String ALARM_TIMEOUT = "com.android.stk.INPUT_ALARM_TIMEOUT";
 
     // Click listener to handle buttons press..
     public void onClick(View v) {
@@ -128,7 +121,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             break;
         case R.id.button_cancel:
             mAcceptUsersInput = false;
-            cancelTimeOut();
             appService.getStkContext(mSlotId).setPendingActivityInstance(this);
             sendResponse(StkAppService.RES_ID_END_SESSION);
             return;
@@ -165,7 +157,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             break;
         }
         CatLog.d(LOG_TAG, "handleClick, ready to response");
-        cancelTimeOut();
         appService.getStkContext(mSlotId).setPendingActivityInstance(this);
         sendResponse(StkAppService.RES_ID_INPUT, input, false);
     }
@@ -221,6 +212,9 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         initFromIntent(getIntent());
         mContext = getBaseContext();
         mAcceptUsersInput = true;
+
+        mAlarmIntentFilter = new IntentFilter(ALARM_TIMEOUT);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
     }
 
     @Override
@@ -235,7 +229,11 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         super.onResume();
         CatLog.d(LOG_TAG, "onResume - mIsResponseSent[" + mIsResponseSent +
                 "], slot id: " + mSlotId);
-        startTimeOut();
+
+        // Set the time-out alarm if the terminal response has not been sent yet.
+        if (mTimeoutIntent == null && !mIsResponseSent) {
+            startTimeOut();
+        }
     }
 
     @Override
@@ -260,7 +258,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         // It is unnecessary to keep this activity if the response was already sent and
         // this got invisible because of the other full-screen activity in this application.
         if (mIsResponseSent && appService.isTopOfStack()) {
-            cancelTimeOut();
             finish();
         } else {
             appService.getStkContext(mSlotId).setPendingActivityInstance(this);
@@ -285,7 +282,10 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
                 CatLog.d(LOG_TAG, "handleDestroy - Send End Session");
                 sendResponse(StkAppService.RES_ID_END_SESSION);
             }
-            cancelTimeOut();
+        } else {
+            if (mTimeoutIntent != null) {
+                unregisterReceiver(mAlarmReceiver);
+            }
         }
     }
 
@@ -308,7 +308,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         case KeyEvent.KEYCODE_BACK:
             CatLog.d(LOG_TAG, "onKeyDown - KEYCODE_BACK");
             mAcceptUsersInput = false;
-            cancelTimeOut();
             appService.getStkContext(mSlotId).setPendingActivityInstance(this);
             sendResponse(StkAppService.RES_ID_BACKWARD, null, false);
             return true;
@@ -321,6 +320,8 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     }
 
     void sendResponse(int resId, String input, boolean help) {
+        cancelTimeOut();
+
         if (mSlotId == -1) {
             CatLog.d(LOG_TAG, "slot id is invalid");
             return;
@@ -390,13 +391,11 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         switch (item.getItemId()) {
         case StkApp.MENU_ID_END_SESSION:
             mAcceptUsersInput = false;
-            cancelTimeOut();
             sendResponse(StkAppService.RES_ID_END_SESSION);
             finish();
             return true;
         case StkApp.MENU_ID_HELP:
             mAcceptUsersInput = false;
-            cancelTimeOut();
             sendResponse(StkAppService.RES_ID_INPUT, "", true);
             finish();
             return true;
@@ -410,6 +409,7 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         outState.putBoolean(ACCEPT_USERS_INPUT_KEY, mAcceptUsersInput);
         outState.putBoolean(RESPONSE_SENT_KEY, mIsResponseSent);
         outState.putString(INPUT_STRING_KEY, mTextIn.getText().toString());
+        outState.putParcelable(TIMEOUT_INTENT, mTimeoutIntent);
     }
 
     @Override
@@ -426,6 +426,10 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         String savedString = savedInstanceState.getString(INPUT_STRING_KEY);
         if (!TextUtils.isEmpty(savedString)) {
             mTextIn.setText(savedString);
+        }
+        mTimeoutIntent = savedInstanceState.getParcelable(TIMEOUT_INTENT);
+        if (mTimeoutIntent != null) {
+            mContext.registerReceiver(mAlarmReceiver, mAlarmIntentFilter);
         }
     }
 
@@ -451,7 +455,12 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     }
 
     private void cancelTimeOut() {
-        mTimeoutHandler.removeMessages(MSG_ID_TIMEOUT);
+        CatLog.d(LOG_TAG, "cancelTimeOut: " + mSlotId);
+        if (mTimeoutIntent != null) {
+            mAlarmManager.cancel(mTimeoutIntent);
+            mTimeoutIntent = null;
+            unregisterReceiver(mAlarmReceiver);
+        }
     }
 
     private void startTimeOut() {
@@ -461,8 +470,15 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             duration = StkApp.UI_TIMEOUT;
         }
         cancelTimeOut();
-        mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
-                .obtainMessage(MSG_ID_TIMEOUT), duration);
+
+        CatLog.d(LOG_TAG, "startTimeOut: " + mSlotId);
+        Intent alarmIntent = new Intent(ALARM_TIMEOUT);
+        alarmIntent.putExtra(StkAppService.SLOT_ID, mSlotId);
+        mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, alarmIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + duration, mTimeoutIntent);
+        mContext.registerReceiver(mAlarmReceiver, mAlarmIntentFilter);
     }
 
     private void configInputDisplay() {
@@ -556,4 +572,22 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             finish();
         }
     }
+
+    private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            int slotId = intent.getIntExtra(StkAppService.SLOT_ID, 0);
+
+            if (slotId != mSlotId || appService == null || !ALARM_TIMEOUT.equals(action)) {
+                return;
+            }
+
+            CatLog.d(LOG_TAG, "onReceive, action=" + action + ", sim id: " + slotId);
+            mTimeoutIntent = null;
+            unregisterReceiver(mAlarmReceiver);
+            appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
+            sendResponse(StkAppService.RES_ID_TIMEOUT);
+        }
+    };
 }
