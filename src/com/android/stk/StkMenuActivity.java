@@ -18,11 +18,14 @@ package com.android.stk;
 
 import android.app.ListActivity;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.SystemClock;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -55,6 +58,11 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
     private boolean mIsResponseSent = false;
     Activity mInstance = null;
 
+    private PendingIntent mTimeoutIntent;
+    private IntentFilter mAlarmIntentFilter;
+    private AlarmManager mAlarmManager;
+    private final static String ALARM_TIMEOUT = "com.android.stk.MENU_ALARM_TIMEOUT";
+
     private TextView mTitleTextView = null;
     private ImageView mTitleIconView = null;
     private ProgressBar mProgressView = null;
@@ -73,26 +81,7 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
     static final int FINISH_CAUSE_NULL_SERVICE = 2;
     static final int FINISH_CAUSE_NULL_MENU = 3;
 
-    // message id for time out
-    private static final int MSG_ID_TIMEOUT = 1;
     private static final int CONTEXT_MENU_HELP = 0;
-
-    Handler mTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-            case MSG_ID_TIMEOUT:
-                CatLog.d(LOG_TAG, "MSG_ID_TIMEOUT mState: " + mState);
-                mAcceptUsersInput = false;
-                if (mState == STATE_SECONDARY) {
-                    appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
-                }
-                sendResponse(StkAppService.RES_ID_TIMEOUT);
-                //finish();//We wait the following commands to trigger onStop of this activity.
-                break;
-            }
-        }
-    };
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -120,6 +109,11 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         }
 
         initFromIntent(getIntent());
+
+        if (mState == STATE_SECONDARY) {
+            mAlarmIntentFilter = new IntentFilter(ALARM_TIMEOUT);
+            mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        }
     }
 
     @Override
@@ -209,7 +203,12 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             appService.getStkContext(mSlotId).setMainActivityInstance(this);
         }
         displayMenu();
-        startTimeOut();
+
+        // Set the time-out alarm if the terminal response has not been sent yet.
+        if (mTimeoutIntent == null && !mIsResponseSent) {
+            startTimeOut();
+        }
+
         // whenever this activity is resumed after a sub activity was invoked
         // (Browser, In call screen) switch back to main state and enable
         // user's input;
@@ -401,6 +400,7 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         outState.putInt("STATE", mState);
         outState.putParcelable("MENU", mStkMenu);
         outState.putBoolean("ACCEPT_USERS_INPUT", mAcceptUsersInput);
+        outState.putParcelable("TIMEOUT_INTENT", mTimeoutIntent);
     }
 
     @Override
@@ -409,11 +409,19 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         mState = savedInstanceState.getInt("STATE");
         mStkMenu = savedInstanceState.getParcelable("MENU");
         mAcceptUsersInput = savedInstanceState.getBoolean("ACCEPT_USERS_INPUT");
+        mTimeoutIntent = savedInstanceState.getParcelable("TIMEOUT_INTENT");
+        if (mTimeoutIntent != null) {
+            mContext.registerReceiver(mAlarmReceiver, mAlarmIntentFilter);
+        }
     }
 
     private void cancelTimeOut() {
         CatLog.d(LOG_TAG, "cancelTimeOut: " + mSlotId);
-        mTimeoutHandler.removeMessages(MSG_ID_TIMEOUT);
+        if (mTimeoutIntent != null) {
+            mAlarmManager.cancel(mTimeoutIntent);
+            mTimeoutIntent = null;
+            unregisterReceiver(mAlarmReceiver);
+        }
     }
 
     private void startTimeOut() {
@@ -421,8 +429,13 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             // Reset timeout.
             cancelTimeOut();
             CatLog.d(LOG_TAG, "startTimeOut: " + mSlotId);
-            mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
-                    .obtainMessage(MSG_ID_TIMEOUT), StkApp.UI_TIMEOUT);
+            Intent mAlarmIntent = new Intent(ALARM_TIMEOUT);
+            mAlarmIntent.putExtra(StkAppService.SLOT_ID, mSlotId);
+            mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + StkApp.UI_TIMEOUT, mTimeoutIntent);
+            mContext.registerReceiver(mAlarmReceiver, mAlarmIntentFilter);
         }
     }
 
@@ -502,4 +515,23 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         mContext.startService(new Intent(mContext, StkAppService.class)
                 .putExtras(args));
     }
+
+    private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            int slotId = intent.getIntExtra(StkAppService.SLOT_ID, 0);
+
+            if (slotId != mSlotId || appService == null || !ALARM_TIMEOUT.equals(action)) {
+                return;
+            }
+
+            CatLog.d(LOG_TAG, "onReceive, action=" + action + ", sim id: " + slotId);
+            mTimeoutIntent = null;
+            unregisterReceiver(mAlarmReceiver);
+            mAcceptUsersInput = false;
+            appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
+            sendResponse(StkAppService.RES_ID_TIMEOUT);
+        }
+    };
 }
