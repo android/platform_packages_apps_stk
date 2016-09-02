@@ -17,12 +17,15 @@
 package com.android.stk;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -72,27 +75,16 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     static final float LARGE_FONT_FACTOR = 2;
     static final float SMALL_FONT_FACTOR = (1 / 2);
 
-    // message id for time out
-    private static final int MSG_ID_TIMEOUT = 1;
     private StkAppService appService = StkAppService.getInstance();
 
     private boolean mIsResponseSent = false;
     private int mSlotId = -1;
     Activity mInstance = null;
 
-    Handler mTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-            case MSG_ID_TIMEOUT:
-                CatLog.d(LOG_TAG, "Msg timeout.");
-                mAcceptUsersInput = false;
-                appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
-                sendResponse(StkAppService.RES_ID_TIMEOUT);
-                break;
-            }
-        }
-    };
+    private PendingIntent mTimeoutIntent;
+    private IntentFilter mAlarmIntentFilter;
+    private AlarmManager mAlarmManager;
+    private final static String ALARM_TIMEOUT = "com.android.stk.INPUT_ALARM_TIMEOUT";
 
     // Click listener to handle buttons press..
     public void onClick(View v) {
@@ -164,6 +156,9 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         initFromIntent(getIntent());
         mContext = getBaseContext();
         mAcceptUsersInput = true;
+
+        mAlarmIntentFilter = new IntentFilter(ALARM_TIMEOUT);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
     }
 
     @Override
@@ -178,7 +173,12 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         super.onResume();
         CatLog.d(LOG_TAG, "onResume - mIsResponseSent[" + mIsResponseSent +
                 "], slot id: " + mSlotId);
-        startTimeOut();
+
+        // Set the time-out alarm if the terminal response has not been sent yet.
+        if (mTimeoutIntent == null && !mIsResponseSent) {
+            startTimeOut();
+        }
+
         appService.getStkContext(mSlotId).setPendingActivityInstance(null);
         if (mIsResponseSent) {
             cancelTimeOut();
@@ -317,12 +317,17 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     protected void onSaveInstanceState(Bundle outState) {
         CatLog.d(LOG_TAG, "onSaveInstanceState: " + mSlotId);
         outState.putBoolean("ACCEPT_USERS_INPUT", mAcceptUsersInput);
+        outState.putParcelable("TIMEOUT_INTENT", mTimeoutIntent);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         CatLog.d(LOG_TAG, "onRestoreInstanceState: " + mSlotId);
         mAcceptUsersInput = savedInstanceState.getBoolean("ACCEPT_USERS_INPUT");
+        mTimeoutIntent = savedInstanceState.getParcelable("TIMEOUT_INTENT");
+        if (mTimeoutIntent != null) {
+            mContext.registerReceiver(mAlarmReceiver, mAlarmIntentFilter);
+        }
     }
 
     public void beforeTextChanged(CharSequence s, int start, int count,
@@ -347,7 +352,12 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     }
 
     private void cancelTimeOut() {
-        mTimeoutHandler.removeMessages(MSG_ID_TIMEOUT);
+        CatLog.d(LOG_TAG, "cancelTimeOut: " + mSlotId);
+        if (mTimeoutIntent != null) {
+            mAlarmManager.cancel(mTimeoutIntent);
+            mTimeoutIntent = null;
+            unregisterReceiver(mAlarmReceiver);
+        }
     }
 
     private void startTimeOut() {
@@ -357,8 +367,15 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             duration = StkApp.UI_TIMEOUT;
         }
         cancelTimeOut();
-        mTimeoutHandler.sendMessageDelayed(mTimeoutHandler
-                .obtainMessage(MSG_ID_TIMEOUT), duration);
+
+        CatLog.d(LOG_TAG, "startTimeOut: " + mSlotId);
+        Intent mAlarmIntent = new Intent(ALARM_TIMEOUT);
+        mAlarmIntent.putExtra(StkAppService.SLOT_ID, mSlotId);
+        mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + duration, mTimeoutIntent);
+        mContext.registerReceiver(mAlarmReceiver, mAlarmIntentFilter);
     }
 
     private void configInputDisplay() {
@@ -448,4 +465,23 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             finish();
         }
     }
+
+    private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            int slotId = intent.getIntExtra(StkAppService.SLOT_ID, 0);
+
+            if (slotId != mSlotId || appService == null || !ALARM_TIMEOUT.equals(action)) {
+                return;
+            }
+
+            CatLog.d(LOG_TAG, "onReceive, action=" + action + ", sim id: " + slotId);
+            mTimeoutIntent = null;
+            unregisterReceiver(mAlarmReceiver);
+            mAcceptUsersInput = false;
+            appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
+            sendResponse(StkAppService.RES_ID_TIMEOUT);
+        }
+    };
 }
