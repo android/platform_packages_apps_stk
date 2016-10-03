@@ -89,6 +89,12 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         mAlarmManager =(AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
 
+        if (appService == null) {
+            CatLog.d(LOG_TAG, "onCreate - appService is null");
+            finish();
+            return;
+        }
+
         setFinishOnTouchOutside(false);
     }
 
@@ -232,7 +238,7 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
         // if dialog activity is finished by stkappservice
         // when receiving OP_LAUNCH_APP from the other SIM, we can not send TR here
         // , since the dialog cmd is waiting user to process.
-        if (!mIsResponseSent && !appService.isDialogPending(mSlotId)) {
+        if (!mIsResponseSent && appService != null && !appService.isDialogPending(mSlotId)) {
             sendResponse(StkAppService.RES_ID_CONFIRM, false);
         }
         cancelTimeOut();
