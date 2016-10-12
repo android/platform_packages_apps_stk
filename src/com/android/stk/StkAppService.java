@@ -1460,7 +1460,7 @@ public class StkAppService extends Service implements Runnable {
     }
 
     private void launchEventMessage(int slotId, TextMessage msg) {
-        if (msg == null || (msg.text != null && msg.text.length() == 0)) {
+        if (msg == null || TextUtils.isEmpty(msg.text)) {
             CatLog.d(LOG_TAG, "launchEventMessage return");
             return;
         }
