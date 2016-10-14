@@ -43,6 +43,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -237,6 +238,8 @@ public class StkAppService extends Service implements Runnable {
     // Notification id used to display Idle Mode text in NotificationManager.
     private static final int STK_NOTIFICATION_ID = 333;
     private static final String LOG_TAG = new Object(){}.getClass().getEnclosingClass().getName();
+
+    static final String SESSION_ENDED = "session_ended";
 
     // Inner class used for queuing telephony messages (proactive commands,
     // session end) while the service is busy processing a previous message.
@@ -784,6 +787,12 @@ public class StkAppService extends Service implements Runnable {
         if (StkMenuActivity.STATE_SECONDARY == mStkContext[slotId].mMenuState) {
             launchMenuActivity(null, slotId);
         }
+
+        // Send a local broadcast as a notice that this service handled the session end event.
+        Intent intent = new Intent(SESSION_ENDED);
+        intent.putExtra(SLOT_ID, slotId);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
         if (mStkContext[slotId].mCmdsQ.size() != 0) {
             callDelayedMsg(slotId);
         } else {

@@ -18,11 +18,14 @@ package com.android.stk;
 
 import android.app.ListActivity;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -83,7 +86,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             switch(msg.what) {
             case MSG_ID_TIMEOUT:
                 CatLog.d(LOG_TAG, "MSG_ID_TIMEOUT mState: " + mState);
-                mAcceptUsersInput = false;
                 if (mState == STATE_SECONDARY) {
                     appService.getStkContext(mSlotId).setPendingActivityInstance(mInstance);
                 }
@@ -108,7 +110,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         mTitleIconView = (ImageView) findViewById(R.id.title_icon);
         mProgressView = (ProgressBar) findViewById(R.id.progress_bar);
         mContext = getBaseContext();
-        mAcceptUsersInput = true;
         getListView().setOnCreateContextMenuListener(this);
 
         // appService can be null if this activity is automatically recreated by the system
@@ -119,6 +120,8 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             return;
         }
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocalBroadcastReceiver,
+                new IntentFilter(StkAppService.SESSION_ENDED));
         initFromIntent(getIntent());
     }
 
@@ -144,9 +147,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         }
         cancelTimeOut();
         sendResponse(StkAppService.RES_ID_MENU_SELECTION, item.id, false);
-        mAcceptUsersInput = false;
-        mProgressView.setVisibility(View.VISIBLE);
-        mProgressView.setIndeterminate(true);
     }
 
     @Override
@@ -163,7 +163,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             case STATE_SECONDARY:
                 CatLog.d(LOG_TAG, "STATE_SECONDARY");
                 cancelTimeOut();
-                mAcceptUsersInput = false;
                 appService.getStkContext(mSlotId).setPendingActivityInstance(this);
                 sendResponse(StkAppService.RES_ID_BACKWARD);
                 return true;
@@ -210,18 +209,7 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         }
         displayMenu();
         startTimeOut();
-        // whenever this activity is resumed after a sub activity was invoked
-        // (Browser, In call screen) switch back to main state and enable
-        // user's input;
-        if (!mAcceptUsersInput) {
-            //Remove set mState to STATE_MAIN. This is for single instance flow.
-            mAcceptUsersInput = true;
-        }
         invalidateOptionsMenu();
-
-        // make sure the progress bar is not shown.
-        mProgressView.setIndeterminate(false);
-        mProgressView.setVisibility(View.GONE);
     }
 
     @Override
@@ -297,6 +285,8 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
                 CatLog.d(LOG_TAG, "onDestroy: null appService.");
             }
         }
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalBroadcastReceiver);
     }
 
     @Override
@@ -334,7 +324,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         switch (item.getItemId()) {
         case StkApp.MENU_ID_END_SESSION:
             cancelTimeOut();
-            mAcceptUsersInput = false;
             // send session end response.
             sendResponse(StkAppService.RES_ID_END_SESSION);
             cancelTimeOut();
@@ -342,7 +331,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
             return true;
         case StkApp.MENU_ID_HELP:
             cancelTimeOut();
-            mAcceptUsersInput = false;
             int position = getSelectedItemPosition();
             Item stkItem = getSelectedItem(position);
             if (stkItem == null) {
@@ -380,7 +368,6 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         switch (item.getItemId()) {
             case CONTEXT_MENU_HELP:
                 cancelTimeOut();
-                mAcceptUsersInput = false;
                 int position = info.position;
                 CatLog.d(this, "Position:" + position);
                 Item stkItem = getSelectedItem(position);
@@ -409,6 +396,9 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         mState = savedInstanceState.getInt("STATE");
         mStkMenu = savedInstanceState.getParcelable("MENU");
         mAcceptUsersInput = savedInstanceState.getBoolean("ACCEPT_USERS_INPUT");
+        if (!mAcceptUsersInput) {
+            showProgressBar(true);
+        }
     }
 
     private void cancelTimeOut() {
@@ -455,6 +445,16 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         }
     }
 
+    private void showProgressBar(boolean show) {
+        if (show) {
+            mProgressView.setIndeterminate(true);
+            mProgressView.setVisibility(View.VISIBLE);
+        } else {
+            mProgressView.setIndeterminate(false);
+            mProgressView.setVisibility(View.GONE);
+        }
+    }
+
     private void initFromIntent(Intent intent) {
 
         if (intent != null) {
@@ -492,6 +492,13 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
     private void sendResponse(int resId, int itemId, boolean help) {
         CatLog.d(LOG_TAG, "sendResponse resID[" + resId + "] itemId[" + itemId +
             "] help[" + help + "]");
+
+        // Disallow user operation temporarily until receiving the result of the response.
+        mAcceptUsersInput = false;
+        if (resId == StkAppService.RES_ID_MENU_SELECTION) {
+            showProgressBar(true);
+        }
+
         mIsResponseSent = true;
         Bundle args = new Bundle();
         args.putInt(StkAppService.OPCODE, StkAppService.OP_RESPONSE);
@@ -502,4 +509,17 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         mContext.startService(new Intent(mContext, StkAppService.class)
                 .putExtras(args));
     }
+
+    private final BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (StkAppService.SESSION_ENDED.equals(intent.getAction())) {
+                int slotId = intent.getIntExtra(StkAppService.SLOT_ID, 0);
+                if ((mState == STATE_MAIN) && (mSlotId == slotId)) {
+                    mAcceptUsersInput = true;
+                    showProgressBar(false);
+                }
+            }
+        }
+    };
 }
