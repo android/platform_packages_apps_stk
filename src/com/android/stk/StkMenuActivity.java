@@ -17,6 +17,7 @@
 package com.android.stk;
 
 import android.app.ListActivity;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -99,8 +100,11 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         super.onCreate(icicle);
 
         CatLog.d(LOG_TAG, "onCreate");
-        // Remove the default title, customized one is used.
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setCustomView(R.layout.stk_title);
+        actionBar.setDisplayShowCustomEnabled(true);
+
         // Set the layout for this activity.
         setContentView(R.layout.stk_menu_list);
         mInstance = this;
@@ -147,6 +151,8 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         mAcceptUsersInput = false;
         mProgressView.setVisibility(View.VISIBLE);
         mProgressView.setIndeterminate(true);
+
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -313,11 +319,8 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         boolean helpVisible = false;
         boolean mainVisible = false;
 
-        if (mState == STATE_SECONDARY) {
+        if (mState == STATE_SECONDARY && mAcceptUsersInput) {
             mainVisible = true;
-        }
-        if (mStkMenu != null) {
-            helpVisible = mStkMenu.helpAvailable;
         }
 
         menu.findItem(StkApp.MENU_ID_END_SESSION).setVisible(mainVisible);
