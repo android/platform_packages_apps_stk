@@ -120,6 +120,10 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         }
 
         initFromIntent(getIntent());
+        if (mSlotId < 0) {
+            finish();
+            return;
+        }
     }
 
     @Override
@@ -281,7 +285,7 @@ public class StkMenuActivity extends ListActivity implements View.OnCreateContex
         getListView().setOnCreateContextMenuListener(null);
         super.onDestroy();
         CatLog.d(LOG_TAG, "onDestroy" + "," + mState);
-        if (appService == null) {
+        if (appService == null || (mSlotId < 0)) {
             return;
         }
         //isMenuPending: if input act is finish by stkappservice when OP_LAUNCH_APP again,
