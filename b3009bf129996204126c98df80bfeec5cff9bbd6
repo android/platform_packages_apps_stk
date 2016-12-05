@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4da643c5_2f61e94d",
+        "filename": "res/layout/stk_title.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1115438
+      },
+      "writtenOn": "2016-12-05T05:34:14Z",
+      "side": 1,
+      "message": "\"@+id/stk_title\" and \"@android:id/content\" are useless. We will remove them in the next patch set if it is required.\n\n    \u003cLinearLayout xmlns:android\u003d\"http://schemas.android.com/apk/res/android\"\n        android:layout_width\u003d\"match_parent\"\n        android:layout_height\u003d\"wrap_content\"\n -      android:orientation\u003d\"vertical\"\n +      android:orientation\u003d\"horizontal\"\n        android:fitsSystemWindows\u003d\"true\"\u003e\n\n -      \u003cLinearLayout android:id\u003d\"@+id/stk_title\"\n -          android:layout_width\u003d\"match_parent\"\n -          android:layout_height\u003d\"wrap_content\"\n -          android:orientation\u003d\"horizontal\" \u003e\n\n    ...\n\n -      \u003c/LinearLayout\u003e\n -\n -      \u003cFrameLayout android:id\u003d\"@android:id/content\"\n -          android:layout_width\u003d\"match_parent\"\n -          android:layout_height\u003d\"0dip\"\n -          android:layout_weight\u003d\"1\"\n -          android:foregroundGravity\u003d\"fill_horizontal|top\"\n -          android:foreground\u003d\"?android:attr/windowContentOverlay\" /\u003e\n    \u003c/LinearLayout\u003e",
+      "range": {
+        "startLine": 23,
+        "startChar": 26,
+        "endLine": 23,
+        "endChar": 42
+      },
+      "revId": "b3009bf129996204126c98df80bfeec5cff9bbd6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4da643c5_0f5c259b",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1115438
+      },
+      "writtenOn": "2016-12-05T05:34:14Z",
+      "side": 1,
+      "message": "The help option item is available as a context menu, so we do not need to have (or we can remove) the help related code existing in onCreateOptionsMenu(), onPrepareOptionsMenu() and onOptionsItemSelected(). We will upload the next patch set if we should remove such unnecessary code.\n\n    @Override\n    public boolean onCreateOptionsMenu(android.view.Menu menu) {\n        super.onCreateOptionsMenu(menu);\n        menu.add(0, StkApp.MENU_ID_END_SESSION, 1, R.string.menu_end_session);\n -      menu.add(0, StkApp.MENU_ID_HELP, 2, R.string.help);\n        return true;\n    }\n\n    @Override\n    public boolean onPrepareOptionsMenu(android.view.Menu menu) {\n        super.onPrepareOptionsMenu(menu);\n -      boolean helpVisible \u003d false;\n        boolean mainVisible \u003d false;\n\n        if (mState \u003d\u003d STATE_SECONDARY \u0026\u0026 mAcceptUsersInput) {\n            mainVisible \u003d true;\n        }\n\n        menu.findItem(StkApp.MENU_ID_END_SESSION).setVisible(mainVisible);\n -      menu.findItem(StkApp.MENU_ID_HELP).setVisible(helpVisible);\n\n        return true;\n    }\n\n    @Override\n    public boolean onOptionsItemSelected(MenuItem item) {\n\n    ...\n\n -      case StkApp.MENU_ID_HELP:\n -          cancelTimeOut();\n -          mAcceptUsersInput \u003d false;\n -          int position \u003d getSelectedItemPosition();\n -          Item stkItem \u003d getSelectedItem(position);\n -          if (stkItem \u003d\u003d null) {\n -              break;\n -          }\n -          // send help needed response.\n -          sendResponse(StkAppService.RES_ID_MENU_SELECTION, stkItem.id, true);\n -          return true;\n +      default:\n +          break;\n        }\n        return super.onOptionsItemSelected(item);\n    }",
+      "range": {
+        "startLine": 312,
+        "startChar": 8,
+        "endLine": 312,
+        "endChar": 59
+      },
+      "revId": "b3009bf129996204126c98df80bfeec5cff9bbd6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
