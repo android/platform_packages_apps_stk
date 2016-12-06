@@ -85,6 +85,15 @@ import java.util.LinkedList;
 import java.lang.System;
 import java.util.List;
 
+import android.os.Build;
+import android.view.Display;
+import android.hardware.display.DisplayManager;
+import android.media.ToneGenerator;
+import android.media.AudioManager;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.app.KeyguardManager;
+
 import static com.android.internal.telephony.cat.CatCmdMessage.
                    SetupEventListConstants.IDLE_SCREEN_AVAILABLE_EVENT;
 import static com.android.internal.telephony.cat.CatCmdMessage.
@@ -1290,15 +1299,87 @@ public class StkAppService extends Service implements Runnable {
         String uriString = STK_INPUT_URI + System.currentTimeMillis();
         //Set unique URI to create a new instance of activity for different slotId.
         Uri uriData = Uri.parse(uriString);
+        Input input = mStkContext[slotId].mCurrentCmd.geInput();
+        String title = null;
+        if (input != null) { title = input.text;}
 
         CatLog.d(LOG_TAG, "launchInputActivity, slotId: " + slotId);
         newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                             | getFlagActivityNoUserAction(InitiatedByUserAction.unknown, slotId));
         newIntent.setClassName(PACKAGE_NAME, targetActivity);
-        newIntent.putExtra("INPUT", mStkContext[slotId].mCurrentCmd.geInput());
+        newIntent.putExtra("INPUT", input);
         newIntent.putExtra(SLOT_ID, slotId);
         newIntent.setData(uriData);
-        mContext.startActivity(newIntent);
+
+        if (isScreenOff()) {
+            wakeUp();
+            buildNotification(newIntent, title, slotId);
+        } else if (isScreenLocked()) {
+            beep();
+            buildNotification(newIntent, title, slotId);
+        } else {
+            mContext.startActivity(newIntent);
+        }
+    }
+
+    private boolean isScreenLocked(){
+       boolean result = false;
+       KeyguardManager kmgt = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+       if (kmgt.inKeyguardRestrictedInputMode()) {
+           result = true;
+       }
+
+       return result;
+    }
+
+    private boolean isScreenOff(){
+       boolean result = false;
+
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            DisplayManager mgt = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+            Display screen = mgt.getDisplay(Display.DEFAULT_DISPLAY);
+            if ((screen != null) && (Display.STATE_OFF == screen.getState())) { result = true;}
+       } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1){
+            PowerManager pmgt = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!pmgt.isScreenOn()) { result = true;}
+       }
+
+       return result;
+    }
+
+    private void beep(){
+       ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 500);
+       tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+    }
+
+    private void wakeUp(){
+       long screenOnTimeOut = 5000;
+       beep();
+       PowerManager pmgt = (PowerManager) getSystemService(POWER_SERVICE);
+       WakeLock wakeLock = pmgt.newWakeLock(PowerManager.FULL_WAKE_LOCK |
+                                            PowerManager.ACQUIRE_CAUSES_WAKEUP, "StkWakeLock");
+       wakeLock.acquire(screenOnTimeOut);
+    }
+
+    private void buildNotification(Intent embededIntent, String title, int slotId){
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, embededIntent, 0);
+
+        final Notification.Builder notificationBuilder = new Notification.Builder(StkAppService.this);
+        if (title != null) {
+            notificationBuilder.setContentTitle(title);
+            notificationBuilder.setTicker(title);
+        }
+        Bitmap bitmapIcon = BitmapFactory.decodeResource(StkAppService.this.getResources().getSystem(),
+                                              com.android.internal.R.drawable.stat_notify_sim_toolkit);
+        notificationBuilder.setLargeIcon(bitmapIcon);
+        notificationBuilder.setSmallIcon(com.android.internal.R.drawable.stat_notify_sim_toolkit);
+        notificationBuilder.setContentIntent(pendingIntent);
+        notificationBuilder.setAutoCancel(true);
+        notificationBuilder.setColor(mContext.getResources().getColor(
+                                       com.android.internal.R.color.system_notification_accent_color));
+        if (mNotificationManager != null) {
+            mNotificationManager.notify(getNotificationId(slotId), notificationBuilder.build());
+        }
     }
 
     private void launchTextDialog(int slotId) {
@@ -1317,7 +1398,16 @@ public class StkAppService extends Service implements Runnable {
             newIntent.setData(uriData);
             newIntent.putExtra("TEXT", mStkContext[slotId].mCurrentCmd.geTextMessage());
             newIntent.putExtra(SLOT_ID, slotId);
-            startActivity(newIntent);
+
+            if (isScreenOff()) {
+                wakeUp();
+                buildNotification(newIntent, mStkContext[slotId].mCurrentCmd.geTextMessage().text, slotId);
+            } else if (isScreenLocked()) {
+                beep();
+                buildNotification(newIntent, mStkContext[slotId].mCurrentCmd.geTextMessage().text, slotId);
+            } else {
+                startActivity(newIntent);
+            }
             // For display texts with immediate response, send the terminal response
             // immediately. responseNeeded will be false, if display text command has
             // the immediate response tlv.
@@ -1456,7 +1546,9 @@ public class StkAppService extends Service implements Runnable {
         toast.setView(v);
         toast.setDuration(Toast.LENGTH_LONG);
         toast.setGravity(Gravity.BOTTOM, 0, 0);
-        toast.show();
+        if (!TextUtils.isEmpty(tv.getText().toString())) {
+            toast.show();
+        }
     }
 
     private void launchConfirmationDialog(TextMessage msg, int slotId) {
