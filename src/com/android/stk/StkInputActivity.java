@@ -377,9 +377,10 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         // Set input type (alphabet/digit) info close to the InText form.
         if (mStkInput.digitOnly) {
             mTextIn.setKeyListener(StkDigitsKeyListener.getInstance());
-            inTypeId = R.string.digits;
+            inTypeView.setText("");
+        } else {
+            inTypeView.setText(inTypeId);
         }
-        inTypeView.setText(inTypeId);
 
         if (mStkInput.icon != null) {
             setFeatureDrawable(Window.FEATURE_LEFT_ICON, new BitmapDrawable(
@@ -399,7 +400,10 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
             if (maxLen != minLen) {
                 lengthLimit = minLen + " - " + maxLen;
             }
-            numOfCharsView.setText(lengthLimit);
+
+            if (!mStkInput.digitOnly) {
+                numOfCharsView.setText(lengthLimit);
+            }
 
             if (!mStkInput.echo) {
                 mTextIn.setInputType(InputType.TYPE_CLASS_NUMBER
