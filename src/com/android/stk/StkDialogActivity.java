@@ -143,6 +143,11 @@ public class StkDialogActivity extends Activity implements View.OnClickListener 
             return;
         }
 
+        if (!mTextMsg.responseNeeded) {
+            Button cancelButton = (Button) findViewById(R.id.button_cancel);
+            cancelButton.setVisibility(View.GONE);
+        }
+
         Window window = getWindow();
 
         TextView mMessageView = (TextView) window
