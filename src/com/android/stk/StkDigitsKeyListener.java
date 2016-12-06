@@ -48,7 +48,7 @@ public class StkDigitsKeyListener extends NumberKeyListener {
      * @see #getAcceptedChars
      */
     public static final char[] CHARACTERS = new char[] {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#', '+'};
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     private static StkDigitsKeyListener sInstance;
 }
