@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b126f6f5_a30f9559",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 806,
+      "author": {
+        "id": 1061212
+      },
+      "writtenOn": "2017-02-06T21:30:24Z",
+      "side": 1,
+      "message": "we don\u0027t need this, it cannot be null.",
+      "range": {
+        "startLine": 804,
+        "startChar": 0,
+        "endLine": 806,
+        "endChar": 9
+      },
+      "revId": "291c15ebcde917af4876e894b36b04dd360bb0f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a7ef324_c367ad94",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 808,
+      "author": {
+        "id": 1061212
+      },
+      "writtenOn": "2017-02-06T21:30:24Z",
+      "side": 1,
+      "message": "we probably don\u0027t need this as well.",
+      "range": {
+        "startLine": 808,
+        "startChar": 29,
+        "endLine": 808,
+        "endChar": 44
+      },
+      "revId": "291c15ebcde917af4876e894b36b04dd360bb0f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
