@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "724dec53_26439da4",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 808,
+      "author": {
+        "id": 1061212
+      },
+      "writtenOn": "2017-02-07T22:30:42Z",
+      "side": 1,
+      "message": "Looking into ActivityManager, this can be null as well",
+      "range": {
+        "startLine": 808,
+        "startChar": 42,
+        "endLine": 808,
+        "endChar": 53
+      },
+      "revId": "42f733c14186d9a515d3a447f4e351b679cfa17b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
