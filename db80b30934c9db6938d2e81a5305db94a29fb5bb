@@ -1,0 +1,9 @@
+Code-Review+2: Amit Mahajan <amitmahajan@google.com>
+Code-Review+1: Yoshiaki Naka <yoshiaki.naka@sonymobile.com>
+Verified+1: Pankaj Kanwar <pkanwar@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Pankaj Kanwar <pkanwar@google.com>
+Submitted-at: Thu, 16 Feb 2017 18:09:33 +0000
+Reviewed-on: https://android-review.googlesource.com/299977
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
