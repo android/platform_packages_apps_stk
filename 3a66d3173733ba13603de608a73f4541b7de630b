@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de085fd8_57ee7b69",
+        "filename": "src/com/android/stk/StkDigitsKeyListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-02-22T01:22:22Z",
+      "side": 1,
+      "message": "Per ETSI 102 223 spec 6.4.2 GET INKEY, need to support *, #, +\n\nif the UICC requests a digit only, the terminal shall only allow the user to enter a character from the\ndigits 0 to 9, *, # and +.",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 41
+      },
+      "revId": "3a66d3173733ba13603de608a73f4541b7de630b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
