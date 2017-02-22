@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e2d823c_43524c20",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-02-22T02:12:46Z",
+      "side": 1,
+      "message": "Move to StkApp.java",
+      "range": {
+        "startLine": 1356,
+        "startChar": 7,
+        "endLine": 1356,
+        "endChar": 35
+      },
+      "revId": "8edab4af5e5174afb054460f7ad2cda8f7eb7eea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67a95eae_ce9cc970",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1410,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-02-22T02:12:46Z",
+      "side": 1,
+      "message": "If user does not respond to the notification, some modems have a \u0027timer\u0027 to auto-respond \u0027no response from user\u0027 which results in the display text being re-sent again by the UICC, over and over. In this situation, it wouldn\u0027t be good to: \u0027wake\u0027 up the device repeatedly or have multiple notifications pop-up",
+      "range": {
+        "startLine": 1402,
+        "startChar": 0,
+        "endLine": 1410,
+        "endChar": 13
+      },
+      "revId": "8edab4af5e5174afb054460f7ad2cda8f7eb7eea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
