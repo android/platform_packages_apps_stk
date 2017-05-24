@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df743ff0_cd04c229",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1061212
+      },
+      "writtenOn": "2017-05-24T21:58:35Z",
+      "side": 0,
+      "message": "Why is this removed ? Is this new as per new spec ?",
+      "range": {
+        "startLine": 321,
+        "startChar": 0,
+        "endLine": 323,
+        "endChar": 9
+      },
+      "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
