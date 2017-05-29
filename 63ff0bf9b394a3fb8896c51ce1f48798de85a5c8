@@ -22,6 +22,30 @@
       "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0cc57ef_64ff2837",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1115438
+      },
+      "writtenOn": "2017-05-29T06:53:03Z",
+      "side": 0,
+      "message": "There is the help option available in the context menu also and the context menu is better than the option menu on the action bar in order to specify the index number of the menu items. We think that we can remove the help option from the action bar.",
+      "parentUuid": "df743ff0_cd04c229",
+      "range": {
+        "startLine": 321,
+        "startChar": 0,
+        "endLine": 323,
+        "endChar": 9
+      },
+      "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

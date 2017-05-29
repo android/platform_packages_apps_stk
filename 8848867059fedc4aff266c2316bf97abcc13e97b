@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "3926a590_f3c1eb47",
+        "filename": "res/layout/stk_title.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1115438
+      },
+      "writtenOn": "2017-05-29T06:53:03Z",
+      "side": 1,
+      "message": "I agree with you but we observe corrupted layout on the action bar if we keep wrap_content. I will update Bug: 33329277 regarding this.",
+      "parentUuid": "e2910782_fcdb21c9",
+      "range": {
+        "startLine": 61,
+        "startChar": 39,
+        "endLine": 61,
+        "endChar": 44
+      },
+      "revId": "8848867059fedc4aff266c2316bf97abcc13e97b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3b8b5f6_98dad5f9",
         "filename": "src/com/android/stk/StkMenuActivity.java",
         "patchSetId": 4
@@ -83,6 +107,30 @@
       "side": 1,
       "message": "If its not required then we should remove it.",
       "parentUuid": "a3b8b5f6_98dad5f9",
+      "range": {
+        "startLine": 312,
+        "startChar": 8,
+        "endLine": 312,
+        "endChar": 59
+      },
+      "revId": "8848867059fedc4aff266c2316bf97abcc13e97b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "007aaf27_a6a5a6b5",
+        "filename": "src/com/android/stk/StkMenuActivity.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1115438
+      },
+      "writtenOn": "2017-05-29T06:53:03Z",
+      "side": 1,
+      "message": "Sure. I will remove unnecessary code in the next patch set.",
+      "parentUuid": "cdf61044_554fd161",
       "range": {
         "startLine": 312,
         "startChar": 8,
