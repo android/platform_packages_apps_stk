@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2fe199fb_141ff510",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-06-29T01:02:09Z",
+      "side": 1,
+      "message": "rename to: android.intent.action.stk.finish_activity to keep consistent",
+      "range": {
+        "startLine": 198,
+        "startChar": 33,
+        "endLine": 198,
+        "endChar": 47
+      },
+      "revId": "0a1692c39dedf501143031f1d645672a792eab9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c697a4a_1ca0e58e",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-06-29T01:02:09Z",
+      "side": 1,
+      "message": "Message id to signal stop tone due to play tone timeout.",
+      "range": {
+        "startLine": 222,
+        "startChar": 27,
+        "endLine": 222,
+        "endChar": 49
+      },
+      "revId": "0a1692c39dedf501143031f1d645672a792eab9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9534f9c1_a4aee73b",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1627,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-06-29T01:02:09Z",
+      "side": 1,
+      "message": "space missing",
+      "range": {
+        "startLine": 1627,
+        "startChar": 27,
+        "endLine": 1627,
+        "endChar": 29
+      },
+      "revId": "0a1692c39dedf501143031f1d645672a792eab9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fa0e0a1_0bcdf950",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1656,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-06-29T01:02:09Z",
+      "side": 1,
+      "message": "what if settings is null? it was checked earlier in ToneDialog.java before it was moved here",
+      "range": {
+        "startLine": 1656,
+        "startChar": 32,
+        "endLine": 1656,
+        "endChar": 81
+      },
+      "revId": "0a1692c39dedf501143031f1d645672a792eab9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f79d0edc_25da135c",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1662,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-06-29T01:02:09Z",
+      "side": 1,
+      "message": "This is mispelled, TONE_DFEAULT_TIMEOUT --\u003e TONE_DEFAULT_TIMEOUT, change in definition too",
+      "range": {
+        "startLine": 1662,
+        "startChar": 29,
+        "endLine": 1662,
+        "endChar": 49
+      },
+      "revId": "0a1692c39dedf501143031f1d645672a792eab9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
