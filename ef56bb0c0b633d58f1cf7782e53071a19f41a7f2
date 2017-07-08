@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7dfe0598_bd6e2b8a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "Please clean-up this description. It is a run-on sentence and the scenario is not clear.",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 56
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b2ad893_c9608861",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "change these to android.intent.action.stk.idle_screen to match with others",
+      "range": {
+        "startLine": 110,
+        "startChar": 39,
+        "endLine": 110,
+        "endChar": 76
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9f596d0_998778df",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 246,
+        "startChar": 37,
+        "endLine": 246,
+        "endChar": 74
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d08fb44_65896a37",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "spelling: mActivityManager , multiple locations",
+      "range": {
+        "startLine": 669,
+        "startChar": 24,
+        "endLine": 669,
+        "endChar": 39
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c18ce764_26974a6f",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 682,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "Can we add a comment above, \"Query the package manager for the default launcher\"",
+      "range": {
+        "startLine": 682,
+        "startChar": 8,
+        "endLine": 682,
+        "endChar": 41
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82e99d60_7b620cc1",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "does",
+      "range": {
+        "startLine": 955,
+        "startChar": 73,
+        "endLine": 955,
+        "endChar": 75
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4af530d2_210d9b63",
+        "filename": "src/com/android/stk/StkCmdReceiver.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-07-08T00:51:00Z",
+      "side": 1,
+      "message": "In case Launcher3 changes are not approved by launcher team, I think we can compromise by using SCREEN_OFF for this case.\n\nThe package manager checks in isIdleScreen() will at least help ease the testing process.",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 71
+      },
+      "revId": "ef56bb0c0b633d58f1cf7782e53071a19f41a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
