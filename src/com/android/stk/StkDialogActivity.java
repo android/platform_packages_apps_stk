@@ -28,6 +28,9 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 
 import android.os.Bundle;
@@ -56,6 +59,7 @@ public class StkDialogActivity extends Activity {
     private static final String TEXT = "text";
 
     private AlertDialog.Builder alertDialogBuilder;
+    private DisplayMetrics dm;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -75,6 +79,22 @@ public class StkDialogActivity extends Activity {
         mIsResponseSent = false;
 
         alertDialogBuilder = new AlertDialog.Builder(this);
+
+        alertDialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction()
+                        == KeyEvent.ACTION_DOWN) {
+                    CatLog.d(LOG_TAG, "onKeyDown - KEYCODE_BACK");
+                    cancelTimeOut();
+                    sendResponse(StkAppService.RES_ID_BACKWARD);
+                    dialog.dismiss();
+                    finish();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         alertDialogBuilder.setPositiveButton(R.string.button_ok, new
                 DialogInterface.OnClickListener() {
@@ -104,21 +124,10 @@ public class StkDialogActivity extends Activity {
         intentFilter.addAction(ALARM_TIMEOUT);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         mAlarmManager =(AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
 
         setFinishOnTouchOutside(false);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                CatLog.d(LOG_TAG, "onKeyDown - KEYCODE_BACK");
-                cancelTimeOut();
-                sendResponse(StkAppService.RES_ID_BACKWARD);
-                finish();
-                break;
-        }
-        return false;
     }
 
     @Override
@@ -133,10 +142,38 @@ public class StkDialogActivity extends Activity {
             return;
         }
 
-        alertDialogBuilder.setTitle(mTextMsg.title);
+        if (mTextMsg.title == null || mTextMsg.title.isEmpty()) {
+            CatLog.d(LOG_TAG, "Empty title");
+            alertDialogBuilder.setTitle(" ");
+        } else {
+            alertDialogBuilder.setTitle(mTextMsg.title);
+        }
 
         if (!(mTextMsg.iconSelfExplanatory && mTextMsg.icon != null)) {
             alertDialogBuilder.setMessage(mTextMsg.text);
+        }
+
+        // width of the available display.
+        int displayWidth = dm.widthPixels;
+
+        // Icon size expected.
+        int expIconSize = displayWidth/4;
+
+        if (mTextMsg.icon == null) {
+            alertDialogBuilder.setIcon(com.android.internal.R.drawable.stat_notify_sim_toolkit);
+        } else {
+            if ((mTextMsg.icon.getHeight() >= expIconSize) && (mTextMsg.icon.getWidth()
+                    >= expIconSize)) {
+                CatLog.d(LOG_TAG, "Icon size is ok");
+                alertDialogBuilder.setIcon(new BitmapDrawable(mTextMsg.icon));
+            } else {
+                // Increase the icon size.
+                Bitmap scBitmap = Bitmap.createScaledBitmap(mTextMsg.icon, expIconSize,
+                        expIconSize, false);
+                CatLog.d(LOG_TAG, "Size scaling height: " + scBitmap.getHeight() + "width:"
+                        + scBitmap.getWidth());
+                alertDialogBuilder.setIcon(new BitmapDrawable(scBitmap));
+            }
         }
         alertDialogBuilder.show();
 
