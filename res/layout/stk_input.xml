@@ -14,6 +14,19 @@
      limitations under the License.
 -->
 
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+<ImageButton
+    style="@android:style/Widget.Material.ActionButton.Overflow"
+    android:id="@+id/more"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:layout_gravity="end"
+    android:visibility="gone" />
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -110,3 +123,4 @@
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
+</LinearLayout>
