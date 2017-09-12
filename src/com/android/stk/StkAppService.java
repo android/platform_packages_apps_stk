@@ -732,13 +732,28 @@ public class StkAppService extends Service implements Runnable {
             } else {
                 IccRefreshResponse state = new IccRefreshResponse();
                 state.refreshResult = args.getInt(AppInterface.REFRESH_RESULT);
+                state.aid = args.getString(AppInterface.AID);
 
-                CatLog.d(LOG_TAG, "Icc Refresh Result: "+ state.refreshResult);
+                CatLog.d(LOG_TAG, "Icc Refresh Result: "+ state.refreshResult
+                        + " aid: " + state.aid);
                 if ((state.refreshResult == IccRefreshResponse.REFRESH_RESULT_INIT) ||
                     (state.refreshResult == IccRefreshResponse.REFRESH_RESULT_RESET)) {
                     // Clear Idle Text
                     cancelIdleText(slotId);
                 }
+<<<<<<< HEAD
+=======
+
+                if (state.refreshResult == IccRefreshResponse.REFRESH_RESULT_RESET &&
+                        state.aid == null) {
+                    // Uninstall STkmenu
+                    if (isAllOtherCardsAbsent(slotId)) {
+                        StkAppInstaller.unInstall(mContext);
+                    }
+                    mStkContext[slotId].mCurrentMenu = null;
+                    mStkContext[slotId].mMainCmd = null;
+                }
+>>>>>>> 40a72f7... STK application uninstall for NAA Application reset.
             }
         }
     }

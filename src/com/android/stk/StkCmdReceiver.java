@@ -73,6 +73,7 @@ public class StkCmdReceiver extends BroadcastReceiver {
             args.putInt(AppInterface.REFRESH_RESULT,
                     intent.getIntExtra(AppInterface.REFRESH_RESULT,
                     IccRefreshResponse.REFRESH_RESULT_FILE_UPDATE));
+            args.putString(AppInterface.AID, intent.getStringExtra(AppInterface.AID));
         } else if (StkAppService.OP_ALPHA_NOTIFY == op) {
             String alphaString = intent.getStringExtra(AppInterface.ALPHA_STRING);
             args.putString(AppInterface.ALPHA_STRING, alphaString);
