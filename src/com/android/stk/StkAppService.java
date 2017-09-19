@@ -48,6 +48,7 @@ import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -55,9 +56,11 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -89,6 +92,8 @@ import static com.android.internal.telephony.cat.CatCmdMessage.
                    SetupEventListConstants.IDLE_SCREEN_AVAILABLE_EVENT;
 import static com.android.internal.telephony.cat.CatCmdMessage.
                    SetupEventListConstants.LANGUAGE_SELECTION_EVENT;
+import static com.android.internal.telephony.cat.CatCmdMessage.
+                   SetupEventListConstants.USER_ACTIVITY_EVENT;
 
 /**
  * SIM toolkit application level service. Interacts with Telephopny messages,
@@ -165,9 +170,10 @@ public class StkAppService extends Service implements Runnable {
     private StkContext[] mStkContext = null;
     private int mSimCount = 0;
     private IProcessObserver.Stub mProcessObserver = null;
-    private BroadcastReceiver mBroadcastReceiver = null;
+    private BroadcastReceiver mLocalChangedReceiver = null;
     private TonePlayer mTonePlayer = null;
     private Vibrator mVibrator = null;
+    private BroadcastReceiver mUserActivityReceiver = null;
 
     // Used for setting FLAG_ACTIVITY_NO_USER_ACTION when
     // creating an intent.
@@ -224,6 +230,9 @@ public class StkAppService extends Service implements Runnable {
 
     // Message id to remove stop tone message from queue.
     private static final int STOP_TONE_WHAT = 100;
+
+    // Message id to send user activity event to card.
+    private static final int OP_USER_ACTIVITY = 20;
 
     // Response ids
     static final int RES_ID_MENU_SELECTION = 11;
@@ -378,8 +387,9 @@ public class StkAppService extends Service implements Runnable {
     @Override
     public void onDestroy() {
         CatLog.d(LOG_TAG, "onDestroy()");
+        unregisterUserActivityReceiver();
         unregisterProcessObserver();
-        unregisterBroadcastReceiver();
+        unregisterLocaleChangedReceiver();
         sInstance = null;
         waitForLooper();
         mServiceLooper.quit();
@@ -648,6 +658,11 @@ public class StkAppService extends Service implements Runnable {
             case OP_STOP_TONE:
                 CatLog.d(this, "Stop tone");
                 handleStopTone(msg, slotId);
+                break;
+            case OP_USER_ACTIVITY:
+                for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+                    checkForSetupEvent(USER_ACTIVITY_EVENT, null, slot);
+                }
                 break;
             }
         }
@@ -1488,11 +1503,14 @@ public class StkAppService extends Service implements Runnable {
 
     private void unregisterEvent(int event, int slotId) {
         switch (event) {
+            case USER_ACTIVITY_EVENT:
+                unregisterUserActivityReceiver();
+                break;
             case IDLE_SCREEN_AVAILABLE_EVENT:
                 unregisterProcessObserver(AppInterface.CommandType.SET_UP_EVENT_LIST, slotId);
                 break;
             case LANGUAGE_SELECTION_EVENT:
-                unregisterBroadcastReceiver();
+                unregisterLocaleChangedReceiver();
                 break;
             default:
                 break;
@@ -1505,15 +1523,50 @@ public class StkAppService extends Service implements Runnable {
         }
         for (int event : mStkContext[slotId].mSetupEventListSettings.eventList) {
             switch (event) {
+                case USER_ACTIVITY_EVENT:
+                    registerUserActivityReceiver();
+                    break;
                 case IDLE_SCREEN_AVAILABLE_EVENT:
                     registerProcessObserver();
                     break;
                 case LANGUAGE_SELECTION_EVENT:
-                    registerBroadcastReceiver();
+                    registerLocaleChangedReceiver();
                     break;
                 default:
                     break;
             }
+        }
+    }
+
+    private void registerUserActivityReceiver() {
+        if (mUserActivityReceiver == null) {
+            mUserActivityReceiver = new BroadcastReceiver() {
+                @Override public void onReceive(Context context, Intent intent) {
+                    if (WindowManagerPolicy.ACTION_USER_ACTIVITY_NOTIFICATION.equals(
+                            intent.getAction())) {
+                        Message message = mServiceHandler.obtainMessage();
+                        message.arg1 = OP_USER_ACTIVITY;
+                        mServiceHandler.sendMessage(message);
+                        unregisterUserActivityReceiver();
+                    }
+                }
+            };
+            registerReceiver(mUserActivityReceiver, new IntentFilter(
+                    WindowManagerPolicy.ACTION_USER_ACTIVITY_NOTIFICATION));
+            try {
+                IWindowManager wm = IWindowManager.Stub.asInterface(
+                        ServiceManager.getService(Context.WINDOW_SERVICE));
+                wm.requestUserActivityNotification();
+            } catch (RemoteException e) {
+                CatLog.e(this, "failed to init WindowManager:" + e);
+            }
+        }
+    }
+
+    private void unregisterUserActivityReceiver() {
+        if (mUserActivityReceiver != null) {
+            unregisterReceiver(mUserActivityReceiver);
+            mUserActivityReceiver = null;
         }
     }
 
@@ -1580,9 +1633,9 @@ public class StkAppService extends Service implements Runnable {
         }
     }
 
-    private void registerBroadcastReceiver() {
-        if (mBroadcastReceiver == null) {
-            mBroadcastReceiver = new BroadcastReceiver() {
+    private void registerLocaleChangedReceiver() {
+        if (mLocalChangedReceiver == null) {
+            mLocalChangedReceiver = new BroadcastReceiver() {
                 @Override public void onReceive(Context context, Intent intent) {
                     if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
                         Message message = mServiceHandler.obtainMessage();
@@ -1591,14 +1644,14 @@ public class StkAppService extends Service implements Runnable {
                     }
                 }
             };
-            registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
+            registerReceiver(mLocalChangedReceiver, new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
         }
     }
 
-    private void unregisterBroadcastReceiver() {
-        if (mBroadcastReceiver != null) {
-            unregisterReceiver(mBroadcastReceiver);
-            mBroadcastReceiver = null;
+    private void unregisterLocaleChangedReceiver() {
+        if (mLocalChangedReceiver != null) {
+            unregisterReceiver(mLocalChangedReceiver);
+            mLocalChangedReceiver = null;
         }
     }
 
@@ -1639,6 +1692,7 @@ public class StkAppService extends Service implements Runnable {
 
                 switch (event) {
                     case IDLE_SCREEN_AVAILABLE_EVENT:
+                    case USER_ACTIVITY_EVENT:
                         sendSetUpEventResponse(event, addedInfo, slotId);
                         removeSetUpEvent(event, slotId);
                         break;
