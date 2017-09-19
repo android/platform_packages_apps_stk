@@ -25,6 +25,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +42,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -48,9 +51,11 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,6 +87,8 @@ import static com.android.internal.telephony.cat.CatCmdMessage.
                    SetupEventListConstants.IDLE_SCREEN_AVAILABLE_EVENT;
 import static com.android.internal.telephony.cat.CatCmdMessage.
                    SetupEventListConstants.LANGUAGE_SELECTION_EVENT;
+import static com.android.internal.telephony.cat.CatCmdMessage.
+                   SetupEventListConstants.USER_ACTIVITY_EVENT;
 
 /**
  * SIM toolkit application level service. Interacts with Telephopny messages,
@@ -160,6 +167,7 @@ public class StkAppService extends Service implements Runnable {
     private StkCmdReceiver mStkCmdReceiver = null;
     private TonePlayer mTonePlayer = null;
     private Vibrator mVibrator = null;
+    private BroadcastReceiver mUserActivityReceiver = null;
 
     // Used for setting FLAG_ACTIVITY_NO_USER_ACTION when
     // creating an intent.
@@ -216,6 +224,9 @@ public class StkAppService extends Service implements Runnable {
 
     // Message id to remove stop tone message from queue.
     private static final int STOP_TONE_WHAT = 100;
+
+    // Message id to send user activity event to card.
+    private static final int OP_USER_ACTIVITY = 20;
 
     // Response ids
     static final int RES_ID_MENU_SELECTION = 11;
@@ -615,6 +626,11 @@ public class StkAppService extends Service implements Runnable {
             case OP_STOP_TONE:
                 CatLog.d(this, "Stop tone");
                 handleStopTone(msg, slotId);
+                break;
+            case OP_USER_ACTIVITY:
+                for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+                    checkForSetupEvent(USER_ACTIVITY_EVENT, null, slot);
+                }
                 break;
             }
         }
@@ -1035,10 +1051,7 @@ public class StkAppService extends Service implements Runnable {
             launchEventMessage(slotId);
             break;
         case SET_UP_EVENT_LIST:
-            mStkContext[slotId].mSetupEventListSettings =
-                    mStkContext[slotId].mCurrentCmd.getSetEventList();
-            mStkContext[slotId].mCurrentSetupEventCmd = mStkContext[slotId].mCurrentCmd;
-            mStkContext[slotId].mCurrentCmd = mStkContext[slotId].mMainCmd;
+            replaceEventList(slotId);
             if (isScreenIdle()) {
                 CatLog.d(this," Check if IDLE_SCREEN_AVAILABLE_EVENT is present in List");
                 checkForSetupEvent(IDLE_SCREEN_AVAILABLE_EVENT, null, slotId);
@@ -1396,6 +1409,102 @@ public class StkAppService extends Service implements Runnable {
         return activated;
     }
 
+    private void replaceEventList(int slotId) {
+        if (mStkContext[slotId].mSetupEventListSettings != null) {
+            for (int current : mStkContext[slotId].mSetupEventListSettings.eventList) {
+                if (current != INVALID_SETUP_EVENT) {
+                    if ((mStkContext[slotId].mCurrentCmd.getSetEventList() == null)
+                            || !findEvent(current, mStkContext[slotId].mCurrentCmd
+                            .getSetEventList().eventList)) {
+                        // Cancel the event notification if it is not listed in the new event list.
+                        cancelEvent(current, slotId);
+                    }
+                }
+            }
+        }
+        mStkContext[slotId].mSetupEventListSettings
+                = mStkContext[slotId].mCurrentCmd.getSetEventList();
+        mStkContext[slotId].mCurrentSetupEventCmd = mStkContext[slotId].mCurrentCmd;
+        mStkContext[slotId].mCurrentCmd = mStkContext[slotId].mMainCmd;
+        registerEvents(slotId);
+    }
+
+    private boolean findEvent(int event, int[] eventList) {
+        for (int content : eventList) {
+            if (content == event) return true;
+        }
+        return false;
+    }
+
+    private void cancelEvent(int event, int slotId) {
+        for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+            if (slot != slotId) {
+                if (mStkContext[slot].mSetupEventListSettings != null) {
+                    if (findEvent(event, mStkContext[slot].mSetupEventListSettings.eventList)) {
+                        // The specified event shall never be canceled
+                        // if there is any other SIM card which requests the event.
+                        return;
+                    }
+                }
+            }
+        }
+        unregisterEvent(event);
+    }
+
+    private void unregisterEvent(int event) {
+        switch (event) {
+        case USER_ACTIVITY_EVENT:
+            if (mUserActivityReceiver != null) {
+                CatLog.d(this, "unregister USER_ACTIVITY_EVENT");
+                unregisterReceiver(mUserActivityReceiver);
+                mUserActivityReceiver = null;
+            }
+            break;
+        case IDLE_SCREEN_AVAILABLE_EVENT:
+        case LANGUAGE_SELECTION_EVENT:
+        default:
+            break;
+        }
+    }
+
+    private void registerEvents(int slotId) {
+        if (mStkContext[slotId].mSetupEventListSettings == null) {
+            return;
+        }
+        for (int event : mStkContext[slotId].mSetupEventListSettings.eventList) {
+            switch (event) {
+            case USER_ACTIVITY_EVENT:
+                if (mUserActivityReceiver == null) {
+                    CatLog.d(this, "register USER_ACTIVITY_EVENT");
+                    mUserActivityReceiver = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            CatLog.d(LOG_TAG, "onReceive, action = " + intent.getAction());
+                            Message message = mServiceHandler.obtainMessage();
+                            message.arg1 = OP_USER_ACTIVITY;
+                            mServiceHandler.sendMessage(message);
+                            unregisterEvent(USER_ACTIVITY_EVENT);
+                        }
+                    };
+                    registerReceiver(mUserActivityReceiver, new IntentFilter(
+                            WindowManagerPolicy.ACTION_USER_ACTIVITY_NOTIFICATION));
+                    try {
+                        IWindowManager wm = IWindowManager.Stub.asInterface(
+                                ServiceManager.getService(Context.WINDOW_SERVICE));
+                        wm.requestUserActivityNotification();
+                    } catch (RemoteException e) {
+                        CatLog.e(this, "failed to init WindowManager:" + e);
+                    }
+                }
+                break;
+            case IDLE_SCREEN_AVAILABLE_EVENT:
+            case LANGUAGE_SELECTION_EVENT:
+            default:
+                break;
+            }
+        }
+    }
+
     private void sendSetUpEventResponse(int event, byte[] addedInfo, int slotId) {
         CatLog.d(this, "sendSetUpEventResponse: event : " + event + "slotId = " + slotId);
 
@@ -1433,6 +1542,7 @@ public class StkAppService extends Service implements Runnable {
 
                 switch (event) {
                     case IDLE_SCREEN_AVAILABLE_EVENT:
+                    case USER_ACTIVITY_EVENT:
                         sendSetUpEventResponse(event, addedInfo, slotId);
                         removeSetUpEvent(event, slotId);
                         break;
