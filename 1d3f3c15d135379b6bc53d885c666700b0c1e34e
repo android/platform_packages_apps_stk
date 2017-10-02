@@ -1,0 +1,10 @@
+Code-Review+1: Yoshiaki Naka <yoshiaki.naka@sonymobile.com>
+Code-Review+2: Jordan Liu <jminjie@google.com>
+Code-Review+1: Sanket Padawe <sanketpadawe@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Jordan Liu <jminjie@google.com>
+Submitted-by: Jordan Liu <jminjie@google.com>
+Submitted-at: Mon, 02 Oct 2017 19:17:41 +0000
+Reviewed-on: https://android-review.googlesource.com/268761
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
