@@ -25,9 +25,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.Activity;
+import android.app.ActivityManagerNative;
+import android.app.IProcessObserver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -41,6 +45,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -119,6 +124,7 @@ public class StkAppService extends Service implements Runnable {
         private boolean mDisplayTextDlgIsVisibile = false;
         private CatCmdMessage mCurrentSetupEventCmd = null;
         private CatCmdMessage mIdleModeTextCmd = null;
+        private boolean mIdleModeTextVisible = false;
         final synchronized void setPendingActivityInstance(Activity act) {
             CatLog.d(this, "setPendingActivityInstance act : " + mSlotId + ", " + act);
             callSetActivityInstMsg(OP_SET_ACT_INST, mSlotId, act);
@@ -157,7 +163,7 @@ public class StkAppService extends Service implements Runnable {
     private StkContext[] mStkContext = null;
     private int mSimCount = 0;
     private PowerManager mPowerManager = null;
-    private StkCmdReceiver mStkCmdReceiver = null;
+    private IProcessObserver.Stub mProcessObserver = null;
     private TonePlayer mTonePlayer = null;
     private Vibrator mVibrator = null;
 
@@ -276,8 +282,7 @@ public class StkAppService extends Service implements Runnable {
         mStkService = new AppInterface[mSimCount];
         mStkContext = new StkContext[mSimCount];
         mPowerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
-        mStkCmdReceiver = new StkCmdReceiver();
-        registerReceiver(mStkCmdReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
         for (i = 0; i < mSimCount; i++) {
             CatLog.d(LOG_TAG, "slotId: " + i);
             mStkService[i] = CatService.getInstance(i);
@@ -371,10 +376,6 @@ public class StkAppService extends Service implements Runnable {
     @Override
     public void onDestroy() {
         CatLog.d(LOG_TAG, "onDestroy()");
-        if (mStkCmdReceiver != null) {
-            unregisterReceiver(mStkCmdReceiver);
-            mStkCmdReceiver = null;
-        }
         mPowerManager = null;
         waitForLooper();
         mServiceLooper.quit();
@@ -626,7 +627,7 @@ public class StkAppService extends Service implements Runnable {
             if (cardStatus == false) {
                 CatLog.d(LOG_TAG, "CARD is ABSENT");
                 // Uninstall STKAPP, Clear Idle text, Stop StkAppService
-                mNotificationManager.cancel(getNotificationId(slotId));
+                cancelIdleText(slotId);
                 mStkContext[slotId].mCurrentMenu = null;
                 mStkContext[slotId].mMainCmd = null;
                 if (isAllOtherCardsAbsent(slotId)) {
@@ -642,7 +643,7 @@ public class StkAppService extends Service implements Runnable {
                 if ((state.refreshResult == IccRefreshResponse.REFRESH_RESULT_INIT) ||
                     (state.refreshResult == IccRefreshResponse.REFRESH_RESULT_RESET)) {
                     // Clear Idle Text
-                    mNotificationManager.cancel(getNotificationId(slotId));
+                    cancelIdleText(slotId);
                 }
 
                 if (state.refreshResult == IccRefreshResponse.REFRESH_RESULT_RESET) {
@@ -676,12 +677,31 @@ public class StkAppService extends Service implements Runnable {
         }
     }
 
-    /*
-     * If the device is not in an interactive state, we can assume
-     * that the screen is idle.
-     */
-    private boolean isScreenIdle() {
-        return (!mPowerManager.isInteractive());
+    /* package */ boolean isScreenIdle() {
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (tasks == null || tasks.isEmpty()) {
+            return false;
+        }
+
+        String top = tasks.get(0).topActivity.getPackageName();
+        if (top == null) {
+            return false;
+        }
+
+        // We can assume that the screen is idle if the home application is in the foreground.
+        final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+        intent.addCategory(Intent.CATEGORY_HOME);
+
+        ResolveInfo info = getPackageManager().resolveActivity(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        if (info != null) {
+            if (top.equals(info.activityInfo.packageName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void handleIdleScreen(int slotId) {
@@ -691,8 +711,9 @@ public class StkAppService extends Service implements Runnable {
         CatLog.d(this, "Need to send IDLE SCREEN Available event to SIM");
         checkForSetupEvent(IDLE_SCREEN_AVAILABLE_EVENT, null, slotId);
 
-        if (mStkContext[slotId].mIdleModeTextCmd != null) {
-           launchIdleText(slotId);
+        if (mStkContext[slotId].mIdleModeTextCmd != null
+                && !mStkContext[slotId].mIdleModeTextVisible) {
+            launchIdleText(slotId);
         }
     }
 
@@ -946,14 +967,17 @@ public class StkAppService extends Service implements Runnable {
             waitForUsersResponse = false;
             mStkContext[slotId].mIdleModeTextCmd = mStkContext[slotId].mCurrentCmd;
             TextMessage idleModeText = mStkContext[slotId].mCurrentCmd.geTextMessage();
-            if (idleModeText == null) {
-                launchIdleText(slotId);
-                mStkContext[slotId].mIdleModeTextCmd = null;
+            if (idleModeText == null || TextUtils.isEmpty(idleModeText.text)) {
+                cancelIdleText(slotId);
             }
             mStkContext[slotId].mCurrentCmd = mStkContext[slotId].mMainCmd;
-            if ((mStkContext[slotId].mIdleModeTextCmd != null) && isScreenIdle()) {
-                CatLog.d(this, "set up idle mode");
-                launchIdleText(slotId);
+            if (mStkContext[slotId].mIdleModeTextCmd != null) {
+                if (mStkContext[slotId].mIdleModeTextVisible || isScreenIdle()) {
+                    CatLog.d(this, "set up idle mode");
+                    launchIdleText(slotId);
+                } else {
+                    registerProcessObserver();
+                }
             }
             break;
         case SEND_DTMF:
@@ -1036,10 +1060,7 @@ public class StkAppService extends Service implements Runnable {
             launchEventMessage(slotId);
             break;
         case SET_UP_EVENT_LIST:
-            mStkContext[slotId].mSetupEventListSettings =
-                    mStkContext[slotId].mCurrentCmd.getSetEventList();
-            mStkContext[slotId].mCurrentSetupEventCmd = mStkContext[slotId].mCurrentCmd;
-            mStkContext[slotId].mCurrentCmd = mStkContext[slotId].mMainCmd;
+            replaceEventList(slotId);
             if (isScreenIdle()) {
                 CatLog.d(this," Check if IDLE_SCREEN_AVAILABLE_EVENT is present in List");
                 checkForSetupEvent(IDLE_SCREEN_AVAILABLE_EVENT, null, slotId);
@@ -1397,6 +1418,142 @@ public class StkAppService extends Service implements Runnable {
         return activated;
     }
 
+    private void replaceEventList(int slotId) {
+        if (mStkContext[slotId].mSetupEventListSettings != null) {
+            for (int current : mStkContext[slotId].mSetupEventListSettings.eventList) {
+                if (current != INVALID_SETUP_EVENT) {
+                    // Cancel the event notification if it is not listed in the new event list.
+                    if ((mStkContext[slotId].mCurrentCmd.getSetEventList() == null)
+                            || !findEvent(current, mStkContext[slotId].mCurrentCmd
+                            .getSetEventList().eventList)) {
+                        if (isUnregisterableEvent(current, slotId)) {
+                            unregisterEvent(current, slotId);
+                        }
+                    }
+                }
+            }
+        }
+        mStkContext[slotId].mSetupEventListSettings
+                = mStkContext[slotId].mCurrentCmd.getSetEventList();
+        mStkContext[slotId].mCurrentSetupEventCmd = mStkContext[slotId].mCurrentCmd;
+        mStkContext[slotId].mCurrentCmd = mStkContext[slotId].mMainCmd;
+        registerEvents(slotId);
+    }
+
+    private boolean findEvent(int event, int[] eventList) {
+        for (int content : eventList) {
+            if (content == event) return true;
+        }
+        return false;
+    }
+
+    private boolean isRequestedEvent(int event) {
+        for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+            if (mStkContext[slot].mSetupEventListSettings != null) {
+                if (findEvent(event, mStkContext[slot].mSetupEventListSettings.eventList)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isUnregisterableEvent(int event, int slotId) {
+        for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+            if (slot != slotId) {
+                if (mStkContext[slot].mSetupEventListSettings != null) {
+                    if (findEvent(event, mStkContext[slot].mSetupEventListSettings.eventList)) {
+                        // The specified event shall never be canceled
+                        // if there is any other SIM card which requests the event.
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void unregisterEvent(int event, int slotId) {
+        switch (event) {
+            case IDLE_SCREEN_AVAILABLE_EVENT:
+                unregisterProcessObserver(AppInterface.CommandType.SET_UP_EVENT_LIST, slotId);
+                break;
+            case LANGUAGE_SELECTION_EVENT:
+            default:
+                break;
+        }
+    }
+
+    private void registerEvents(int slotId) {
+        if (mStkContext[slotId].mSetupEventListSettings == null) {
+            return;
+        }
+        for (int event : mStkContext[slotId].mSetupEventListSettings.eventList) {
+            switch (event) {
+                case IDLE_SCREEN_AVAILABLE_EVENT:
+                    registerProcessObserver();
+                    break;
+                case LANGUAGE_SELECTION_EVENT:
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void registerProcessObserver() {
+        if (mProcessObserver == null) {
+            try {
+                IProcessObserver.Stub observer = new IProcessObserver.Stub() {
+                    @Override
+                    public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
+                        if (isScreenIdle()) {
+                            Message message = mServiceHandler.obtainMessage();
+                            message.arg1 = OP_IDLE_SCREEN;
+                            mServiceHandler.sendMessage(message);
+                            unregisterProcessObserver();
+                        }
+                    }
+
+                    @Override
+                    public void onProcessDied(int pid, int uid) {
+                    }
+                };
+                ActivityManagerNative.getDefault().registerProcessObserver(observer);
+                mProcessObserver = observer;
+            } catch (RemoteException e) {
+                CatLog.d(this, "Failed to register the process observer");
+            }
+        }
+    }
+
+    private void unregisterProcessObserver(AppInterface.CommandType command, int slotId) {
+        switch (command) {
+            case SET_UP_EVENT_LIST:
+                if (mStkContext[slotId].mIdleModeTextCmd != null
+                        && !mStkContext[slotId].mIdleModeTextVisible) {
+                    return;
+                }
+                break;
+            case SET_UP_IDLE_MODE_TEXT:
+                if (isRequestedEvent(IDLE_SCREEN_AVAILABLE_EVENT)) {
+                    return;
+                }
+                break;
+        }
+        unregisterProcessObserver();
+    }
+
+    private void unregisterProcessObserver() {
+        if (mProcessObserver != null) {
+            try {
+                ActivityManagerNative.getDefault().unregisterProcessObserver(mProcessObserver);
+                mProcessObserver = null;
+            } catch (RemoteException e) {
+                CatLog.d(this, "Failed to unregister the process observer");
+            }
+        }
+    }
+
     private void sendSetUpEventResponse(int event, byte[] addedInfo, int slotId) {
         CatLog.d(this, "sendSetUpEventResponse: event : " + event + "slotId = " + slotId);
 
@@ -1587,15 +1744,17 @@ public class StkAppService extends Service implements Runnable {
         } catch (InterruptedException e) {}
     }
 
+    private void cancelIdleText(int slotId) {
+        unregisterProcessObserver(AppInterface.CommandType.SET_UP_IDLE_MODE_TEXT, slotId);
+        mNotificationManager.cancel(getNotificationId(slotId));
+        mStkContext[slotId].mIdleModeTextCmd = null;
+        mStkContext[slotId].mIdleModeTextVisible = false;
+    }
+
     private void launchIdleText(int slotId) {
         TextMessage msg = mStkContext[slotId].mIdleModeTextCmd.geTextMessage();
 
-        if (msg == null || msg.text ==null) {
-            CatLog.d(LOG_TAG,  msg == null ? "mCurrent.getTextMessage is NULL"
-                    : "mCurrent.getTextMessage.text is NULL");
-            mNotificationManager.cancel(getNotificationId(slotId));
-            return;
-        } else {
+        if (msg != null && !TextUtils.isEmpty(msg.text)) {
             CatLog.d(LOG_TAG, "launchIdleText - text[" + msg.text
                     + "] iconSelfExplanatory[" + msg.iconSelfExplanatory
                     + "] icon[" + msg.icon + "], sim id: " + slotId);
@@ -1632,6 +1791,7 @@ public class StkAppService extends Service implements Runnable {
             notificationBuilder.setColor(mContext.getResources().getColor(
                     com.android.internal.R.color.system_notification_accent_color));
             mNotificationManager.notify(getNotificationId(slotId), notificationBuilder.build());
+            mStkContext[slotId].mIdleModeTextVisible = true;
         }
     }
 
