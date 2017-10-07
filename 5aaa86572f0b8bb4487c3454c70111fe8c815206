@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed622fcb_e786f771",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-07T10:29:15Z",
+      "side": 1,
+      "message": "User can replace launcher application with other one downloaded at the store. It must be better NOT to have a dependency on a particular launcher application.",
+      "range": {
+        "startLine": 690,
+        "startChar": 20,
+        "endLine": 690,
+        "endChar": 75
+      },
+      "revId": "5aaa86572f0b8bb4487c3454c70111fe8c815206",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
