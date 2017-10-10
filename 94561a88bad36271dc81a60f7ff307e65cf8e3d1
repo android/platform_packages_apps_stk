@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1412cfb6_2c9a628c",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-10-10T17:41:12Z",
+      "side": 1,
+      "message": "Can we add a comment?\n\n// Per spec, only set text if the icon is not self-explanatory",
+      "range": {
+        "startLine": 131,
+        "startChar": 7,
+        "endLine": 136,
+        "endChar": 9
+      },
+      "revId": "94561a88bad36271dc81a60f7ff307e65cf8e3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
