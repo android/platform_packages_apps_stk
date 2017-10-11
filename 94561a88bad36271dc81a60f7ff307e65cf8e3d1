@@ -22,6 +22,30 @@
       "revId": "94561a88bad36271dc81a60f7ff307e65cf8e3d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7f953d1_6b639d3b",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-11T02:32:40Z",
+      "side": 1,
+      "message": "I recalled that Jordan uploaded new patch set to simplify the logic in the following commit,\nso let me follow his preference here also.\n\n    Icon must be placed near the text string on the input screen\n    https://android-review.googlesource.com/451016\n\nIn addition, I added a comment line in accordance with the suggestion from Grace.",
+      "parentUuid": "1412cfb6_2c9a628c",
+      "range": {
+        "startLine": 131,
+        "startChar": 7,
+        "endLine": 136,
+        "endChar": 9
+      },
+      "revId": "94561a88bad36271dc81a60f7ff307e65cf8e3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
