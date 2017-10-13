@@ -22,6 +22,30 @@
       "revId": "a4527649d9d5c8f3a41e0c8c5852674938e96804",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ccaa5845_e8b2aec9",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-13T02:02:09Z",
+      "side": 0,
+      "message": "It was unnecessary from the beginning.\n\nLAUNCH_IF_NOT_ALREADY_LAUNCHED is \u002700\u0027.\nAccording to ETSI TS 102 223 - 8.6 Command details, not only \u002700\u0027 but also the other mode launches the browser anyway.\n\n  \u002700\u0027 \u003d launch browser if not already launched;\n  \u002702\u0027 \u003d use the existing browser (the browser shall not use the active existing secured session);\n  \u002703\u0027 \u003d close the existing browser session and launch new browser session;\n\nRegardless of the launch mode, user confirmation is unnecessary if there is no alpha identifier.\nI explained that to Qualcomm 2 years ago, then they agreed with me.",
+      "parentUuid": "b2e7464a_617ad104",
+      "range": {
+        "startLine": 985,
+        "startChar": 17,
+        "endLine": 986,
+        "endChar": 71
+      },
+      "revId": "a4527649d9d5c8f3a41e0c8c5852674938e96804",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

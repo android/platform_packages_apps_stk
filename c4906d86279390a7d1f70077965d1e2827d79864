@@ -22,6 +22,30 @@
       "revId": "c4906d86279390a7d1f70077965d1e2827d79864",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea2df70c_8e3dbe54",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1936,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-13T02:02:09Z",
+      "side": 1,
+      "message": "Yes, let me change it to isUrlAvailableToLaunchBrowser().",
+      "parentUuid": "386ddfdc_7613da7e",
+      "range": {
+        "startLine": 1936,
+        "startChar": 20,
+        "endLine": 1936,
+        "endChar": 42
+      },
+      "revId": "c4906d86279390a7d1f70077965d1e2827d79864",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
