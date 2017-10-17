@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "142d16ab_1c9a2c31",
+        "filename": "res/xml/menu_conf.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2017-10-17T22:34:38Z",
+      "side": 1,
+      "message": "Can you say \"Both of the attributes \u0027\u0027 and \u0027\u0027  are mandatory\" instead?",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 20
+      },
+      "revId": "eebc095c5c79e59191e7e1bf88ee4d42221fceed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74720a79_93d43fd0",
+        "filename": "res/xml/menu_conf.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2017-10-17T22:34:38Z",
+      "side": 1,
+      "message": "You can also accomplish this with resource overlays for mcc-mnc pairs https://developer.android.com/guide/topics/resources/providing-resources.html, then the StkMenuConfig class can do less parsing also.",
+      "range": {
+        "startLine": 23,
+        "startChar": 15,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "eebc095c5c79e59191e7e1bf88ee4d42221fceed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
