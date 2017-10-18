@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bf9f2d3c_3874099d",
+        "filename": "res/xml/menu_conf.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-18T03:30:59Z",
+      "side": 1,
+      "message": "Yes, I will update it in accordance with your suggestion.",
+      "parentUuid": "142d16ab_1c9a2c31",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 20
+      },
+      "revId": "eebc095c5c79e59191e7e1bf88ee4d42221fceed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74720a79_93d43fd0",
         "filename": "res/xml/menu_conf.xml",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-17T22:34:38Z",
       "side": 1,
       "message": "You can also accomplish this with resource overlays for mcc-mnc pairs https://developer.android.com/guide/topics/resources/providing-resources.html, then the StkMenuConfig class can do less parsing also.",
+      "range": {
+        "startLine": 23,
+        "startChar": 15,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "eebc095c5c79e59191e7e1bf88ee4d42221fceed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aadbdff_e8d55b14",
+        "filename": "res/xml/menu_conf.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-18T03:30:59Z",
+      "side": 1,
+      "message": "Only one mcc/mnc pair can be available in the system configuration at a time, but we have to treat multiple pairs of mcc/mnc for MSIM model. I think that only a kind of tricky way to utilize the existing system resource mechanism for this purpose might be available. Or, would you please let me know more detail of your suggestion?",
+      "parentUuid": "74720a79_93d43fd0",
       "range": {
         "startLine": 23,
         "startChar": 15,
