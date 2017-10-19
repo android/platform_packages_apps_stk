@@ -81,6 +81,11 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     static final float LARGE_FONT_FACTOR = 2;
     static final float SMALL_FONT_FACTOR = (1 / 2);
 
+    // Keys for saving the state of the activity in the bundle
+    private static final String ACCEPT_USERS_INPUT_KEY = "accept_users_input";
+    private static final String RESPONSE_SENT_KEY = "response_sent";
+    private static final String INPUT_STRING_KEY = "input_string";
+
     // message id for time out
     private static final int MSG_ID_TIMEOUT = 1;
     private StkAppService appService = StkAppService.getInstance();
@@ -160,8 +165,8 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     }
 
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         CatLog.d(LOG_TAG, "onCreate - mIsResponseSent[" + mIsResponseSent + "]");
 
@@ -259,14 +264,15 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         if (appService == null) {
             return;
         }
-        //If the input activity is finished by stkappservice
-        //when receiving OP_LAUNCH_APP from the other SIM, we can not send TR here
-        //, since the input cmd is waiting user to process.
-        if (!mIsResponseSent && !appService.isInputPending(mSlotId)) {
-            CatLog.d(LOG_TAG, "handleDestroy - Send End Session");
-            sendResponse(StkAppService.RES_ID_END_SESSION);
+        // Avoid sending the terminal response while the activty is being restarted
+        // due to some kind of configuration change.
+        if (!isChangingConfigurations()) {
+            if (!mIsResponseSent && !appService.isInputPending(mSlotId)) {
+                CatLog.d(LOG_TAG, "handleDestroy - Send End Session");
+                sendResponse(StkAppService.RES_ID_END_SESSION);
+            }
+            cancelTimeOut();
         }
-        cancelTimeOut();
     }
 
     @Override
@@ -387,15 +393,25 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         CatLog.d(LOG_TAG, "onSaveInstanceState: " + mSlotId);
-        outState.putBoolean("ACCEPT_USERS_INPUT", mAcceptUsersInput);
+        outState.putBoolean(ACCEPT_USERS_INPUT_KEY, mAcceptUsersInput);
+        outState.putBoolean(RESPONSE_SENT_KEY, mIsResponseSent);
+        outState.putString(INPUT_STRING_KEY, mTextIn.getText().toString());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         CatLog.d(LOG_TAG, "onRestoreInstanceState: " + mSlotId);
-        mAcceptUsersInput = savedInstanceState.getBoolean("ACCEPT_USERS_INPUT");
+
+        mAcceptUsersInput = savedInstanceState.getBoolean(ACCEPT_USERS_INPUT_KEY);
         if ((mAcceptUsersInput == false) && (mMoreOptions != null)) {
             mMoreOptions.setVisibility(View.INVISIBLE);
+        }
+
+        mIsResponseSent = savedInstanceState.getBoolean(RESPONSE_SENT_KEY);
+
+        String savedString = savedInstanceState.getString(INPUT_STRING_KEY);
+        if (!TextUtils.isEmpty(savedString)) {
+            mTextIn.setText(savedString);
         }
     }
 
