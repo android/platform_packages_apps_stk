@@ -223,10 +223,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         CatLog.d(LOG_TAG, "onResume - mIsResponseSent[" + mIsResponseSent +
                 "], slot id: " + mSlotId);
         startTimeOut();
-        if (mIsResponseSent) {
-            cancelTimeOut();
-            finish();
-        }
     }
 
     @Override
@@ -242,7 +238,7 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     public void onStop() {
         super.onStop();
         CatLog.d(LOG_TAG, "onStop - mIsResponseSent[" + mIsResponseSent + "]");
-        if (mIsResponseSent) {
+        if (mIsResponseSent && appService.isTopOfStack()) {
             cancelTimeOut();
             finish();
         } else {
