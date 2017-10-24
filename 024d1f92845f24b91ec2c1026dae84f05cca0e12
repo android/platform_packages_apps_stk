@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f99c446_1f736186",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2017-10-24T18:25:02Z",
+      "side": 1,
+      "message": "Can you document somewhere that config.getLabel only appears if no title string is set, but config.getIcon overwrites the default icon?",
+      "range": {
+        "startLine": 461,
+        "startChar": 20,
+        "endLine": 461,
+        "endChar": 38
+      },
+      "revId": "024d1f92845f24b91ec2c1026dae84f05cca0e12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
