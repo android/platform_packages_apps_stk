@@ -22,6 +22,30 @@
       "revId": "024d1f92845f24b91ec2c1026dae84f05cca0e12",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "be970542_a3f4febb",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-10-25T08:29:15Z",
+      "side": 1,
+      "message": "Thanks for your comment. That is a good point and I think that it might be good to treat both title and icon in the same manner.",
+      "parentUuid": "6f99c446_1f736186",
+      "range": {
+        "startLine": 461,
+        "startChar": 20,
+        "endLine": 461,
+        "endChar": 38
+      },
+      "revId": "024d1f92845f24b91ec2c1026dae84f05cca0e12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
