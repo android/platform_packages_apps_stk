@@ -19,6 +19,7 @@ package com.android.stk;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,6 +28,7 @@ import android.app.Service;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IProcessObserver;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +39,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,6 +66,7 @@ import android.widget.Toast;
 import android.content.IntentFilter;
 
 import com.android.internal.telephony.cat.AppInterface;
+import com.android.internal.telephony.cat.Input;
 import com.android.internal.telephony.cat.LaunchBrowserMode;
 import com.android.internal.telephony.cat.Menu;
 import com.android.internal.telephony.cat.Item;
@@ -107,7 +111,8 @@ public class StkAppService extends Service implements Runnable {
         protected boolean mIsInputPending = false;
         protected boolean mIsMenuPending = false;
         protected boolean mIsDialogPending = false;
-        protected boolean responseNeeded = true;
+        protected boolean mNotificationOnKeyguard = false;
+        protected boolean mNoResponseFromUser = false;
         protected boolean launchBrowser = false;
         protected BrowserSettings mBrowserSettings = null;
         protected LinkedList<DelayedCmd> mCmdsQ = null;
@@ -271,6 +276,10 @@ public class StkAppService extends Service implements Runnable {
 
     // system property to set the STK specific default url for launch browser proactive cmds
     private static final String STK_BROWSER_DEFAULT_URL_SYSPROP = "persist.radio.stk.default_url";
+
+    private static final int NOTIFICATION_ON_KEYGUARD = 1;
+    private static final long[] VIBRATION_PATTERN = new long[] { 0, 350, 250, 350 };
+    private BroadcastReceiver mUserPresentReceiver = null;
 
     @Override
     public void onCreate() {
@@ -838,6 +847,7 @@ public class StkAppService extends Service implements Runnable {
         mStkContext[slotId].mIsInputPending = false;
         mStkContext[slotId].mIsMenuPending = false;
         mStkContext[slotId].mIsDialogPending = false;
+        mStkContext[slotId].mNoResponseFromUser = false;
 
         if (mStkContext[slotId].mMainCmd == null) {
             CatLog.d(LOG_TAG, "[handleSessionEnd][mMainCmd is null!]");
@@ -1254,6 +1264,24 @@ public class StkAppService extends Service implements Runnable {
             return;
         }
 
+        switch (args.getInt(RES_ID)) {
+            case RES_ID_MENU_SELECTION:
+            case RES_ID_INPUT:
+            case RES_ID_CONFIRM:
+            case RES_ID_CHOICE:
+            case RES_ID_BACKWARD:
+            case RES_ID_END_SESSION:
+                mStkContext[slotId].mNoResponseFromUser = false;
+                break;
+            case RES_ID_TIMEOUT:
+                cancelNotificationOnKeyguard(slotId);
+                mStkContext[slotId].mNoResponseFromUser = true;
+                break;
+            default:
+                // The other IDs cannot be used to judge if there is no response from user.
+                break;
+        }
+
         if (null != mStkContext[slotId].mCurrentCmd &&
                 null != mStkContext[slotId].mCurrentCmd.getCmdType()) {
             CatLog.d(LOG_TAG, "handleCmdResponse- cmdName[" +
@@ -1412,6 +1440,10 @@ public class StkAppService extends Service implements Runnable {
         newIntent.putExtra("INPUT", mStkContext[slotId].mCurrentCmd.geInput());
         newIntent.putExtra(SLOT_ID, slotId);
         newIntent.setData(uriData);
+
+        Input input = mStkContext[slotId].mCurrentCmd.geInput();
+        notifyUserIfNecessary(slotId, (input != null) ? input.text : null);
+
         mContext.startActivity(newIntent);
     }
 
@@ -1431,6 +1463,10 @@ public class StkAppService extends Service implements Runnable {
             newIntent.setData(uriData);
             newIntent.putExtra("TEXT", mStkContext[slotId].mCurrentCmd.geTextMessage());
             newIntent.putExtra(SLOT_ID, slotId);
+
+            TextMessage textMessage = mStkContext[slotId].mCurrentCmd.geTextMessage();
+            notifyUserIfNecessary(slotId, (textMessage) != null ? textMessage.text : null);
+
             startActivity(newIntent);
             // For display texts with immediate response, send the terminal response
             // immediately. responseNeeded will be false, if display text command has
@@ -1439,6 +1475,113 @@ public class StkAppService extends Service implements Runnable {
                 sendResponse(RES_ID_CONFIRM, slotId, true);
             }
         }
+    }
+
+    private void notifyUserIfNecessary(int slotId, String message) {
+        createAllChannels();
+
+        if (mStkContext[slotId].mNoResponseFromUser) {
+            // No response from user was observed in the current session.
+            // Do nothing in that case in order to avoid turning on the screen again and again
+            // when the card repeatedly sends the same command in its retry procedure.
+            return;
+        }
+
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+
+        if (((KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE)).isKeyguardLocked()) {
+            // Display the notification on the keyguard screen
+            // if user cannot see the message from the card right now because of it.
+            // The notification can be dismissed if user removed the keyguard screen.
+            launchNotificationOnKeyguard(slotId, message);
+        } else if (!(pm.isInteractive() && isTopOfStack())) {
+            // User might be doing something but it is not related to the SIM Toolkit.
+            // Play the tone and do vibration in order to attract user's attention.
+            // User will see the input screen or the dialog soon in this case.
+            NotificationChannel channel = mNotificationManager
+                    .getNotificationChannel(STK_NOTIFICATION_CHANNEL_ID);
+            Uri uri = channel.getSound();
+            if (uri != null && !Uri.EMPTY.equals(uri)
+                    && (NotificationManager.IMPORTANCE_LOW) < channel.getImportance()) {
+                RingtoneManager.getRingtone(getApplicationContext(), uri).play();
+            }
+            long[] pattern = channel.getVibrationPattern();
+            if (pattern != null && channel.shouldVibrate()) {
+                ((Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE))
+                        .vibrate(pattern, -1);
+            }
+        }
+
+        // Turn on the screen.
+        PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
+                | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, LOG_TAG);
+        wakelock.acquire();
+        wakelock.release();
+    }
+
+    private void launchNotificationOnKeyguard(int slotId, String message) {
+        Notification.Builder builder = new Notification.Builder(this, STK_NOTIFICATION_CHANNEL_ID);
+
+        builder.setStyle(new Notification.BigTextStyle(builder).bigText(message));
+        builder.setContentText(message);
+
+        Menu menu = getMainMenu(slotId);
+        if (menu == null || TextUtils.isEmpty(menu.title)) {
+            builder.setContentTitle(getResources().getString(R.string.app_name));
+        } else {
+            builder.setContentTitle(menu.title);
+        }
+
+        builder.setSmallIcon(com.android.internal.R.drawable.stat_notify_sim_toolkit);
+        builder.setOngoing(true);
+        builder.setOnlyAlertOnce(true);
+        builder.setColor(getResources().getColor(
+                com.android.internal.R.color.system_notification_accent_color));
+
+        registerUserPresentReceiver();
+        mNotificationManager.notify(getNotificationId(NOTIFICATION_ON_KEYGUARD, slotId),
+                builder.build());
+        mStkContext[slotId].mNotificationOnKeyguard = true;
+    }
+
+    private void cancelNotificationOnKeyguard(int slotId) {
+        mNotificationManager.cancel(getNotificationId(NOTIFICATION_ON_KEYGUARD, slotId));
+        mStkContext[slotId].mNotificationOnKeyguard = false;
+        unregisterUserPresentReceiver(slotId);
+    }
+
+    private synchronized void registerUserPresentReceiver() {
+        if (mUserPresentReceiver == null) {
+            mUserPresentReceiver = new BroadcastReceiver() {
+                @Override public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+                        for (int slot = 0; slot < mSimCount; slot++) {
+                            cancelNotificationOnKeyguard(slot);
+                        }
+                    }
+                }
+            };
+            registerReceiver(mUserPresentReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
+        }
+    }
+
+    private synchronized void unregisterUserPresentReceiver(int slotId) {
+        if (mUserPresentReceiver != null) {
+            for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+                if (slot != slotId) {
+                    if (mStkContext[slot].mNotificationOnKeyguard) {
+                        // The broadcast receiver is still necessary for other SIM card.
+                        return;
+                    }
+                }
+            }
+            unregisterReceiver(mUserPresentReceiver);
+            mUserPresentReceiver = null;
+        }
+    }
+
+    private int getNotificationId(int notificationType, int slotId) {
+        return getNotificationId(slotId) + (notificationType * mSimCount);
     }
 
     public boolean isStkDialogActivated(Context context) {
@@ -1803,6 +1946,7 @@ public class StkAppService extends Service implements Runnable {
                     .setSmallIcon(com.android.internal.R.drawable.stat_notify_sim_toolkit);
             notificationBuilder.setContentIntent(pendingIntent);
             notificationBuilder.setOngoing(true);
+            notificationBuilder.setOnlyAlertOnce(true);
             // Set text and icon for the status bar and notification body.
             if (mStkContext[slotId].mIdleModeTextCmd.hasIconLoadFailed() ||
                     !msg.iconSelfExplanatory) {
@@ -1829,10 +1973,15 @@ public class StkAppService extends Service implements Runnable {
      * ignore this call.
      */
     private void createAllChannels() {
-        mNotificationManager.createNotificationChannel(new NotificationChannel(
+        NotificationChannel notificationChannel = new NotificationChannel(
                 STK_NOTIFICATION_CHANNEL_ID,
                 getResources().getString(R.string.stk_channel_name),
-                NotificationManager.IMPORTANCE_MIN));
+                NotificationManager.IMPORTANCE_DEFAULT);
+
+        notificationChannel.enableVibration(true);
+        notificationChannel.setVibrationPattern(VIBRATION_PATTERN);
+
+        mNotificationManager.createNotificationChannel(notificationChannel);
     }
 
     private void launchToneDialog(int slotId) {
