@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87c814b1_751fddca",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T03:40:08Z",
+      "side": 1,
+      "message": "Doesn\u0027t seem used anymore since changing isScreenIdle() implementation, clean up?",
+      "range": {
+        "startLine": 166,
+        "startChar": 12,
+        "endLine": 166,
+        "endChar": 38
+      },
+      "revId": "8f6c0583632069b6e0a10421bba9384969bf5c9a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d1eba36_c9258866",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T03:40:08Z",
+      "side": 1,
+      "message": "Should be a deprecated interface, is this working in all cases for you? Would like to check whether another API can be used.",
+      "range": {
+        "startLine": 712,
+        "startChar": 41,
+        "endLine": 712,
+        "endChar": 56
+      },
+      "revId": "8f6c0583632069b6e0a10421bba9384969bf5c9a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b39b75d_ab51d2b8",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T03:40:08Z",
+      "side": 1,
+      "message": "For each event in the old setup cmd, there is a check whether the new setup cmd has that event, then unregistering if it\u0027s not in new setup cmd list.\n\nIt seems simpler to loop through the old events \u0026 unregister, and then setup the new event list.",
+      "range": {
+        "startLine": 1464,
+        "startChar": 19,
+        "endLine": 1464,
+        "endChar": 95
+      },
+      "revId": "8f6c0583632069b6e0a10421bba9384969bf5c9a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
