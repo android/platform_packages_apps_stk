@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "60f430bb_4e8f011d",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T19:28:05Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "641fead3_c578e2d2",
+      "range": {
+        "startLine": 115,
+        "startChar": 39,
+        "endLine": 115,
+        "endChar": 60
+      },
+      "revId": "f26fdf6c44485e143dcc1e08ecc668ac5bddea77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c548a52b_540c5e2f",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-19T20:37:28Z",
       "side": 1,
       "message": "File is not merging cleanly, please rebase",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 19
+      },
+      "revId": "f26fdf6c44485e143dcc1e08ecc668ac5bddea77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "850bbf96_dd163a18",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T19:28:05Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "c548a52b_540c5e2f",
       "range": {
         "startLine": 93,
         "startChar": 0,
@@ -64,6 +112,53 @@
         "startChar": 23,
         "endLine": 1024,
         "endChar": 32
+      },
+      "revId": "f26fdf6c44485e143dcc1e08ecc668ac5bddea77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "326341d0_17423031",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1024,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T19:28:05Z",
+      "side": 1,
+      "message": "Fixed, used StkAppService.STK_CMD already defined",
+      "parentUuid": "49b6b044_0ac17665",
+      "range": {
+        "startLine": 1024,
+        "startChar": 23,
+        "endLine": 1024,
+        "endChar": 32
+      },
+      "revId": "f26fdf6c44485e143dcc1e08ecc668ac5bddea77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eaaddfe4_2fd7eb2f",
+        "filename": "src/com/android/stk/StkCmdReceiver.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-17T19:28:05Z",
+      "side": 1,
+      "message": "Changed this to: StkAppService.SLOT_ID (already defined) to avoid hardcoding",
+      "range": {
+        "startLine": 107,
+        "startChar": 40,
+        "endLine": 107,
+        "endChar": 47
       },
       "revId": "f26fdf6c44485e143dcc1e08ecc668ac5bddea77",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
