@@ -27,6 +27,7 @@ import android.app.Service;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IProcessObserver;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -164,6 +165,7 @@ public class StkAppService extends Service implements Runnable {
     private StkContext[] mStkContext = null;
     private int mSimCount = 0;
     private IProcessObserver.Stub mProcessObserver = null;
+    private BroadcastReceiver mLocaleChangeReceiver = null;
     private TonePlayer mTonePlayer = null;
     private Vibrator mVibrator = null;
 
@@ -377,6 +379,7 @@ public class StkAppService extends Service implements Runnable {
     public void onDestroy() {
         CatLog.d(LOG_TAG, "onDestroy()");
         unregisterProcessObserver();
+        unregisterLocaleChangeReceiver();
         sInstance = null;
         waitForLooper();
         mServiceLooper.quit();
@@ -1484,11 +1487,25 @@ public class StkAppService extends Service implements Runnable {
     }
 
     private void unregisterEvent(int event, int slotId) {
+        for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+            if (slot != slotId) {
+                if (mStkContext[slot].mSetupEventListSettings != null) {
+                    if (findEvent(event, mStkContext[slot].mSetupEventListSettings.eventList)) {
+                        // The specified event shall never be canceled
+                        // if there is any other SIM card which requests the event.
+                        return;
+                    }
+                }
+            }
+        }
+
         switch (event) {
             case IDLE_SCREEN_AVAILABLE_EVENT:
                 unregisterProcessObserver(AppInterface.CommandType.SET_UP_EVENT_LIST, slotId);
                 break;
             case LANGUAGE_SELECTION_EVENT:
+                unregisterLocaleChangeReceiver();
+                break;
             default:
                 break;
         }
@@ -1504,6 +1521,8 @@ public class StkAppService extends Service implements Runnable {
                     registerProcessObserver();
                     break;
                 case LANGUAGE_SELECTION_EVENT:
+                    registerLocaleChangeReceiver();
+                    break;
                 default:
                     break;
             }
@@ -1570,6 +1589,28 @@ public class StkAppService extends Service implements Runnable {
             } catch (RemoteException e) {
                 CatLog.d(this, "Failed to unregister the process observer");
             }
+        }
+    }
+
+    private synchronized void registerLocaleChangeReceiver() {
+        if (mLocaleChangeReceiver == null) {
+            mLocaleChangeReceiver = new BroadcastReceiver() {
+                @Override public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                        Message message = mServiceHandler.obtainMessage();
+                        message.arg1 = OP_LOCALE_CHANGED;
+                        mServiceHandler.sendMessage(message);
+                    }
+                }
+            };
+            registerReceiver(mLocaleChangeReceiver, new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
+        }
+    }
+
+    private synchronized void unregisterLocaleChangeReceiver() {
+        if (mLocaleChangeReceiver != null) {
+            unregisterReceiver(mLocaleChangeReceiver);
+            mLocaleChangeReceiver = null;
         }
     }
 
