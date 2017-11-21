@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "5b536e58_b6eabded",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2017-11-21T19:20:25Z",
+      "side": 1,
+      "message": "Hi Yoshiaki, got response back on the API. We\u0027ll definitely need to figure out a different interface to use, but I don\u0027t have an answer on which API to use. I\u0027ll go ahead and submit this for now, and we\u0027ll have to file a bug to fix this.\n\nFrom: hackbod@ via email correspondence: The code there is \"fragile and has bad edge cases.  You can make various situations where it doesn\u0027t work -- for example if the user has two launchers installed and currently doesn\u0027t have a default set.  And this concept of look at recent tasks really falls apart with split window and other things.  The API documentation is pretty clear about this:\n\nNote: this method is only intended for debugging and presenting task management user interfaces. This should never be used for core logic in an application, such as deciding between different behaviors based on the information found here. Such uses are not supported, and will likely break in the future. For example, if multiple applications can be actively running at the same time, assumptions made about the meaning of the data here for purposes of control flow will be incorrect.\"",
+      "parentUuid": "100058c0_b52d898c",
+      "range": {
+        "startLine": 712,
+        "startChar": 41,
+        "endLine": 712,
+        "endChar": 56
+      },
+      "revId": "8f6c0583632069b6e0a10421bba9384969bf5c9a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b39b75d_ab51d2b8",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 5
