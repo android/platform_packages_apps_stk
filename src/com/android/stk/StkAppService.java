@@ -791,6 +791,7 @@ public class StkAppService extends Service implements Runnable {
         case SEND_USSD:
         case SET_UP_IDLE_MODE_TEXT:
         case SET_UP_MENU:
+        case REFRESH:
         case CLOSE_CHANNEL:
         case RECEIVE_DATA:
         case SEND_DATA:
@@ -1026,6 +1027,7 @@ public class StkAppService extends Service implements Runnable {
                 }
             }
             break;
+        case REFRESH:
         case SEND_DTMF:
         case SEND_SMS:
         case SEND_SS:
