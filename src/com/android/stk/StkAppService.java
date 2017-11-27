@@ -2302,15 +2302,11 @@ public class StkAppService extends Service implements Runnable {
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
                     | getFlagActivityNoUserAction(InitiatedByUserAction.unknown, slotId));
             newIntent.putExtra("TEXT", mStkContext[slotId].mCurrentCmd.geTextMessage());
+            newIntent.putExtra("TONE", mStkContext[slotId].mCurrentCmd.getToneSettings());
             newIntent.putExtra(SLOT_ID, slotId);
             newIntent.setData(uriData);
             startActivity(newIntent);
         }
-    }
-
-    private void finishToneDialogActivity() {
-        Intent finishIntent = new Intent(FINISH_TONE_ACTIVITY_ACTION);
-        sendBroadcast(finishIntent);
     }
 
     private void handleStopTone(Message msg, int slotId) {
@@ -2321,8 +2317,6 @@ public class StkAppService extends Service implements Runnable {
         // 2.STOP_TONE_USER: user pressed the back key.
         if (msg.what == OP_STOP_TONE) {
             resId = RES_ID_DONE;
-            // Dismiss Tone dialog, after finishing off playing the tone.
-            if (PLAY_TONE_WITH_DIALOG.equals((Integer) msg.obj)) finishToneDialogActivity();
         } else if (msg.what == OP_STOP_TONE_USER) {
             resId = RES_ID_END_SESSION;
         }
