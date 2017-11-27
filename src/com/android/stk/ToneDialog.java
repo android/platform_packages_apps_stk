@@ -33,7 +33,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.internal.telephony.cat.CatLog;
 import com.android.internal.telephony.cat.TextMessage;
-import com.android.internal.telephony.cat.CatLog;
+import com.android.internal.telephony.cat.ToneSettings;
+
 
 /**
  * Activity used to display tone dialog.
@@ -41,9 +42,26 @@ import com.android.internal.telephony.cat.CatLog;
  */
 public class ToneDialog extends Activity {
     TextMessage toneMsg = null;
+    ToneSettings settings = null;
     int mSlotId = -1;
 
     private static final String LOG_TAG = new Object(){}.getClass().getEnclosingClass().getName();
+
+    Handler mToneStopper = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                case MSG_ID_STOP_TONE:
+                    CatLog.d(LOG_TAG, "Finishing Tone dialog activity");
+                    finish();
+                    break;
+                }
+            }
+    };
+    private AlertDialog alertDialog;
+
+    // Message id to signal tone duration timeout.
+    private static final int MSG_ID_STOP_TONE = 0xda;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -53,8 +71,6 @@ public class ToneDialog extends Activity {
         initFromIntent(getIntent());
         // Register receiver
         IntentFilter filter = new IntentFilter();
-        filter.addAction(StkAppService.FINISH_TONE_ACTIVITY_ACTION);
-        registerReceiver(mFinishActivityReceiver, filter);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -80,13 +96,26 @@ public class ToneDialog extends Activity {
         if (toneMsg.iconSelfExplanatory && toneMsg.icon != null) {
             tv.setVisibility(View.GONE);
         }
+
+        if (null == settings) {
+            CatLog.d(LOG_TAG, "onCreate - null settings - finish");
+            finish();
+            return;
+        }
+
+        int timeout = StkApp.calculateDurationInMilis(settings.duration);
+        if (timeout == 0) {
+            timeout = StkApp.TONE_DEFAULT_TIMEOUT;
+        }
+        mToneStopper.sendEmptyMessageDelayed(MSG_ID_STOP_TONE, timeout);
+
+        alertDialog = alertDialogBuilder.show();
     }
 
     @Override
     protected void onDestroy() {
         CatLog.d(LOG_TAG, "onDestroy");
-        // Unregister receiver
-        unregisterReceiver(mFinishActivityReceiver);
+        mToneStopper.removeMessages(MSG_ID_STOP_TONE);
         super.onDestroy();
     }
 
@@ -112,23 +141,12 @@ public class ToneDialog extends Activity {
         return super.onTouchEvent(event);
     }
 
-    private BroadcastReceiver mFinishActivityReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Intent received from StkAppService to finish ToneDialog activity,
-            // after finishing off playing the tone.
-            if (intent.getAction().equals(StkAppService.FINISH_TONE_ACTIVITY_ACTION)) {
-                CatLog.d(this, "Finishing Tone dialog activity");
-                finish();
-            }
-        }
-    };
-
     private void initFromIntent(Intent intent) {
         if (intent == null) {
             finish();
         }
         toneMsg = intent.getParcelableExtra("TEXT");
+        settings = intent.getParcelableExtra("TONE");
         mSlotId = intent.getIntExtra(StkAppService.SLOT_ID, -1);
     }
 
