@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97b4716e_e4e54d5d",
+        "filename": "src/com/android/stk/ToneDialog.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2017-12-04T20:50:27Z",
+      "side": 0,
+      "message": "Why are these removed?",
+      "range": {
+        "startLine": 93,
+        "startChar": 4,
+        "endLine": 113,
+        "endChar": 5
+      },
+      "revId": "82be71e1c4dda887acbf656ce39534da74ec7c01",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
