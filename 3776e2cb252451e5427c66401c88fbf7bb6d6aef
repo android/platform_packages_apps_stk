@@ -16,6 +16,24 @@
       "revId": "3776e2cb252451e5427c66401c88fbf7bb6d6aef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c5a2055_e27bac27",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-12-05T12:54:26Z",
+      "side": 1,
+      "message": "Dear Jordan,\n\nYes, this change was tested.\nLet me run the test again on the top of the latest application, just in case.\nPlease give me one day.\n\nBest regards,\nYoshiaki",
+      "parentUuid": "e79b7d0d_d2e9ac79",
+      "revId": "3776e2cb252451e5427c66401c88fbf7bb6d6aef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
