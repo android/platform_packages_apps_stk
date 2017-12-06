@@ -34,6 +34,24 @@
       "revId": "3776e2cb252451e5427c66401c88fbf7bb6d6aef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f42df078_3b82d2e7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-12-06T12:09:40Z",
+      "side": 1,
+      "message": "Dear Jordan,\n\nI cannot upload the next patch set to add \"Test:\" information due to some kind of limitation,\nbut I have not found any issue in the tests I performed today.\n\n    Test: Verified by some manual test cases considers the activity states.\n\nThe activity can receive the new local broadcast for the session end notification in its pause, resume or destroy state.\nThere was no issue found in all such cases.\n\nBy the way, StkInputActivity also has the field \u0027mAcceptUsersInput\u0027 and change its value to \u0027false\u0027 here and there.\nIt might be better to change it to \u0027false\u0027 only in sendResponse() like this change\nin the near future (in a separate commit).\n\nBest regards,\nYoshiaki",
+      "parentUuid": "3c5a2055_e27bac27",
+      "revId": "3776e2cb252451e5427c66401c88fbf7bb6d6aef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
