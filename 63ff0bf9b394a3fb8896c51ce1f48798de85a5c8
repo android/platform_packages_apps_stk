@@ -22,6 +22,30 @@
       "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9678174_d1dede69",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2017-12-07T19:49:25Z",
+      "side": 0,
+      "message": "Based on some investigation it seems to have to do with StkMenuActivity being shared between multiple slots. I\u0027m not sure if you have permission to view but here\u0027s some of the history of the app that I\u0027ve found\n\nhttps://partner-android-review.googlesource.com/#/c/platform/packages/apps/Stk/+/172563/13..20/src/com/android/stk/StkAppService.java\n\nEven with this history I\u0027m not able to discern the exact use. Have you had a chance to test the removal of these lines on a msim device?",
+      "parentUuid": "8ab4698f_6ef3996f",
+      "range": {
+        "startLine": 124,
+        "startChar": 25,
+        "endLine": 124,
+        "endChar": 46
+      },
+      "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
