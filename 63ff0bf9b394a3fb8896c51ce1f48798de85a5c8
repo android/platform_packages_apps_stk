@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ab4698f_6ef3996f",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2017-12-07T19:09:23Z",
+      "side": 0,
+      "message": "Do you know what this used to be used for?",
+      "range": {
+        "startLine": 124,
+        "startChar": 25,
+        "endLine": 124,
+        "endChar": 46
+      },
+      "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
