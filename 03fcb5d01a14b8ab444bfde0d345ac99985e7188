@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba60f68d_ffd7dc62",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-12-08T10:03:12Z",
+      "side": 1,
+      "message": "Dear Reviewers,\n\nPlease refer to StkAppService.handleCardStatusChangeAndIccRefresh().\nStkAppService already has a logic to remove IDLE MODE TEXT when REFRESH command comes,\nso we can fulfill the expected behavior with more simple change like this;\n\n    Support the alpha identifier of REFRESH command\n    https://android-review.googlesource.com/547239\n    (packages/apps/Stk)\n\nBest regards,\nYoshiaki",
+      "range": {
+        "startLine": 926,
+        "startChar": 12,
+        "endLine": 926,
+        "endChar": 48
+      },
+      "revId": "03fcb5d01a14b8ab444bfde0d345ac99985e7188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
