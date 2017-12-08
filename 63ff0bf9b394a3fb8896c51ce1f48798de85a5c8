@@ -46,6 +46,30 @@
       "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b876fe7_47a2b8e0",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2017-12-08T06:03:04Z",
+      "side": 0,
+      "message": "Dear Jordan,\n\nNo issue was observed in our verification on both a single SIM device and a dual SIM device\nthough I still cannot upload the new patch set today, too.\nOur commercial SS/DS products also have the same change.\n\n    Test: Verified this on both SS/DS devices and no issue was observed.\n\nTo me, there are some misterious code changes in Change: 172563 on the partner git.\nAs you know, \u0027mMainActivityInstance\u0027 has been referenced only in the following method.\nThis part is only for one particular scenario that launchMenuActivity() is called in handleSessionEnd().\n\n    private void launchMenuActivity(Menu menu, int slotId) {\n    ...\n        if (menu \u003d\u003d null) {\n            // We assume this was initiated by the user pressing the tool kit icon\n            intentFlags |\u003d getFlagActivityNoUserAction(InitiatedByUserAction.yes, slotId);\n            if (mStkContext[slotId].mOpCode \u003d\u003d OP_END_SESSION) {\n                CatLog.d(LOG_TAG, \"launchMenuActivity, return OP_END_SESSION\");\n                mStkContext[slotId].mMenuState \u003d StkMenuActivity.STATE_MAIN;\n                if (mStkContext[slotId].mMainActivityInstance !\u003d null) {\n                    CatLog.d(LOG_TAG, \"launchMenuActivity, mMainActivityInstance is not null\");\n                    return;\n    ...\n\nHere is the code to call launchMenuActivity() in handleSessionEnd().\nMy team and I tried to find the scenario desribed in this comment a year ago, but could not.\nI do not think \"we should launch main menu\" when SELECT ITEM command ends \"in multiple instance architecture\".\n\n    private void handleSessionEnd(int slotId) {\n    ...\n        // In mutiple instance architecture, the main menu for slotId will be finished when user\n        // goes to the Stk menu of the other SIM. So, we should launch a new instance for the\n        // main menu if the main menu instance has been finished.\n        // If the current menu is secondary menu, we should launch main menu.\n        if (StkMenuActivity.STATE_SECONDARY \u003d\u003d mStkContext[slotId].mMenuState) {\n            launchMenuActivity(null, slotId);\n        }\n\nBest regards,\nYoshiaki",
+      "parentUuid": "b9678174_d1dede69",
+      "range": {
+        "startLine": 124,
+        "startChar": 25,
+        "endLine": 124,
+        "endChar": 46
+      },
+      "revId": "63ff0bf9b394a3fb8896c51ce1f48798de85a5c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
