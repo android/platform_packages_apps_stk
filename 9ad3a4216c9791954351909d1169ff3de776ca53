@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "535a7a53_49726778",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-01T11:00:33Z",
+      "side": 1,
+      "message": "Only the application name will be displayed on the notification in that case. The requirement is that the phone shall get out of the standby mode when receiving a DISPLAY TEXT command. I think that something new should be displayed on the keyguard screen if the screen is turned on due to the DISPLAY TEXT command though some message must always be specified by the service provider in the actual situation.",
+      "parentUuid": "3cfe7b56_5bffcfa3",
+      "range": {
+        "startLine": 1468,
+        "startChar": 85,
+        "endLine": 1468,
+        "endChar": 89
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8efb83f1_7b5d5f5e",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "82dca7fd_5e4df417",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1548,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-01T11:00:33Z",
+      "side": 1,
+      "message": "Let us say that you found the notification on the keyguard screen on your phone. You unlocked the keyguard, but you could not find anything special on the screen. Not good, right? The notification shall also be closed when the dialog is closed because of the timeout value specified.\n\nIf the notification shall be persistent, the timeout value shall never be specified in DISPLAY TEXT command. If the timeout value is specified, we have to discard the dialog when the timeout timer expires in accordance with the 3GPP standard.",
+      "parentUuid": "8efb83f1_7b5d5f5e",
+      "range": {
+        "startLine": 1548,
+        "startChar": 8,
+        "endLine": 1548,
+        "endChar": 89
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "245b53f7_327a4259",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2018-01-31T21:27:21Z",
       "side": 1,
       "message": "Is vibration and sound required? Can we remove this and go back to IMPORTANCE_MIN?",
+      "range": {
+        "startLine": 1980,
+        "startChar": 0,
+        "endLine": 1982,
+        "endChar": 61
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "533baf58_266dfc6a",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1982,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-01T11:00:33Z",
+      "side": 1,
+      "message": "If we change the importance of the notification channel back to IMPORTANCE_MIN, user will not see this notification on the keyguard screen because it is not priorized. The imporance must be greater than IMPORTANCE_MIN.\n\nWe discussed the UI specification with Orange people then the current specification was made. Our products with this UI specification are already in the market.",
+      "parentUuid": "245b53f7_327a4259",
       "range": {
         "startLine": 1980,
         "startChar": 0,
