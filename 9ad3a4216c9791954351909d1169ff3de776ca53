@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b66027a3_43577a48",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2018-02-02T18:44:46Z",
+      "side": 1,
+      "message": "I think we should not show the notification if the display text message is null.",
+      "parentUuid": "535a7a53_49726778",
+      "range": {
+        "startLine": 1468,
+        "startChar": 85,
+        "endLine": 1468,
+        "endChar": 89
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8efb83f1_7b5d5f5e",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "99f1f1c3_96f9b812",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1548,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2018-02-02T18:44:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "82dca7fd_5e4df417",
+      "range": {
+        "startLine": 1548,
+        "startChar": 8,
+        "endLine": 1548,
+        "endChar": 89
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "245b53f7_327a4259",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
@@ -140,6 +188,30 @@
       "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f06d16b9_09a897d8",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1982,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2018-02-02T18:44:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "533baf58_266dfc6a",
+      "range": {
+        "startLine": 1980,
+        "startChar": 0,
+        "endLine": 1982,
+        "endChar": 61
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
