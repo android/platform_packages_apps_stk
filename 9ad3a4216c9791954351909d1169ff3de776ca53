@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5f7c48db_8a69ee8e",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1458,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-05T02:27:44Z",
+      "side": 1,
+      "message": "newIntent will never be null.",
+      "range": {
+        "startLine": 1458,
+        "startChar": 12,
+        "endLine": 1458,
+        "endChar": 21
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3cfe7b56_5bffcfa3",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
@@ -61,6 +84,30 @@
       "side": 1,
       "message": "I think we should not show the notification if the display text message is null.",
       "parentUuid": "535a7a53_49726778",
+      "range": {
+        "startLine": 1468,
+        "startChar": 85,
+        "endLine": 1468,
+        "endChar": 89
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c5f4b68_ebaa8421",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-05T02:27:44Z",
+      "side": 1,
+      "message": "Let me improve the code in the next patch set.",
+      "parentUuid": "b66027a3_43577a48",
       "range": {
         "startLine": 1468,
         "startChar": 85,
