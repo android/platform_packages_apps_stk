@@ -191,6 +191,29 @@
     },
     {
       "key": {
+        "uuid": "f2c7dcb4_3c0bccb8",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1854,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-05T04:48:33Z",
+      "side": 1,
+      "message": "newIntent will never be null.",
+      "range": {
+        "startLine": 1854,
+        "startChar": 12,
+        "endLine": 1854,
+        "endChar": 29
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "245b53f7_327a4259",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
