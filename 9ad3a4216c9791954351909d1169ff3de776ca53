@@ -282,6 +282,30 @@
       "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ea32a8b_d79502e3",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1982,
+      "author": {
+        "id": 1010344
+      },
+      "writtenOn": "2018-02-09T18:30:50Z",
+      "side": 1,
+      "message": "Agree with Yoshiaki, to raise notification in keyguard screen at least IMPORTANCE_DEFAULT is required",
+      "parentUuid": "533baf58_266dfc6a",
+      "range": {
+        "startLine": 1980,
+        "startChar": 0,
+        "endLine": 1982,
+        "endChar": 61
+      },
+      "revId": "9ad3a4216c9791954351909d1169ff3de776ca53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

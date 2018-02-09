@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "607f081f_2afa351c",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1511,
+      "author": {
+        "id": 1010344
+      },
+      "writtenOn": "2018-02-09T18:30:50Z",
+      "side": 1,
+      "message": "Declare android.permission.WAKE_LOCK in the manifest",
+      "range": {
+        "startLine": 1511,
+        "startChar": 8,
+        "endLine": 1511,
+        "endChar": 25
+      },
+      "revId": "dfaa39e5ecfd2a012165141fb38eaaab595a2cb6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
