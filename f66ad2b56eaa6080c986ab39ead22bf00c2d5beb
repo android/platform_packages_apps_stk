@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3126d06a_77eef168",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1313,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-26T09:55:13Z",
+      "side": 1,
+      "message": "Check if mCurrentCmd is null or not to avoid NullPointerException, but does not exit this method until finishing pending activity or pending dialog.",
+      "range": {
+        "startLine": 1313,
+        "startChar": 12,
+        "endLine": 1313,
+        "endChar": 58
+      },
+      "revId": "f66ad2b56eaa6080c986ab39ead22bf00c2d5beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

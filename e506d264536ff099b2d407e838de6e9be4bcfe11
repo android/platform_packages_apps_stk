@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab65b552_4207529a",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1314,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-26T09:55:13Z",
+      "side": 0,
+      "message": "We should not exit this method here. If cleanUpInstanceStackBySlot() is called and there is any pending activity or dialog, the pending object must be finished before exiting this method.",
+      "range": {
+        "startLine": 1314,
+        "startChar": 12,
+        "endLine": 1314,
+        "endChar": 19
+      },
+      "revId": "e506d264536ff099b2d407e838de6e9be4bcfe11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd2cb3f4_5794f86f",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1323,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-26T09:55:13Z",
+      "side": 0,
+      "message": "Our understanding is that \u0027mIsInputPending\u0027 and \u0027mIsMenuPending\u0027 are unnecessary with the current application design, so we should be able to remove their related code in a different commit in the near future to reduce a maintenance cost. Let us leave it as it is in this commit.",
+      "range": {
+        "startLine": 1323,
+        "startChar": 36,
+        "endLine": 1323,
+        "endChar": 51
+      },
+      "revId": "e506d264536ff099b2d407e838de6e9be4bcfe11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
