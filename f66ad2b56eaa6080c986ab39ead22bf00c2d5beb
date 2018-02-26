@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fdd4fb13_e848d6da",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1306,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2018-02-26T18:33:58Z",
+      "side": 1,
+      "message": "Add a comment here indicating that no terminal response will be sent for pending instances.",
+      "range": {
+        "startLine": 1306,
+        "startChar": 7,
+        "endLine": 1306,
+        "endChar": 70
+      },
+      "revId": "f66ad2b56eaa6080c986ab39ead22bf00c2d5beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3126d06a_77eef168",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
