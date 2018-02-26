@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "954af950_7bb711fc",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1401,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2018-02-26T18:14:57Z",
+      "side": 1,
+      "message": "Prefer we reword this to make it easier to understand:\nClose the dialog displayed for DISPLAY TEXT command\nwith an immediate response object before new dialog is displayed.",
+      "range": {
+        "startLine": 1399,
+        "startChar": 8,
+        "endLine": 1401,
+        "endChar": 35
+      },
+      "revId": "a56969e04a65542029a1266776f7d24298da6bcf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
