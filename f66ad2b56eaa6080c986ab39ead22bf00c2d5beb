@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3ae5bcb3_941807a7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-27T04:02:02Z",
+      "side": 1,
+      "message": "I just wanted to say that the three lines with the plus sign below were added just to avoid NullPointerException but it was wrong solution. \nLet me delete the confusing part from the commit message in the patch set 2.\n\n    private void cleanUpInstanceStackBySlot(int slotId) {\n        Activity activity \u003d mStkContext[slotId].getPendingActivityInstance();\n        Activity dialog \u003d mStkContext[slotId].getPendingDialogInstance();\n        CatLog.d(LOG_TAG, \"cleanUpInstanceStackBySlot slotId: \" + slotId);\n +      if (mStkContext[slotId].mCurrentCmd \u003d\u003d null) {\n +          CatLog.d(LOG_TAG, \"current cmd is null.\");\n +          return;\n +      }\n        if (activity !\u003d null) {\n            CatLog.d(LOG_TAG, \"current cmd type: \" +\n                    mStkContext[slotId].mCurrentCmd.getCmdType());",
+      "range": {
+        "startLine": 12,
+        "startChar": 20,
+        "endLine": 14,
+        "endChar": 72
+      },
+      "revId": "f66ad2b56eaa6080c986ab39ead22bf00c2d5beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdd4fb13_e848d6da",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
@@ -13,6 +36,30 @@
       "writtenOn": "2018-02-26T18:33:58Z",
       "side": 1,
       "message": "Add a comment here indicating that no terminal response will be sent for pending instances.",
+      "range": {
+        "startLine": 1306,
+        "startChar": 7,
+        "endLine": 1306,
+        "endChar": 70
+      },
+      "revId": "f66ad2b56eaa6080c986ab39ead22bf00c2d5beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "418fb89d_43d7addc",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1306,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-02-27T04:02:02Z",
+      "side": 1,
+      "message": "Sure. I will follow your comment in the patch set 3.",
+      "parentUuid": "fdd4fb13_e848d6da",
       "range": {
         "startLine": 1306,
         "startChar": 7,
