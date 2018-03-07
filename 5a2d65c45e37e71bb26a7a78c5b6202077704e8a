@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb6fb02c_3115cb3e",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2018-03-07T19:38:32Z",
+      "side": 0,
+      "message": "can you keep some explanation of this comment also",
+      "range": {
+        "startLine": 267,
+        "startChar": 8,
+        "endLine": 269,
+        "endChar": 59
+      },
+      "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
