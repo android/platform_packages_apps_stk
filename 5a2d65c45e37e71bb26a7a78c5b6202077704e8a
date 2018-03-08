@@ -46,6 +46,30 @@
       "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc89f503_b7a4b053",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2018-03-08T19:48:32Z",
+      "side": 0,
+      "message": "I\u0027m not sure if you have access to view this, but I\u0027ve found that the original CL contributing this code was to support STK for DSDS devices (https://partner-android-review.googlesource.com/#/c/platform/packages/apps/Stk/+/172563/)\n\nIf the code is indeed dead and not used for DSDS handling then I think it\u0027s okay to remove the comment. Please let me know if this original CL changes your assessment.",
+      "parentUuid": "cadbac0f_7416ccc6",
+      "range": {
+        "startLine": 267,
+        "startChar": 8,
+        "endLine": 269,
+        "endChar": 59
+      },
+      "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
