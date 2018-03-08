@@ -22,6 +22,30 @@
       "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cadbac0f_7416ccc6",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-03-08T02:32:56Z",
+      "side": 0,
+      "message": "Dear Jordan,\n\nLet me explain why I removed the comment first though it will be a long explanation.\nWe have the following code in StkAppService.handleMessage().\n\n            case OP_LAUNCH_APP:\n                if (mStkContext[slotId].mMainCmd \u003d\u003d null) {\n                    CatLog.d(LOG_TAG, \"mMainCmd is null\");\n                    // nothing todo when no SET UP MENU command didn\u0027t arrive.\n                    return;\n                }\n                CatLog.d(LOG_TAG, \"handleMessage OP_LAUNCH_APP - mCmdInProgress[\" +\n                        mStkContext[slotId].mCmdInProgress + \"]\");\n                //If there is a pending activity for the slot id,\n                //just finish it and create a new one to handle the pending command.\n                cleanUpInstanceStackBySlot(slotId);\n                CatLog.d(LOG_TAG, \"Current cmd type: \" +\n                        mStkContext[slotId].mCurrentCmd.getCmdType());\n                //Restore the last command from stack by slot id.\n                restoreInstanceFromStackBySlot(slotId);\n                break;\n\nStkMain or StkLauncherActivity can send OP_LAUNCH_APP message.\nIt looks that this code was added to re-create activity in the pending state\nwhen user attempts to bring the SIM Toolkit application to the foreground\nby tapping the application icon on the launcher application.\n\nHowever, I have never seen this code working in that situation.\nAll the STK activities have the same task affinity now.\nIf user taps the SIM Toolkit icon when there is a pending activity,\nthe pending activity is brought to the foreground instead of StkMain or StkLauncherActivity\nbecause whole the application task is moved to the foreground.\nIn short, I think that the code above is a kind of dead code.\n\nThen, let us get back to StkInputActivity.onDestroy().\nThe comment that I removed says that isInputPending() was introduced\nto avoid sending unexpected TERMINAL RESPONSE while renewing the pending activity.\nI think that it will never happen because the renewal mechanism for pending activity\nwill never work in the current software design.\n\n        if (!isChangingConfigurations()) {\n            if (!mIsResponseSent \u0026\u0026 !appService.isInputPending(mSlotId)) {\n                CatLog.d(LOG_TAG, \"handleDestroy - Send End Session\");\n                sendResponse(StkAppService.RES_ID_END_SESSION);\n            }\n            cancelTimeOut();\n        }\n\nRemoving the dead code is not in the scope of this code change,\nbut I removed the comment just because it was confusing.\nOf course, it is okay for me to keep it for now.\n\nBest regards,\nYoshiaki",
+      "parentUuid": "bb6fb02c_3115cb3e",
+      "range": {
+        "startLine": 267,
+        "startChar": 8,
+        "endLine": 269,
+        "endChar": 59
+      },
+      "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
