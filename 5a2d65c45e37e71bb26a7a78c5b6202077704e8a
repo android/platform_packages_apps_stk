@@ -70,6 +70,30 @@
       "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d42ba508_35e8ac58",
+        "filename": "src/com/android/stk/StkInputActivity.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-03-09T05:44:24Z",
+      "side": 0,
+      "message": "Dear Jordan,\n\nI checked the old CL which includes the dead code before uploading my change.\nIt was added between the patch set 9 and the patch set 10 in the middle of the code review,\nbut I could not find any clue to assume why they decided to add it.\n\nCleaning up unnecessary code or confusing comments is not the main purpose of this change,\nso let me restore the 3-line comments back to the original place.\n\nBest regards,\nYoshiaki",
+      "parentUuid": "bc89f503_b7a4b053",
+      "range": {
+        "startLine": 267,
+        "startChar": 8,
+        "endLine": 269,
+        "endChar": 59
+      },
+      "revId": "5a2d65c45e37e71bb26a7a78c5b6202077704e8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
