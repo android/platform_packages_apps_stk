@@ -71,7 +71,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     private static final String LOG_TAG = className.substring(className.lastIndexOf('.') + 1);
 
     private Input mStkInput = null;
-    private boolean mAcceptUsersInput = true;
     // Constants
     private static final int STATE_TEXT = 1;
     private static final int STATE_YES_NO = 2;
@@ -85,7 +84,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     static final float SMALL_FONT_FACTOR = (1 / 2);
 
     // Keys for saving the state of the activity in the bundle
-    private static final String ACCEPT_USERS_INPUT_KEY = "accept_users_input";
     private static final String RESPONSE_SENT_KEY = "response_sent";
     private static final String INPUT_STRING_KEY = "input_string";
     private static final String TIMEOUT_INTENT = "timeout_intent";
@@ -104,8 +102,8 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     // Click listener to handle buttons press..
     public void onClick(View v) {
         String input = null;
-        if (!mAcceptUsersInput) {
-            CatLog.d(LOG_TAG, "mAcceptUsersInput:false");
+        if (mIsResponseSent) {
+            CatLog.d(LOG_TAG, "Already responded");
             return;
         }
 
@@ -116,21 +114,17 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
                 CatLog.d(LOG_TAG, "handleClick, invalid text");
                 return;
             }
-            mAcceptUsersInput = false;
             input = mTextIn.getText().toString();
             break;
         case R.id.button_cancel:
-            mAcceptUsersInput = false;
             appService.getStkContext(mSlotId).setPendingActivityInstance(this);
             sendResponse(StkAppService.RES_ID_END_SESSION);
             return;
         // Yes/No layout buttons.
         case R.id.button_yes:
-            mAcceptUsersInput = false;
             input = YES_STR_RESPONSE;
             break;
         case R.id.button_no:
-            mAcceptUsersInput = false;
             input = NO_STR_RESPONSE;
             break;
         case R.id.more:
@@ -211,7 +205,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
         mNormalLayout = findViewById(R.id.normal_layout);
         initFromIntent(getIntent());
         mContext = getBaseContext();
-        mAcceptUsersInput = true;
 
         mAlarmIntentFilter = new IntentFilter(ALARM_TIMEOUT);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -299,15 +292,14 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (!mAcceptUsersInput) {
-            CatLog.d(LOG_TAG, "mAcceptUsersInput:false");
+        if (mIsResponseSent) {
+            CatLog.d(LOG_TAG, "Already responded");
             return true;
         }
 
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
             CatLog.d(LOG_TAG, "onKeyDown - KEYCODE_BACK");
-            mAcceptUsersInput = false;
             appService.getStkContext(mSlotId).setPendingActivityInstance(this);
             sendResponse(StkAppService.RES_ID_BACKWARD, null, false);
             return true;
@@ -384,18 +376,16 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     }
 
     private boolean optionsItemSelectedInternal(MenuItem item) {
-        if (!mAcceptUsersInput) {
-            CatLog.d(LOG_TAG, "mAcceptUsersInput:false");
+        if (mIsResponseSent) {
+            CatLog.d(LOG_TAG, "Already responded");
             return true;
         }
         switch (item.getItemId()) {
         case StkApp.MENU_ID_END_SESSION:
-            mAcceptUsersInput = false;
             sendResponse(StkAppService.RES_ID_END_SESSION);
             finish();
             return true;
         case StkApp.MENU_ID_HELP:
-            mAcceptUsersInput = false;
             sendResponse(StkAppService.RES_ID_INPUT, "", true);
             finish();
             return true;
@@ -406,7 +396,6 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         CatLog.d(LOG_TAG, "onSaveInstanceState: " + mSlotId);
-        outState.putBoolean(ACCEPT_USERS_INPUT_KEY, mAcceptUsersInput);
         outState.putBoolean(RESPONSE_SENT_KEY, mIsResponseSent);
         outState.putString(INPUT_STRING_KEY, mTextIn.getText().toString());
         outState.putParcelable(TIMEOUT_INTENT, mTimeoutIntent);
@@ -415,14 +404,10 @@ public class StkInputActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         CatLog.d(LOG_TAG, "onRestoreInstanceState: " + mSlotId);
-
-        mAcceptUsersInput = savedInstanceState.getBoolean(ACCEPT_USERS_INPUT_KEY);
-        if ((mAcceptUsersInput == false) && (mMoreOptions != null)) {
+        mIsResponseSent = savedInstanceState.getBoolean(RESPONSE_SENT_KEY);
+        if (mIsResponseSent && (mMoreOptions != null)) {
             mMoreOptions.setVisibility(View.INVISIBLE);
         }
-
-        mIsResponseSent = savedInstanceState.getBoolean(RESPONSE_SENT_KEY);
-
         String savedString = savedInstanceState.getString(INPUT_STRING_KEY);
         if (!TextUtils.isEmpty(savedString)) {
             mTextIn.setText(savedString);
