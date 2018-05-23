@@ -364,7 +364,7 @@ public class StkAppService extends Service implements Runnable {
             }
             if (i == mSimCount) {
                 stopSelf();
-                StkAppInstaller.unInstall(mContext);
+                StkAppInstaller.uninstall(this);
                 return;
             }
         }
@@ -624,7 +624,7 @@ public class StkAppService extends Service implements Runnable {
                     }
                 }
                 if (i == mSimCount) {
-                    StkAppInstaller.unInstall(mContext);
+                    StkAppInstaller.uninstall(StkAppService.this);
                 }
                 break;
             case OP_DELAYED_MSG:
@@ -724,8 +724,10 @@ public class StkAppService extends Service implements Runnable {
                 mStkContext[slotId].mMainCmd = null;
                 if (isAllOtherCardsAbsent(slotId)) {
                     CatLog.d(LOG_TAG, "All CARDs are ABSENT");
-                    StkAppInstaller.unInstall(mContext);
+                    StkAppInstaller.uninstall(StkAppService.this);
                     stopSelf();
+                } else {
+                    addToMenuSystemOrUpdateLabel();
                 }
             } else {
                 IccRefreshResponse state = new IccRefreshResponse();
@@ -739,12 +741,14 @@ public class StkAppService extends Service implements Runnable {
                 }
 
                 if (state.refreshResult == IccRefreshResponse.REFRESH_RESULT_RESET) {
-                    // Uninstall STkmenu
-                    if (isAllOtherCardsAbsent(slotId)) {
-                        StkAppInstaller.unInstall(mContext);
-                    }
                     mStkContext[slotId].mCurrentMenu = null;
                     mStkContext[slotId].mMainCmd = null;
+                    // Uninstall STkmenu
+                    if (isAllOtherCardsAbsent(slotId)) {
+                        StkAppInstaller.uninstall(StkAppService.this);
+                    } else {
+                        addToMenuSystemOrUpdateLabel();
+                    }
                 }
             }
         }
@@ -1090,11 +1094,12 @@ public class StkAppService extends Service implements Runnable {
                     }
                 }
                 if (i == mSimCount) {
-                    StkAppInstaller.unInstall(mContext);
+                    StkAppInstaller.uninstall(this);
+                } else {
+                    addToMenuSystemOrUpdateLabel();
                 }
             } else {
-                CatLog.d(LOG_TAG, "install App");
-                StkAppInstaller.install(mContext);
+                addToMenuSystemOrUpdateLabel();
             }
             if (mStkContext[slotId].mMenuIsVisible) {
                 launchMenuActivity(null, slotId);
@@ -1220,6 +1225,30 @@ public class StkAppService extends Service implements Runnable {
                 mStkContext[slotId].mCmdInProgress = false;
             }
         }
+    }
+
+    private void addToMenuSystemOrUpdateLabel() {
+        String candidateLabel = null;
+        boolean foundAlready = false;
+
+        for (int slotId = PhoneConstants.SIM_ID_1; slotId < mSimCount; slotId++) {
+            if (mStkContext[slotId].mMainCmd != null
+                    && mStkContext[slotId].mMainCmd.getMenu() != null) {
+                if (foundAlready) {
+                    // We should not display the alpha identifier of SET-UP MENU command
+                    // as the application label on the application launcher
+                    // if the device receives the command from multiple cards.
+                    candidateLabel = null;
+                    break;
+                }
+                foundAlready = true;
+                if (!TextUtils.isEmpty(mStkContext[slotId].mMainCmd.getMenu().title)) {
+                    candidateLabel = mStkContext[slotId].mMainCmd.getMenu().title;
+                }
+            }
+        }
+
+        StkAppInstaller.installOrUpdate(this, candidateLabel);
     }
 
     @SuppressWarnings("FallThrough")
