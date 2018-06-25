@@ -1,0 +1,11 @@
+Verified+1: Yoshiaki Naka <yoshiaki.naka@sony.com>
+Verified+1: Brad Ebinger <breadley@google.com>
+Code-Review+1: Yoshiaki Naka <yoshiaki.naka@sony.com>
+Code-Review+2: Brad Ebinger <breadley@google.com>
+Code-Review+1: Amit Mahajan <amitmahajan@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Brad Ebinger <breadley@google.com>
+Submitted-at: Mon, 25 Jun 2018 17:33:21 +0000
+Reviewed-on: https://android-review.googlesource.com/697807
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
