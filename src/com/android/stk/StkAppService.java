@@ -710,15 +710,6 @@ public class StkAppService extends Service implements Runnable {
                     // Clear Idle Text
                     cancelIdleText(slotId);
                 }
-
-                if (state.refreshResult == IccRefreshResponse.REFRESH_RESULT_RESET) {
-                    // Uninstall STkmenu
-                    if (isAllOtherCardsAbsent(slotId)) {
-                        StkAppInstaller.unInstall(mContext);
-                    }
-                    mStkContext[slotId].mCurrentMenu = null;
-                    mStkContext[slotId].mMainCmd = null;
-                }
             }
         }
     }
