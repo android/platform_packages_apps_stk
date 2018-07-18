@@ -1037,11 +1037,18 @@ public class StkAppService extends Service implements Runnable {
         ActivityManager mActivityManager = (ActivityManager) mContext
                 .getSystemService(ACTIVITY_SERVICE);
         String currentPackageName = null;
-        List<RunningTaskInfo> tasks = mActivityManager.getRunningTasks(1);
-        if (tasks == null || tasks.get(0).topActivity == null) {
+
+        try {
+            List<RunningTaskInfo> tasks = mActivityManager.getRunningTasks(1);
+            if (tasks == null || tasks.get(0).topActivity == null) {
+                return false;
+            }
+            currentPackageName = tasks.get(0).topActivity.getPackageName();
+        } catch (IndexOutOfBoundsException e) {
+            CatLog.d(LOG_TAG, "isTopOfStack() Exception:" + e.toString());
             return false;
         }
-        currentPackageName = tasks.get(0).topActivity.getPackageName();
+
         if (null != currentPackageName) {
             return currentPackageName.equals(PACKAGE_NAME);
         }
