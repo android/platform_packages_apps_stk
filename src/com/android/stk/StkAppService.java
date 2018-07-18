@@ -1034,11 +1034,13 @@ public class StkAppService extends Service implements Runnable {
         ActivityManager mActivityManager = (ActivityManager) mContext
                 .getSystemService(ACTIVITY_SERVICE);
         String currentPackageName = null;
+
         List<RunningTaskInfo> tasks = mActivityManager.getRunningTasks(1);
-        if (tasks == null || tasks.get(0).topActivity == null) {
+        if (tasks == null || tasks.isEmpty() || tasks.get(0).topActivity == null) {
             return false;
         }
         currentPackageName = tasks.get(0).topActivity.getPackageName();
+
         if (null != currentPackageName) {
             return currentPackageName.equals(PACKAGE_NAME);
         }
