@@ -139,6 +139,7 @@ public class StkAppService extends Service implements Runnable {
         private CatCmdMessage mCurrentSetupEventCmd = null;
         private CatCmdMessage mIdleModeTextCmd = null;
         private boolean mIdleModeTextVisible = false;
+        protected boolean mIsSessionFromUser = false;
         final synchronized void setPendingActivityInstance(Activity act) {
             CatLog.d(this, "setPendingActivityInstance act : " + mSlotId + ", " + act);
             callSetActivityInstMsg(OP_SET_ACT_INST, mSlotId, act);
@@ -644,6 +645,14 @@ public class StkAppService extends Service implements Runnable {
                         CatLog.d(LOG_TAG, "Finish the previous pending activity - " + previous);
                         previous.finish();
                     }
+                    if (act != null && mStkContext[slotId].mCmdInProgress) {
+                        startToObserveIdleScreen(slotId);
+                    } else {
+                        if (mStkContext[slotId].mCurrentCmd != null) {
+                            unregisterProcessObserver(
+                                    mStkContext[slotId].mCurrentCmd.getCmdType(),slotId);
+                        }
+                    }
                 }
                 break;
             case OP_SET_DAL_INST:
@@ -651,6 +660,14 @@ public class StkAppService extends Service implements Runnable {
                 if (mStkContext[slotId].mDialogInstance != dal) {
                     CatLog.d(LOG_TAG, "Set pending dialog instance - " + dal);
                     mStkContext[slotId].mDialogInstance = dal;
+                    if (dal != null) {
+                        startToObserveIdleScreen(slotId);
+                    } else {
+                        if (mStkContext[slotId].mCurrentCmd != null) {
+                            unregisterProcessObserver(
+                                    mStkContext[slotId].mCurrentCmd.getCmdType(),slotId);
+                        }
+                    }
                 }
                 break;
             case OP_SET_IMMED_DAL_INST:
@@ -773,8 +790,33 @@ public class StkAppService extends Service implements Runnable {
         return false;
     }
 
-    private void handleIdleScreen(int slotId) {
+    private void startToObserveIdleScreen(int slotId) {
+        if (!mStkContext[slotId].mIsSessionFromUser) {
+            if (!isScreenIdle()) {
+                synchronized (this) {
+                    if (mProcessObserver == null && !mServiceHandler.hasMessages(OP_IDLE_SCREEN)) {
+                        registerProcessObserver();
+                    }
+                }
+            } else {
+                handleIdleScreen(slotId);
+            }
+        }
+    }
 
+    private void handleIdleScreen(int slotId) {
+        if (!mStkContext[slotId].mIsSessionFromUser) {
+            Activity dialog = mStkContext[slotId].getPendingDialogInstance();
+            if (dialog != null) {
+                dialog.finish();
+                mStkContext[slotId].mDialogInstance = null;
+            }
+            Activity activity = mStkContext[slotId].getPendingActivityInstance();
+            if (activity != null) {
+                activity.finish();
+                mStkContext[slotId].mActivityInstance = null;
+            }
+        }
         // If the idle screen event is present in the list need to send the
         // response to SIM.
         CatLog.d(this, "Need to send IDLE SCREEN Available event to SIM");
@@ -799,6 +841,20 @@ public class StkAppService extends Service implements Runnable {
         } else {
             mStkContext[slotId].mCmdInProgress = false;
         }
+    }
+
+    /**
+     * Sends TERMINAL RESPONSE or ENVELOPE
+     *
+     * @param args detailed parameters of the response
+     * @param slotId slot identifier
+     */
+    public void sendResponse(Bundle args, int slotId) {
+        Message msg = mServiceHandler.obtainMessage();
+        msg.arg1 = OP_RESPONSE;
+        msg.arg2 = slotId;
+        msg.obj = args;
+        mServiceHandler.sendMessage(msg);
     }
 
     private void sendResponse(int resId, int slotId, boolean confirm) {
@@ -886,6 +942,7 @@ public class StkAppService extends Service implements Runnable {
             CatLog.d(LOG_TAG, "[handleSessionEnd][mMainCmd is null!]");
         }
         mStkContext[slotId].lastSelectedItem = null;
+        mStkContext[slotId].mIsSessionFromUser = false;
         // In case of SET UP MENU command which removed the app, don't
         // update the current menu member.
         if (mStkContext[slotId].mCurrentMenu != null && mStkContext[slotId].mMainCmd != null) {
@@ -1156,6 +1213,7 @@ public class StkAppService extends Service implements Runnable {
         }
     }
 
+    @SuppressWarnings("FallThrough")
     private void handleCmdResponse(Bundle args, int slotId) {
         CatLog.d(LOG_TAG, "handleCmdResponse, sim id: " + slotId);
         if (mStkContext[slotId].mCurrentCmd == null) {
@@ -1185,6 +1243,8 @@ public class StkAppService extends Service implements Runnable {
             int menuSelection = args.getInt(MENU_SELECTION);
             switch(mStkContext[slotId].mCurrentMenuCmd.getCmdType()) {
             case SET_UP_MENU:
+                mStkContext[slotId].mIsSessionFromUser = true;
+                // Fall through
             case SELECT_ITEM:
                 mStkContext[slotId].lastSelectedItem = getItemName(menuSelection, slotId);
                 if (helpRequired) {
@@ -1773,6 +1833,7 @@ public class StkAppService extends Service implements Runnable {
                     }
                 };
                 ActivityManagerNative.getDefault().registerProcessObserver(observer);
+                CatLog.d(this, "Started to observe the foreground activity");
                 mProcessObserver = observer;
             } catch (RemoteException e) {
                 CatLog.d(this, "Failed to register the process observer");
@@ -1810,6 +1871,7 @@ public class StkAppService extends Service implements Runnable {
         if (mProcessObserver != null) {
             try {
                 ActivityManagerNative.getDefault().unregisterProcessObserver(mProcessObserver);
+                CatLog.d(this, "Stopped to observe the foreground activity");
                 mProcessObserver = null;
             } catch (RemoteException e) {
                 CatLog.d(this, "Failed to unregister the process observer");
