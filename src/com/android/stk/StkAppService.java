@@ -228,6 +228,9 @@ public class StkAppService extends Service implements Runnable {
     static final int OP_ALPHA_NOTIFY = 11;
     static final int OP_IDLE_SCREEN = 12;
     static final int OP_SET_IMMED_DAL_INST = 13;
+    static final int OP_CARRIER_CONFIG_CHANGED = 14;
+
+    private BroadcastReceiver mCarrierConfigReceiver = null;
 
     //Invalid SetupEvent
     static final int INVALID_SETUP_EVENT = 0xFF;
@@ -364,8 +367,8 @@ public class StkAppService extends Service implements Runnable {
                 mStkContext[slotId].mStkServiceState = STATE_EXIST;
             }
             if (i == mSimCount) {
+                removeFromMenuSystem();
                 stopSelf();
-                StkAppInstaller.uninstall(this);
                 return;
             }
         }
@@ -495,6 +498,18 @@ public class StkAppService extends Service implements Runnable {
         if (slotId >=0 && slotId < mSimCount && (mStkContext[slotId].mMainCmd != null)) {
             Menu menu = mStkContext[slotId].mMainCmd.getMenu();
             if (menu != null) {
+                Parcel parcel = Parcel.obtain();
+                menu.writeToParcel(parcel, 0);
+                parcel.setDataPosition(0);
+                menu = Menu.CREATOR.createFromParcel(parcel);
+                parcel.recycle();
+
+                // The label shall never be updated if it is not allowed by the configuration.
+                if (getBooleanCarrierConfig(CarrierConfigManager
+                        .KEY_STK_DISABLE_DYNAMIC_LABEL_UPDATE_BOOL, slotId)) {
+                    menu.title = null;
+                }
+
                 // If alpha identifier or icon identifier with the self-explanatory qualifier is
                 // specified in SET-UP MENU command, it should be more prioritized than preset ones.
                 if (menu.title == null
@@ -503,11 +518,6 @@ public class StkAppService extends Service implements Runnable {
                     String label = config.getLabel(slotId);
                     Bitmap icon = config.getIcon(slotId);
                     if (label != null || icon != null) {
-                        Parcel parcel = Parcel.obtain();
-                        menu.writeToParcel(parcel, 0);
-                        parcel.setDataPosition(0);
-                        menu = Menu.CREATOR.createFromParcel(parcel);
-                        parcel.recycle();
                         menu.title = label;
                         menu.titleIcon = icon;
                         menu.titleIconSelfExplanatory = false;
@@ -515,9 +525,8 @@ public class StkAppService extends Service implements Runnable {
                 }
             }
             return menu;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /*
@@ -617,15 +626,18 @@ public class StkAppService extends Service implements Runnable {
                 }
                 break;
             case OP_BOOT_COMPLETED:
-                CatLog.d(LOG_TAG, " OP_BOOT_COMPLETED");
-                int i = 0;
-                for (i = PhoneConstants.SIM_ID_1; i < mSimCount; i++) {
-                    if (mStkContext[i].mMainCmd != null) {
+            case OP_CARRIER_CONFIG_CHANGED:
+                boolean exist = false;
+                for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+                    if (mStkContext[slot].mMainCmd != null) {
+                        exist = true;
                         break;
                     }
                 }
-                if (i == mSimCount) {
-                    StkAppInstaller.uninstall(StkAppService.this);
+                if (!exist) {
+                    removeFromMenuSystem();
+                } else {
+                    addToMenuSystemOrUpdateLabel();
                 }
                 break;
             case OP_DELAYED_MSG:
@@ -726,7 +738,7 @@ public class StkAppService extends Service implements Runnable {
                 mStkService[slotId] = null;
                 if (isAllOtherCardsAbsent(slotId)) {
                     CatLog.d(LOG_TAG, "All CARDs are ABSENT");
-                    StkAppInstaller.uninstall(StkAppService.this);
+                    removeFromMenuSystem();
                     stopSelf();
                 } else {
                     addToMenuSystemOrUpdateLabel();
@@ -1086,7 +1098,7 @@ public class StkAppService extends Service implements Runnable {
                     }
                 }
                 if (i == mSimCount) {
-                    StkAppInstaller.uninstall(this);
+                    removeFromMenuSystem();
                 } else {
                     addToMenuSystemOrUpdateLabel();
                 }
@@ -1240,6 +1252,30 @@ public class StkAppService extends Service implements Runnable {
         }
 
         StkAppInstaller.installOrUpdate(this, candidateLabel);
+
+        if (mCarrierConfigReceiver == null) {
+            mCarrierConfigReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(
+                            intent.getAction())) {
+                        Message message = mServiceHandler.obtainMessage();
+                        message.arg1 = OP_CARRIER_CONFIG_CHANGED;
+                        mServiceHandler.sendMessage(message);
+                    }
+                }
+            };
+            registerReceiver(mCarrierConfigReceiver,
+                    new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED));
+        }
+    }
+
+    private void removeFromMenuSystem() {
+        if (mCarrierConfigReceiver != null) {
+            unregisterReceiver(mCarrierConfigReceiver);
+            mCarrierConfigReceiver = null;
+        }
+        StkAppInstaller.uninstall(this);
     }
 
     @SuppressWarnings("FallThrough")
