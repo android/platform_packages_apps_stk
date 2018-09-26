@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0408b1d4_36e0f3e1",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1087703
+      },
+      "writtenOn": "2018-09-26T23:08:30Z",
+      "side": 1,
+      "message": "Curious why you check for inequality first -- doesn\u0027t this have the same effect (other than printing the log message) as just setting the mDialogInstance variable without checking?",
+      "range": {
+        "startLine": 652,
+        "startChar": 16,
+        "endLine": 655,
+        "endChar": 17
+      },
+      "revId": "a1cea4633c48ddf877783cc902a8520d5fbf3609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
