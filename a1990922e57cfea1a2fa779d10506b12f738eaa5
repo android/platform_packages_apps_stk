@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ea85ee2_79e5f33e",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 1087703
+      },
+      "writtenOn": "2018-09-26T23:15:29Z",
+      "side": 1,
+      "message": "insert space after comma",
+      "range": {
+        "startLine": 659,
+        "startChar": 81,
+        "endLine": 659,
+        "endChar": 87
+      },
+      "revId": "a1990922e57cfea1a2fa779d10506b12f738eaa5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
