@@ -22,6 +22,30 @@
       "revId": "a1cea4633c48ddf877783cc902a8520d5fbf3609",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc50f28b_fcb9cc89",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2018-09-27T01:36:23Z",
+      "side": 1,
+      "message": "We can see the same code structure around the line 635. The same code structure will slightly make the readability better and CatLog.d() can output the log only when the new instance is set.\n\n    case OP_SET_ACT_INST:\n        Activity act \u003d (Activity) msg.obj;\n        if (mStkContext[slotId].mActivityInstance !\u003d act) {\n        CatLog.d(LOG_TAG, \"Set pending activity instance - \" + act);\n    ...\n\nThere is no functional reason. :)",
+      "parentUuid": "0408b1d4_36e0f3e1",
+      "range": {
+        "startLine": 652,
+        "startChar": 16,
+        "endLine": 655,
+        "endChar": 17
+      },
+      "revId": "a1cea4633c48ddf877783cc902a8520d5fbf3609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
