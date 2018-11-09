@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39637e7c_82558125",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1351305
+      },
+      "writtenOn": "2018-11-09T22:25:25Z",
+      "side": 1,
+      "message": "This method is valid now but might change in the future. Looping Shuo for advises.\n\nAre the any other way (might be better) for you to get the subscription Id here? e.g. from activity/intent, etc.",
+      "range": {
+        "startLine": 1003,
+        "startChar": 20,
+        "endLine": 1003,
+        "endChar": 37
+      },
+      "revId": "f5719a1812dfebed121809a30b3eba3c71b92c44",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
