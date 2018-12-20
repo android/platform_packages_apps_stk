@@ -52,10 +52,10 @@ import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
+import android.sysprop.RadioProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -2068,8 +2068,7 @@ public class StkAppService extends Service implements Runnable {
             // launch the browser to the default homepage.
             CatLog.d(this, "no url data provided by proactive command." +
                        " launching browser with stk default URL ... ");
-            url = SystemProperties.get(STK_BROWSER_DEFAULT_URL_SYSPROP,
-                    "http://www.google.com");
+            url = RadioPRoperties.stk_Default_url().orElse("http://www.google.com");
         } else {
             CatLog.d(this, "launch browser command has attached url = " + settings.url);
             url = settings.url;
@@ -2456,10 +2455,6 @@ public class StkAppService extends Service implements Runnable {
     }
 
     private boolean isUrlAvailableToLaunchBrowser(BrowserSettings settings) {
-        String url = SystemProperties.get(STK_BROWSER_DEFAULT_URL_SYSPROP, "");
-        if (url == "" && settings.url == null) {
-            return false;
-        }
-        return true;
+        return RadioProperties.stk_default_url().isPresent() || settings.url != null;
     }
 }
