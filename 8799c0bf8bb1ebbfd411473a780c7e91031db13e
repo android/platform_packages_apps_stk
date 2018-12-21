@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "01c5419f_f19cc548",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1291338
+      },
+      "writtenOn": "2018-12-21T06:29:30Z",
+      "side": 1,
+      "message": "The point of this commit is not on this app, but on the system properties.",
+      "parentUuid": "4c4f4145_db50eb89",
+      "range": {
+        "startLine": 58,
+        "startChar": 7,
+        "endLine": 58,
+        "endChar": 38
+      },
+      "revId": "8799c0bf8bb1ebbfd411473a780c7e91031db13e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "58f34dd7_a8067e22",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-12-21T03:34:35Z",
       "side": 1,
       "message": "Is this upper case character correct?",
+      "range": {
+        "startLine": 2071,
+        "startChar": 24,
+        "endLine": 2071,
+        "endChar": 25
+      },
+      "revId": "8799c0bf8bb1ebbfd411473a780c7e91031db13e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5aff8184_858bbc3a",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2071,
+      "author": {
+        "id": 1291338
+      },
+      "writtenOn": "2018-12-21T06:29:30Z",
+      "side": 1,
+      "message": "my mistake.. will fix",
+      "parentUuid": "58f34dd7_a8067e22",
       "range": {
         "startLine": 2071,
         "startChar": 24,
