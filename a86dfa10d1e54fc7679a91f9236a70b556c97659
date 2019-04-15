@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0543d2ec_7d8308e7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-04-15T01:27:21Z",
+      "side": 1,
+      "message": "DISPLAY TEXT command has no element which can contain title information.",
+      "range": {
+        "startLine": 14,
+        "startChar": 36,
+        "endLine": 15,
+        "endChar": 37
+      },
+      "revId": "a86dfa10d1e54fc7679a91f9236a70b556c97659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
