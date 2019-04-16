@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "906b9dce_1b3406aa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-04-16T01:14:02Z",
+      "side": 1,
+      "message": "This part is unnecessary.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 35
+      },
+      "revId": "5cdc8a69b0d64d923427e12d6bb8f83ff9b93ed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7b78ac9_4a05cebf",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1131,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-04-16T01:14:02Z",
+      "side": 1,
+      "message": "This works same as the line 1109 for SET UP IDLE MODE TEXT command. I think that this is a nice-to-have change though mCurrentCmd is updated once the next command or the session end command comes from the lower layer.",
+      "range": {
+        "startLine": 1131,
+        "startChar": 12,
+        "endLine": 1131,
+        "endChar": 75
+      },
+      "revId": "5cdc8a69b0d64d923427e12d6bb8f83ff9b93ed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fa0872c1_9f2a0a48",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
