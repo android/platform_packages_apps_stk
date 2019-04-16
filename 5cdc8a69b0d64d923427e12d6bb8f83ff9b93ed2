@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa0872c1_9f2a0a48",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2157,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-04-16T00:39:59Z",
+      "side": 1,
+      "message": "We do not need this additional code as we already have the same one at the line 2164.",
+      "range": {
+        "startLine": 2156,
+        "startChar": 12,
+        "endLine": 2157,
+        "endChar": 40
+      },
+      "revId": "5cdc8a69b0d64d923427e12d6bb8f83ff9b93ed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
