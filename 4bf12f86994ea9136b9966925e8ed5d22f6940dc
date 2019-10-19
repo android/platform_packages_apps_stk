@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d929b08_692cf792",
+        "filename": "res/values/styles.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1081638
+      },
+      "writtenOn": "2019-10-19T19:59:32Z",
+      "side": 1,
+      "message": "Can you try if \"Theme.DeviceDefault\" works for you?",
+      "range": {
+        "startLine": 18,
+        "startChar": 53,
+        "endLine": 18,
+        "endChar": 81
+      },
+      "revId": "4bf12f86994ea9136b9966925e8ed5d22f6940dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
