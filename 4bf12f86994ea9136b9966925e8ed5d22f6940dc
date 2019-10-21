@@ -46,6 +46,30 @@
       "revId": "4bf12f86994ea9136b9966925e8ed5d22f6940dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6ec6892_a00b04f0",
+        "filename": "res/values/styles.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-21T03:12:42Z",
+      "side": 1,
+      "message": "I wanted to say that I tried \"Theme.DeviceDefault\" but could not see the expected behavior :p",
+      "parentUuid": "72b49793_610f6119",
+      "range": {
+        "startLine": 18,
+        "startChar": 53,
+        "endLine": 18,
+        "endChar": 81
+      },
+      "revId": "4bf12f86994ea9136b9966925e8ed5d22f6940dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
