@@ -22,6 +22,30 @@
       "revId": "4bf12f86994ea9136b9966925e8ed5d22f6940dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72b49793_610f6119",
+        "filename": "res/values/styles.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-21T03:09:57Z",
+      "side": 1,
+      "message": "No. It looks that \"Theme.DeviceDefault\" just set the theme to the default one. \"Theme.DeviceDefault.DayNight\" can follow the user preference, so I preferred \"Theme.DeviceDefault.DayNight\".\n\nThe theme of Settings application can be switched between the light theme and the dark theme in accordance with the user preference of Settings \u003e Display \u003e Theme. The theme of Dialer appliation also follows that setting. SIM Toolkit can behave in the same way as Settings/Dialer if we apply \"Theme.DeviceDefault.DayNight\".",
+      "parentUuid": "0d929b08_692cf792",
+      "range": {
+        "startLine": 18,
+        "startChar": 53,
+        "endLine": 18,
+        "endChar": 81
+      },
+      "revId": "4bf12f86994ea9136b9966925e8ed5d22f6940dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
