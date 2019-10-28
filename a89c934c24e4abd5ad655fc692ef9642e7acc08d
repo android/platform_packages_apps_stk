@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "214a4569_0f43939b",
+        "filename": "Android.bp",
+        "patchSetId": 6
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1081223
+      },
+      "writtenOn": "2019-10-28T20:08:26Z",
+      "side": 1,
+      "message": "androidx.localbroadcastmanager_localbroadcastmanager pulls less resources",
+      "range": {
+        "startLine": 6,
+        "startChar": 19,
+        "endLine": 6,
+        "endChar": 55
+      },
+      "revId": "a89c934c24e4abd5ad655fc692ef9642e7acc08d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
