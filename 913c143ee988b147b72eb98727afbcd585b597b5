@@ -1,0 +1,10 @@
+Autosubmit+1: Jack Yu <jackyu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Yoshiaki Naka <yoshiaki.naka@sony.com>
+Code-Review+1: Yoshiaki Naka <yoshiaki.naka@sony.com>
+Code-Review+2: Jordan Liu <jminjie@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Wed, 30 Oct 2019 06:22:25 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/930861
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
