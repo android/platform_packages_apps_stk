@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6c50abcd_addb1012",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-30T09:06:10Z",
+      "side": 1,
+      "message": "The following separate commit replaces CatLog.d(this) with CatLog.d(LOG_TAG).\n\n    Replace CatLog.d(this) with CatLog.d(LOG_TAG) in SIM Toolkit classes\n    https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1154515\n\nThe output class name is also changed from\n\n    CAT     : com.android.stk.StkAppService: handleMessage opcode[1], sim id[0]\n    CAT     : com.android.stk.StkAppService: cmdName[SET_UP_MENU]\n\nto\n\n    CAT     : StkAppService: handleMessage opcode[1], sim id[0]\n    CAT     : StkAppService: cmdName[SET_UP_MENU]\n\nin order to simplify the logs.",
+      "parentUuid": "83d82bec_089e12d8",
+      "range": {
+        "startLine": 679,
+        "startChar": 25,
+        "endLine": 679,
+        "endChar": 29
+      },
+      "revId": "1ac5bd25709a78c3ffc3c6ab988dbfc3bb7568f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ee97afdf_1308ea36",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2019-10-29T18:38:12Z",
       "side": 1,
       "message": "LOG_TAG",
+      "range": {
+        "startLine": 698,
+        "startChar": 25,
+        "endLine": 698,
+        "endChar": 29
+      },
+      "revId": "1ac5bd25709a78c3ffc3c6ab988dbfc3bb7568f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6cca01d5_048e999a",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 698,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-30T09:06:10Z",
+      "side": 1,
+      "message": "The following separate commit replaces CatLog.d(this) with CatLog.d(LOG_TAG).\n\n    Replace CatLog.d(this) with CatLog.d(LOG_TAG) in SIM Toolkit classes\n    https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1154515\n\nThe output class name is also changed from\n\n    CAT     : com.android.stk.StkAppService: handleMessage opcode[1], sim id[0]\n    CAT     : com.android.stk.StkAppService: cmdName[SET_UP_MENU]\n\nto\n\n    CAT     : StkAppService: handleMessage opcode[1], sim id[0]\n    CAT     : StkAppService: cmdName[SET_UP_MENU]\n\nin order to simplify the logs.",
+      "parentUuid": "ee97afdf_1308ea36",
       "range": {
         "startLine": 698,
         "startChar": 25,
@@ -68,6 +116,30 @@
       "revId": "1ac5bd25709a78c3ffc3c6ab988dbfc3bb7568f3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bdbccc97_b86192e0",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-30T09:06:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d64ad98_cda1f40b",
+      "range": {
+        "startLine": 814,
+        "startChar": 21,
+        "endLine": 814,
+        "endChar": 25
+      },
+      "revId": "1ac5bd25709a78c3ffc3c6ab988dbfc3bb7568f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
