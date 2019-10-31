@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9e2a957a_4e67bc71",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-31T02:06:16Z",
+      "side": 1,
+      "message": "I replaced it to 0 as suggested. In addition, the following commit was also uploaded to do the same for other lines.\n\n    Remove PhoneConstants.SIM_ID_1\n    https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1155683/1",
+      "parentUuid": "29e33099_4a290c5e",
+      "range": {
+        "startLine": 709,
+        "startChar": 32,
+        "endLine": 709,
+        "endChar": 55
+      },
+      "revId": "89c5eb6aea47b479ffce083a53ccf466b311a75b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7763de27_2f431a69",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "89c5eb6aea47b479ffce083a53ccf466b311a75b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1535f32_e78eac3a",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 808,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-10-31T02:06:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7763de27_2f431a69",
+      "range": {
+        "startLine": 808,
+        "startChar": 17,
+        "endLine": 808,
+        "endChar": 21
+      },
+      "revId": "89c5eb6aea47b479ffce083a53ccf466b311a75b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
