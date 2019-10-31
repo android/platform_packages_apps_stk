@@ -360,7 +360,7 @@ public class StkAppService extends Service implements Runnable {
                 mStkContext[slotId].mStkServiceState = STATE_NOT_EXIST;
                 //Check other StkService state.
                 //If all StkServices are not available, stop itself and uninstall apk.
-                for (i = PhoneConstants.SIM_ID_1; i < mSimCount; i++) {
+                for (i = 0; i < mSimCount; i++) {
                     if (i != slotId
                             && (mStkService[i] != null)
                             && (mStkContext[i].mStkServiceState == STATE_UNKNOWN
@@ -623,7 +623,7 @@ public class StkAppService extends Service implements Runnable {
             case OP_BOOT_COMPLETED:
                 CatLog.d(LOG_TAG, " OP_BOOT_COMPLETED");
                 int i = 0;
-                for (i = PhoneConstants.SIM_ID_1; i < mSimCount; i++) {
+                for (i = 0; i < mSimCount; i++) {
                     if (mStkContext[i].mMainCmd != null) {
                         break;
                     }
@@ -674,7 +674,7 @@ public class StkAppService extends Service implements Runnable {
                 break;
             case OP_LOCALE_CHANGED:
                 CatLog.d(LOG_TAG, "Locale Changed");
-                for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+                for (int slot = 0; slot < mSimCount; slot++) {
                     checkForSetupEvent(LANGUAGE_SELECTION_EVENT, (Bundle) msg.obj, slot);
                 }
                 // rename all registered notification channels on locale change
@@ -696,7 +696,7 @@ public class StkAppService extends Service implements Runnable {
                 handleStopTone(msg, slotId);
                 break;
             case OP_USER_ACTIVITY:
-                for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+                for (int slot = 0; slot < mSimCount; slot++) {
                     checkForSetupEvent(USER_ACTIVITY_EVENT, null, slot);
                 }
                 break;
@@ -1100,7 +1100,7 @@ public class StkAppService extends Service implements Runnable {
                 mStkContext[slotId].mCurrentMenu = null;
                 mStkContext[slotId].mMainCmd = null;
                 //Check other setup menu state. If all setup menu are removed, uninstall apk.
-                for (i = PhoneConstants.SIM_ID_1; i < mSimCount; i++) {
+                for (i = 0; i < mSimCount; i++) {
                     if (i != slotId && mStkContext[i].mSetupMenuState != STATE_NOT_EXIST) {
                         CatLog.d(LOG_TAG, "Not Uninstall App:" + i + ","
                                 + mStkContext[i].mSetupMenuState);
@@ -1704,7 +1704,7 @@ public class StkAppService extends Service implements Runnable {
 
     private synchronized void unregisterUserPresentReceiver(int slotId) {
         if (mUserPresentReceiver != null) {
-            for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+            for (int slot = 0; slot < mSimCount; slot++) {
                 if (slot != slotId) {
                     if (mStkContext[slot].mNotificationOnKeyguard) {
                         // The broadcast receiver is still necessary for other SIM card.
@@ -1749,7 +1749,7 @@ public class StkAppService extends Service implements Runnable {
     }
 
     private void unregisterEvent(int event, int slotId) {
-        for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+        for (int slot = 0; slot < mSimCount; slot++) {
             if (slot != slotId) {
                 if (mStkContext[slot].mSetupEventListSettings != null) {
                     if (findEvent(event, mStkContext[slot].mSetupEventListSettings.eventList)) {
@@ -1861,7 +1861,7 @@ public class StkAppService extends Service implements Runnable {
     private void unregisterProcessObserver(AppInterface.CommandType command, int slotId) {
         // Check if there is any pending command which still needs the process observer
         // except for the current command and slot.
-        for (int slot = PhoneConstants.SIM_ID_1; slot < mSimCount; slot++) {
+        for (int slot = 0; slot < mSimCount; slot++) {
             if (command != AppInterface.CommandType.SET_UP_IDLE_MODE_TEXT || slot != slotId) {
                 if (mStkContext[slot].mIdleModeTextCmd != null
                         && !mStkContext[slot].mIdleModeTextVisible) {
