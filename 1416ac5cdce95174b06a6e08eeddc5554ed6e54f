@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd1b4a26_d1ddf858",
+        "filename": "src/com/android/stk/StkDialogActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-11-06T00:39:37Z",
+      "side": 1,
+      "message": "nits: more than 100 characters in a line",
+      "range": {
+        "startLine": 331,
+        "startChar": 100,
+        "endLine": 331,
+        "endChar": 103
+      },
+      "revId": "1416ac5cdce95174b06a6e08eeddc5554ed6e54f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
