@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4236800_2eafb6be",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 758,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-11-07T08:03:24Z",
+      "side": 1,
+      "message": "I have no device which can change the number of the active SIM card slots right now, so I am not sure why this new function was added at all. We cannot expect to receive appropriate SIM state change notifications while changing the multi SIM configuration?",
+      "range": {
+        "startLine": 758,
+        "startChar": 30,
+        "endLine": 758,
+        "endChar": 59
+      },
+      "revId": "616ea28b2c781669219b67a67ea72de51838c04b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15cf8254_c7198497",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-11-07T08:03:24Z",
+      "side": 1,
+      "message": "Is it okay to clean up mStkContext[] in such a simple way? No problem with the followings scenario?\n\nStep 1. Receive a proactive command from RIL with Single-SIM configuration.\nStep 2. Change the configuration from single to dual while having an on-going proactive command.",
+      "range": {
+        "startLine": 764,
+        "startChar": 12,
+        "endLine": 766,
+        "endChar": 65
+      },
+      "revId": "616ea28b2c781669219b67a67ea72de51838c04b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "67b5b3cd_42634797",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-11-07T08:03:24Z",
+      "side": 1,
+      "message": "Removing an active slot should also be not so simple according to the existing code in handleCardStatusChangeAndIccRefresh().",
+      "range": {
+        "startLine": 772,
+        "startChar": 16,
+        "endLine": 772,
+        "endChar": 41
+      },
+      "revId": "616ea28b2c781669219b67a67ea72de51838c04b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
