@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "c6ed01f8_d7c42ff3",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1081638
+      },
+      "writtenOn": "2019-11-07T19:29:22Z",
+      "side": 1,
+      "message": "Good point. Yoshiaki, do you know what carrier is best for STK testing? Or do you test STK in the lab? In US we do not have carrier support STK.",
+      "parentUuid": "15cf8254_c7198497",
+      "range": {
+        "startLine": 764,
+        "startChar": 12,
+        "endLine": 766,
+        "endChar": 65
+      },
+      "revId": "616ea28b2c781669219b67a67ea72de51838c04b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "67b5b3cd_42634797",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
