@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "00a5d8c8_85467276",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2019-11-08T03:37:21Z",
+      "side": 1,
+      "message": "I do not use any commercial SIM cards now because I have not encountered good one. Instead, I write Java Card code for my own SIM Toolkit applet and use it.\n\nI thought that I might be able to propose another solution, but the problem is that I am not sure what can happen on the device which supports multi-SIM configuration change without power-cycle. If the state of all the existing cards is once transitioned to NOT_READY or ABSENT during the multi-SIM configuration change, probably we should manage this without registerForMultiSimConfigChange().",
+      "parentUuid": "c6ed01f8_d7c42ff3",
+      "range": {
+        "startLine": 764,
+        "startChar": 12,
+        "endLine": 766,
+        "endChar": 65
+      },
+      "revId": "616ea28b2c781669219b67a67ea72de51838c04b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "67b5b3cd_42634797",
         "filename": "src/com/android/stk/StkAppService.java",
         "patchSetId": 1
