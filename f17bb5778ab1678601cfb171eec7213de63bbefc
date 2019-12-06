@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f4c90f6_ba88a2ce",
+        "filename": "client/Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1060959
+      },
+      "writtenOn": "2019-12-06T22:39:27Z",
+      "side": 0,
+      "message": "add a cleanspec for this one too",
+      "revId": "f17bb5778ab1678601cfb171eec7213de63bbefc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
