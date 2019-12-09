@@ -1,0 +1,9 @@
+Code-Review+1: Anton Hansson <hansson@google.com>
+Code-Review+2: Chen Xu <fionaxu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Autosubmit+1: Amit Mahajan <amitmahajan@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 09 Dec 2019 18:52:03 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1183855
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
