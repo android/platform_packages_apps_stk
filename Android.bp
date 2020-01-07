@@ -18,4 +18,10 @@ android_app {
             "proguard.proguard",
         ],
     },
+    // (b/146984232) StkLib is packaged into a mainline module, which is not
+    // preopted. Add this to clearly tell the build system to not dexpreopt
+    // this apk, thus the dex file is always compressed.
+    dex_preopt: {
+        enabled: false,
+    },
 }
