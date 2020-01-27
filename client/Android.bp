@@ -2,6 +2,9 @@
 
 android_app {
     name: "Stk",
+    libs: [
+        "StkLib",
+    ],
     static_libs: ["com.google.android.material_material"],
     platform_apis: true,
     certificate: "platform",
