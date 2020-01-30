@@ -72,6 +72,29 @@
     },
     {
       "key": {
+        "uuid": "a0decc38_2717c76c",
+        "filename": "client/AndroidManifest.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1061009
+      },
+      "writtenOn": "2020-01-30T18:05:19Z",
+      "side": 1,
+      "message": "instead of referencing it here, it might be easier (and more future proof) to set the theme up in StkInputActivity\u0027s onCreate() with this.setTheme(R.style.NoActionBar)",
+      "range": {
+        "startLine": 88,
+        "startChar": 34,
+        "endLine": 88,
+        "endChar": 45
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ab795991_96f95a08",
         "filename": "client/res/values/styles.xml",
         "patchSetId": 3
