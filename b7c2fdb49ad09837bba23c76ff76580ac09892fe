@@ -22,6 +22,29 @@
       "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab795991_96f95a08",
+        "filename": "client/res/values/styles.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1060959
+      },
+      "writtenOn": "2020-01-30T09:03:32Z",
+      "side": 1,
+      "message": "Actually, what mechanisms do you have in place to track that these stk:style/Transparent resource APIs don\u0027t change in incompatible ways?",
+      "range": {
+        "startLine": 16,
+        "startChar": 78,
+        "endLine": 18,
+        "endChar": 64
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
