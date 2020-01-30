@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e504a61_1e6b3e02",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1060959
+      },
+      "writtenOn": "2020-01-30T09:02:37Z",
+      "side": 1,
+      "message": "You can make a resource-only library and *not* link against the library with java code in it here?",
+      "range": {
+        "startLine": 4,
+        "startChar": 16,
+        "endLine": 7,
+        "endChar": 6
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
