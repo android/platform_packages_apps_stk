@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "c53d9bbf_c755f3ab",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1061009
+      },
+      "writtenOn": "2020-01-31T11:10:09Z",
+      "side": 1,
+      "message": "(created this mistakenly as a resolved comment)",
+      "parentUuid": "9a306f84_d950a0ba",
+      "range": {
+        "startLine": 8,
+        "startChar": 23,
+        "endLine": 8,
+        "endChar": 29
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a0decc38_2717c76c",
         "filename": "client/AndroidManifest.xml",
         "patchSetId": 3
@@ -154,6 +178,30 @@
       "side": 1,
       "message": "First, the library resources must be public an assigned a resource id to be used by the client.\nSecond, Stk can generate api files that track the public R.java as we do for the framework sdk.\nThird, we currently do not have a mechanism to ensure that the attributes or values of items in the style change in backwards compatible ways, but we don\u0027t have that for the framework either. even past API freeze, any framework engineer can change the value of any framework resource with triggering API review. Solving that issue is a larger project that cannot be done for the current release.",
       "parentUuid": "ab795991_96f95a08",
+      "range": {
+        "startLine": 16,
+        "startChar": 78,
+        "endLine": 18,
+        "endChar": 64
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18cc6903_91274281",
+        "filename": "client/res/values/styles.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1061009
+      },
+      "writtenOn": "2020-01-31T11:10:09Z",
+      "side": 1,
+      "message": "\u003e Third, we currently do not have a mechanism to ensure that the attributes or values of items in the style change in backwards compatible ways\n\nThat\u0027s fine here actually, because (at least at the moment) both the resource and the code consuming the resource is in the library. The client package doesn\u0027t actually every *use* the resources, it just points to them.",
+      "parentUuid": "9feeb937_ea8c4ec4",
       "range": {
         "startLine": 16,
         "startChar": 78,
