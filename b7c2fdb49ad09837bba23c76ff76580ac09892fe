@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "ac6832e5_3bb316df",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2020-02-01T01:52:21Z",
+      "side": 1,
+      "message": "Marking this as resolved based on feedback from toddke/ryan",
+      "parentUuid": "40c158da_d98903b2",
+      "range": {
+        "startLine": 4,
+        "startChar": 16,
+        "endLine": 7,
+        "endChar": 6
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a306f84_d950a0ba",
         "filename": "client/Android.bp",
         "patchSetId": 3
@@ -120,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "3e1fef64_9af71ba1",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2020-02-01T01:52:21Z",
+      "side": 1,
+      "message": "I am not clear on origin of this change. I can remove it from the client (it seems to be repeated in the lib). What is the problem and would it be resolved by doing this?",
+      "parentUuid": "c53d9bbf_c755f3ab",
+      "range": {
+        "startLine": 8,
+        "startChar": 23,
+        "endLine": 8,
+        "endChar": 29
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a0decc38_2717c76c",
         "filename": "client/AndroidManifest.xml",
         "patchSetId": 3
@@ -140,6 +188,30 @@
       "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3915b5b9_b782b214",
+        "filename": "client/AndroidManifest.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2020-02-01T01:52:21Z",
+      "side": 1,
+      "message": "Done, will include in next patch.",
+      "parentUuid": "a0decc38_2717c76c",
+      "range": {
+        "startLine": 88,
+        "startChar": 34,
+        "endLine": 88,
+        "endChar": 45
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -211,6 +283,30 @@
       "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d470958f_e98ea995",
+        "filename": "client/res/values/styles.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2020-02-01T01:52:21Z",
+      "side": 1,
+      "message": "Marking as resolved based on feedback. No changes req.",
+      "parentUuid": "18cc6903_91274281",
+      "range": {
+        "startLine": 16,
+        "startChar": 78,
+        "endLine": 18,
+        "endChar": 64
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
