@@ -168,6 +168,30 @@
     },
     {
       "key": {
+        "uuid": "25764ce1_9abb3c1e",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1061009
+      },
+      "writtenOn": "2020-02-03T14:42:38Z",
+      "side": 1,
+      "message": "Leaving the dependency is both:\n- unnecessary, because with your changes the client no longer directly references the resources in AndroidX \u0026 Material. (and thus this just wastes disk space / memory / build time)\n- and has potential to silently break things again in the future if someone directly references a resource in AndroidX or Material from the client\n\n\nBenefit of removing it:\n- if you still have broken resource dependencies, that will then manifest as a build error, instead of a runtime error that only manifests for certain client \u0026 library version combinations.",
+      "parentUuid": "3e1fef64_9af71ba1",
+      "range": {
+        "startLine": 8,
+        "startChar": 23,
+        "endLine": 8,
+        "endChar": 29
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a0decc38_2717c76c",
         "filename": "client/AndroidManifest.xml",
         "patchSetId": 3
