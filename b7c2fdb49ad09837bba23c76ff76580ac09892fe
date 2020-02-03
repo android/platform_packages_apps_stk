@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "ee2aaba6_4adb98cf",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1060959
+      },
+      "writtenOn": "2020-02-03T14:47:20Z",
+      "side": 1,
+      "message": "The recommendation was to generate a stub though, which isn\u0027t the current state of the CL. Unresolving",
+      "parentUuid": "ac6832e5_3bb316df",
+      "range": {
+        "startLine": 4,
+        "startChar": 16,
+        "endLine": 7,
+        "endChar": 6
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9a306f84_d950a0ba",
         "filename": "client/Android.bp",
         "patchSetId": 3
