@@ -216,6 +216,30 @@
     },
     {
       "key": {
+        "uuid": "2239d7d5_b4f13b1c",
+        "filename": "client/Android.bp",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1138138
+      },
+      "writtenOn": "2020-02-05T01:31:15Z",
+      "side": 1,
+      "message": "Seems to have caused below issue, did not debug this further. Adding it for record.\n\n02-03 19:18:45.864 13510 13510 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate receiver com.android.stk.StkCmdReceiver: java.lang.ClassNotFoundException: Didn\u0027t find class \"com.android.stk.StkCmdReceiver\" on path: DexPathList[[],nativeLibraryDirectories\u003d[/system/app/Stk/lib/arm64, /system/app/Stk/Stk.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64, /product/lib64, /apex/com.android.telephony/app/StkLib/StkLib.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64, /product/lib64]]",
+      "parentUuid": "25764ce1_9abb3c1e",
+      "range": {
+        "startLine": 8,
+        "startChar": 23,
+        "endLine": 8,
+        "endChar": 29
+      },
+      "revId": "b7c2fdb49ad09837bba23c76ff76580ac09892fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0decc38_2717c76c",
         "filename": "client/AndroidManifest.xml",
         "patchSetId": 3
