@@ -16,9 +16,14 @@
 -->
 
 <!--
-     Both of the attributes 'mcc' and 'mnc' are mandatory.
-     The other attributes are optional.
+     The carrier ID of the target operator should be specified in the attribute 'id'.
+     The pair of the attributes 'mcc' and 'mnc' are also supported for backward compatibility.
      Example:
+
+     <operator id="1911"
+               label="Test SIM"
+               icon="ic_launcher_sim_toolkit_1"
+     />
 
      <operator mcc="001"
                mnc="01"
