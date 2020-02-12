@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "71919751_bc3347b8",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1791,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2020-02-12T01:32:47Z",
+      "side": 1,
+      "message": "nit: This will be checked by CheckStyle",
+      "range": {
+        "startLine": 1791,
+        "startChar": 100,
+        "endLine": 1791,
+        "endChar": 101
+      },
+      "revId": "8c72f2f9d28acea901c86c699fbe3012a1f76638",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
