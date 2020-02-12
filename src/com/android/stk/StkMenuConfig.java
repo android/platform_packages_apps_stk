@@ -44,6 +44,7 @@ public class StkMenuConfig {
     private static final String XML_OPERATORS_TAG = "operators";
     private static final String XML_OPERATOR_TAG = "operator";
 
+    private static final String XML_CARRIER_ID_ATTR = "id";
     private static final String XML_MCC_ATTR = "mcc";
     private static final String XML_MNC_ATTR = "mnc";
     private static final String XML_LABEL_ATTR = "label";
@@ -62,16 +63,45 @@ public class StkMenuConfig {
     private Config mConfigs[] = null;
 
     private static class Config {
-        public int mcc;
-        public int mnc;
-        public String label;
-        public String icon;
+        public int id = TelephonyManager.UNKNOWN_CARRIER_ID;
+        public int mcc = UNSPECIFIED;
+        public int mnc = UNSPECIFIED;
+        public String label = null;
+        public String icon = null;
+
+        public Config(int id, String label, String icon) {
+            this.id = id;
+            this.label = label;
+            this.icon = icon;
+        }
 
         public Config(int mcc, int mnc, String label, String icon) {
             this.mcc = mcc;
             this.mnc = mnc;
             this.label = label;
             this.icon = icon;
+        }
+
+        public Config(Config config, int id) {
+            this.id = id;
+            this.mcc = config.mcc;
+            this.mnc = config.mnc;
+            this.label = config.label;
+            this.icon = config.icon;
+        }
+
+        public Config(Config config, int mcc, int mnc) {
+            this.id = config.id;
+            this.mcc = mcc;
+            this.mnc = mnc;
+            this.label = config.label;
+            this.icon = config.icon;
+        }
+
+        public Config(int id, int mcc, int mnc) {
+            this.id = id;
+            this.mcc = mcc;
+            this.mnc = mnc;
         }
     }
 
@@ -123,31 +153,49 @@ public class StkMenuConfig {
         }
 
         TelephonyManager telephony =
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        String operator = telephony.getSimOperator(info.getSubscriptionId());
+                ((TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE))
+                .createForSubscriptionId(info.getSubscriptionId());
+        if (telephony == null) {
+            mConfigs[slotId] = NO_CONFIG;
+            return;
+        }
+
+        String operator = telephony.getSimOperator();
         if (TextUtils.isEmpty(operator) || (operator.length() < 5)) {
             mConfigs[slotId] = NO_CONFIG;
             return;
         }
 
+        int id = telephony.getSimSpecificCarrierId();
         int mcc = Integer.parseInt(operator.substring(0, 3));
         int mnc = Integer.parseInt(operator.substring(3));
 
-        if (mConfigs[slotId] != null && mConfigs[slotId].mcc == mcc
-                && mConfigs[slotId].mnc == mnc) {
-            if (DBG) CatLog.d(LOG_TAG, "Return the cached config, slot id: " + slotId);
+        if ((mConfigs[slotId] != null) && (mConfigs[slotId].id == id)
+                && (mConfigs[slotId].mcc == mcc) && (mConfigs[slotId].mnc == mnc)) {
+            if (DBG) CatLog.d(LOG_TAG, "Return the cached config");
             return;
         }
 
-        if (DBG) CatLog.d(LOG_TAG, "Find config and create the cached config, slot id: " + slotId);
+        if (id != TelephonyManager.UNKNOWN_CARRIER_ID) {
+            for (Config config : mArray) {
+                if (config.id == id) {
+                    if (DBG) CatLog.d(LOG_TAG, "Found a config associated with the carrier ID");
+                    mConfigs[slotId] = new Config(config, mcc, mnc);
+                    return;
+                }
+            }
+        }
+
         for (Config config : mArray) {
             if ((config.mcc == mcc) && (config.mnc == mnc)) {
-                mConfigs[slotId] = config;
+                if (DBG) CatLog.d(LOG_TAG, "Found a config associated with the SIM MCC/MNC");
+                mConfigs[slotId] = new Config(config, id);
                 return;
             }
         }
 
-        mConfigs[slotId] = new Config(mcc, mnc, null, null);
+        if (DBG) CatLog.d(LOG_TAG, "No appropriate config found");
+        mConfigs[slotId] = new Config(id, mcc, mnc);
     }
 
     private void initialize(Context context) {
@@ -167,18 +215,19 @@ public class StkMenuConfig {
                     break;
                 }
 
+                int id = parser.getAttributeIntValue(null, XML_CARRIER_ID_ATTR, UNSPECIFIED);
                 int mcc = parser.getAttributeIntValue(null, XML_MCC_ATTR, UNSPECIFIED);
                 int mnc = parser.getAttributeIntValue(null, XML_MNC_ATTR, UNSPECIFIED);
-
-                if ((mcc == UNSPECIFIED) || (mnc == UNSPECIFIED)) {
-                    continue;
-                }
-
                 String label = parser.getAttributeValue(null, XML_LABEL_ATTR);
                 String icon = parser.getAttributeValue(null, XML_ICON_ATTR);
 
-                Config config = new Config(mcc, mnc, label, icon);
-                mArray.add(config);
+                if (id == UNSPECIFIED) {
+                    if ((mcc != UNSPECIFIED) && (mnc != UNSPECIFIED)) {
+                        mArray.add(new Config(mcc, mnc, label, icon));
+                    }
+                } else {
+                    mArray.add(new Config(id, label, icon));
+                }
             } while (true);
         } catch (Exception e) {
             CatLog.e(LOG_TAG, "Something wrong happened while interpreting the xml file" + e);
