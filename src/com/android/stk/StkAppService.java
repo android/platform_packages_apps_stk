@@ -414,6 +414,9 @@ public class StkAppService extends Service implements Runnable {
         unregisterHomeVisibilityObserver();
         unregisterLocaleChangeReceiver();
         unregisterHomeKeyEventReceiver();
+        for (int i = 0; i < mSimCount; i++) {
+            cleanUpInstanceStackBySlot(i);
+        }
         sInstance = null;
         waitForLooper();
         PhoneConfigurationManager.unregisterForMultiSimConfigChange(mServiceHandler);
