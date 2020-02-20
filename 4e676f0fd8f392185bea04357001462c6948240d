@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "49d3de97_4d415d2b",
+        "filename": "src/com/android/stk/StkAppService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1043,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2020-02-20T05:22:56Z",
+      "side": 1,
+      "message": "Dear Hyungjun, I have not encountered such an issue, but we might have to check \u0027empty\u0027 case like this instead of adding the try-catch statement.\n\n        List\u003cRunningTaskInfo\u003e tasks \u003d mActivityManager.getRunningTasks(1);\n -      if (tasks \u003d\u003d null || tasks.get(0).topActivity \u003d\u003d null) {\n +      if (tasks \u003d\u003d null || tasks.isEmpty() || tasks.get(0).topActivity \u003d\u003d null) {\n            return false;\n        }\n        currentPackageName \u003d tasks.get(0).topActivity.getPackageName();\n\nBest regards, Yoshiaki",
+      "range": {
+        "startLine": 1043,
+        "startChar": 12,
+        "endLine": 1043,
+        "endChar": 68
+      },
+      "revId": "4e676f0fd8f392185bea04357001462c6948240d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
