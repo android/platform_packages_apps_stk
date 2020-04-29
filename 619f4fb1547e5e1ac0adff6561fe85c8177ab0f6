@@ -1,0 +1,12 @@
+Open-Source-Licensing-1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Open-Source-Licensing+2: Bob Badour <bbadour@google.com>
+Open-Source-Licensing+2: Amit Mahajan <amitmahajan@google.com>
+Autosubmit+1: Bob Badour <bbadour@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Code-Review+2: Amit Mahajan <amitmahajan@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Wed, 29 Apr 2020 01:52:01 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1296474
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
