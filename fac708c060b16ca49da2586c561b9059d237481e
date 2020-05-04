@@ -1,0 +1,11 @@
+Code-Review+2: Jordan Liu <jminjie@google.com>
+Code-Review+1: Yoshiaki Naka <yoshiaki.naka@sony.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Open-Source-Licensing+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Verified+1: Yoshiaki Naka <yoshiaki.naka@sony.com>
+Submitted-by: Jordan Liu <jminjie@google.com>
+Submitted-at: Mon, 04 May 2020 21:57:44 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1214936
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
