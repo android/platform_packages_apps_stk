@@ -204,6 +204,12 @@ public class StkDialogActivity extends Activity {
     protected void onStart() {
         CatLog.d(LOG_TAG, "onStart, sim id: " + mSlotId);
         super.onStart();
+        StkAppService service = StkAppService.getInstance();
+        if (service == null) {
+            CatLog.d(LOG_TAG, "onStart - appService is null");
+            finish();
+            return;
+        }
     }
 
     @Override
