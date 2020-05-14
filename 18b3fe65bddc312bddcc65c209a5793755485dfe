@@ -1,0 +1,13 @@
+Verified+1: Umashankar Godachi <quic_umasha@quicinc.com>
+Code-Review+1: Umashankar Godachi <quic_umasha@quicinc.com>
+Code-Review+1: Mengjun Leng <quic_mengju@quicinc.com>
+Code-Review+1: Srikanth Chintala <quic_srikchin@quicinc.com>
+Code-Review+2: Jordan Liu <jminjie@google.com>
+Qualcomm-Review+1: Garik Badalyan <garikb@quicinc.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Submitted-by: Jordan Liu <jminjie@google.com>
+Submitted-at: Thu, 14 May 2020 21:12:27 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1177422
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
