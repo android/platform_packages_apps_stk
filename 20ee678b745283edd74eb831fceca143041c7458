@@ -26,6 +26,33 @@
       "revId": "20ee678b745283edd74eb831fceca143041c7458",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000003923318",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1365595?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "a6358a90_b2b14b42",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-07-17T20:37:56Z",
+      "side": 1,
+      "message": "Unrecognized license :\nunenforced\n",
+      "range": {
+        "startLine": 7,
+        "startChar": 27,
+        "endLine": 7,
+        "endChar": 37
+      },
+      "revId": "20ee678b745283edd74eb831fceca143041c7458",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
