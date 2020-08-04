@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e963e5af_6d93384e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-04T22:13:17Z",
+      "side": 1,
+      "message": "clean cp of ag/12306605",
+      "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
