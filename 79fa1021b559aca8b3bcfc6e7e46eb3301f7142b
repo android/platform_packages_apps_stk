@@ -51,6 +51,24 @@
       "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a90da4f8_6e87fffc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2020-08-04T23:19:23Z",
+      "side": 1,
+      "message": "@Jordan - Thanks for the explanation. I understand the intention and have no objection to this change. It will be hard for user to move from StkInputActivity to a kind of note or e-mail application to check what they have to input after merging this change, but I cannot estimate the user impact and it might not a big issue.",
+      "parentUuid": "debcb702_4e9b54cb",
+      "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
