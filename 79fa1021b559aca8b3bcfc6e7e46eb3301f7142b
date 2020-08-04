@@ -16,6 +16,23 @@
       "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e33c7536_b74993cc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2020-08-04T22:45:23Z",
+      "side": 1,
+      "message": "GSMA TS.38 (PDATA.12) expects that \"Home\" and \"Multi task\" are differentiated. There is a risk to make service providers concern it especially in 3-button navigation mode. It is just a risk right now and we will explain this is the standard behavior of the recent version of Android SIM Toolkit, though.\n\nhttps://www.gsma.com/newsroom/wp-content/uploads//TS.38-v2.0.pdf",
+      "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
