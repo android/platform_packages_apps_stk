@@ -33,6 +33,24 @@
       "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "debcb702_4e9b54cb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-04T22:59:59Z",
+      "side": 1,
+      "message": "In 3 and 2 button navigation mode, if the user intends to cancel the operation they are able to use the \"back\" button. I understand that this behavior for \"recentapps\" is not technically what is defined in the spec, but as part of gesture navigation support I think it better captures user intent in the ambiguous cases (some carrier testers have already had trouble triggering terminal responses via \"home\" presses because their gestures were interpreted as \"recentapps\" instead.)",
+      "parentUuid": "e33c7536_b74993cc",
+      "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
