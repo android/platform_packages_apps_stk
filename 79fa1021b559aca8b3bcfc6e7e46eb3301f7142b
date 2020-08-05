@@ -69,6 +69,24 @@
       "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0f68508_539bc297",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-05T16:41:10Z",
+      "side": 1,
+      "message": "Thanks Yoshiaki, your contribution is appreciated as always.",
+      "parentUuid": "a90da4f8_6e87fffc",
+      "revId": "79fa1021b559aca8b3bcfc6e7e46eb3301f7142b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
