@@ -34,6 +34,24 @@
       "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac8e6df9_b3a2f09f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-20T23:34:31Z",
+      "side": 1,
+      "message": "The reproducibility is 100% for the specific test case. It\u0027s possible that the reported issue is due to the delayed broadcast, but for delays up to 1 minute it seems unlikely that the broadcast is just delayed.",
+      "parentUuid": "eb8ab207_05598e37",
+      "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
