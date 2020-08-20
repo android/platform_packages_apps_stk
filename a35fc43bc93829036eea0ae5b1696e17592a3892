@@ -16,6 +16,24 @@
       "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb8ab207_05598e37",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2020-08-20T22:43:57Z",
+      "side": 1,
+      "message": "Dear Jordan,\n\nIs the reproducibility high? I will ask my team to check the behaviors on our devices with Android 11. If these revert commits work, the cause of the reported issue might be a delay of the broadcast and we should identify the cause of the late broadcast instead.\n\nBest regards,\nYoshiaki",
+      "parentUuid": "3484ce66_8b714277",
+      "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
