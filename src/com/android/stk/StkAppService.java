@@ -230,7 +230,6 @@ public class StkAppService extends Service implements Runnable {
     static final int OP_ALPHA_NOTIFY = 11;
     static final int OP_IDLE_SCREEN = 12;
     static final int OP_SET_IMMED_DAL_INST = 13;
-    static final int OP_HOME_KEY_PRESSED = 14;
 
     //Invalid SetupEvent
     static final int INVALID_SETUP_EVENT = 0xFF;
@@ -304,11 +303,6 @@ public class StkAppService extends Service implements Runnable {
     private static final int NOTIFICATION_ON_KEYGUARD = 1;
     private static final long[] VIBRATION_PATTERN = new long[] { 0, 350, 250, 350 };
     private BroadcastReceiver mUserPresentReceiver = null;
-
-    // The reason based on Intent.ACTION_CLOSE_SYSTEM_DIALOGS.
-    private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
-    private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
-    private BroadcastReceiver mHomeKeyEventReceiver = null;
 
     @Override
     public void onCreate() {
@@ -415,7 +409,6 @@ public class StkAppService extends Service implements Runnable {
         unregisterUserActivityReceiver();
         unregisterProcessObserver();
         unregisterLocaleChangeReceiver();
-        unregisterHomeKeyEventReceiver();
         sInstance = null;
         waitForLooper();
         mServiceLooper.quit();
@@ -709,14 +702,6 @@ public class StkAppService extends Service implements Runnable {
             case EVENT_MULTI_SIM_CONFIG_CHANGED:
                 handleMultiSimConfigChanged();
                 break;
-            case OP_HOME_KEY_PRESSED:
-                CatLog.d(LOG_TAG, "Process the home key pressed event");
-                for (int slot = 0; slot < mSimCount; slot++) {
-                    if (mStkContext[slot] != null) {
-                        handleHomeKeyPressed(slot);
-                    }
-                }
-                break;
             }
         }
 
@@ -824,54 +809,36 @@ public class StkAppService extends Service implements Runnable {
         return false;
     }
 
-    private synchronized void startToObserveHomeKeyEvent(int slotId) {
-        if (mStkContext[slotId].mIsSessionFromUser || mHomeKeyEventReceiver != null) {
-            return;
-        }
-        mHomeKeyEventReceiver = new BroadcastReceiver() {
-            @Override public void onReceive(Context context, Intent intent) {
-                if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(
-                        intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY))) {
-                    Message message = mServiceHandler.obtainMessage();
-                    message.arg1 = OP_HOME_KEY_PRESSED;
-                    mServiceHandler.sendMessage(message);
-                }
-            }
-        };
-        CatLog.d(LOG_TAG, "Started to observe home key event");
-        registerReceiver(mHomeKeyEventReceiver,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-    }
-
-    private synchronized void unregisterHomeKeyEventReceiver() {
-        if (mHomeKeyEventReceiver != null) {
-            CatLog.d(LOG_TAG, "Stopped to observe home key event");
-            unregisterReceiver(mHomeKeyEventReceiver);
-            mHomeKeyEventReceiver = null;
-        }
-        if (mServiceHandler != null) {
-            mServiceHandler.removeMessages(OP_HOME_KEY_PRESSED);
-        }
-    }
-
-    private void handleHomeKeyPressed(int slotId) {
-        // It might be hard for user to recognize that the dialog or screens belong to SIM Toolkit
-        // application if the current session was not initiated by user but by the SIM card,
-        // so it is recommended to send TERMINAL RESPONSE if user press the home key.
+    private void startToObserveIdleScreen(int slotId) {
         if (!mStkContext[slotId].mIsSessionFromUser) {
-            Activity dialog = mStkContext[slotId].getPendingDialogInstance();
-            Activity activity = mStkContext[slotId].getPendingActivityInstance();
-            if (dialog != null) {
-                dialog.finish();
-                mStkContext[slotId].mDialogInstance = null;
-            } else if (activity != null) {
-                activity.finish();
-                mStkContext[slotId].mActivityInstance = null;
+            if (!isScreenIdle()) {
+                synchronized (this) {
+                    if (mProcessObserver == null && !mServiceHandler.hasMessages(OP_IDLE_SCREEN)) {
+                        registerProcessObserver();
+                    }
+                }
+            } else {
+                handleIdleScreen(slotId);
             }
         }
     }
 
     private void handleIdleScreen(int slotId) {
+        // It might be hard for user to recognize that the dialog or screens belong to SIM Toolkit
+        // application if the current session was not initiated by user but by the SIM card,
+        // so it is recommended to send TERMINAL RESPONSE if user goes to the idle screen.
+        if (!mStkContext[slotId].mIsSessionFromUser) {
+            Activity dialog = mStkContext[slotId].getPendingDialogInstance();
+            if (dialog != null) {
+                dialog.finish();
+                mStkContext[slotId].mDialogInstance = null;
+            }
+            Activity activity = mStkContext[slotId].getPendingActivityInstance();
+            if (activity != null) {
+                activity.finish();
+                mStkContext[slotId].mActivityInstance = null;
+            }
+        }
         // If the idle screen event is present in the list need to send the
         // response to SIM.
         CatLog.d(this, "Need to send IDLE SCREEN Available event to SIM");
@@ -1274,7 +1241,7 @@ public class StkAppService extends Service implements Runnable {
     @SuppressWarnings("FallThrough")
     private void handleCmdResponse(Bundle args, int slotId) {
         CatLog.d(LOG_TAG, "handleCmdResponse, sim id: " + slotId);
-        unregisterHomeKeyEventReceiver();
+        unregisterProcessObserver();
         if (mStkContext[slotId].mCurrentCmd == null) {
             return;
         }
@@ -1583,7 +1550,7 @@ public class StkAppService extends Service implements Runnable {
             mStkContext[slotId].mMenuState = StkMenuActivity.STATE_SECONDARY;
         }
         if (mStkContext[slotId].mMenuState == StkMenuActivity.STATE_SECONDARY) {
-            startToObserveHomeKeyEvent(slotId);
+            startToObserveIdleScreen(slotId);
         }
         newIntent.putExtra(SLOT_ID, slotId);
         newIntent.setData(uriData);
@@ -1611,7 +1578,7 @@ public class StkAppService extends Service implements Runnable {
             notifyUserIfNecessary(slotId, input.text);
         }
         startActivity(newIntent);
-        startToObserveHomeKeyEvent(slotId);
+        startToObserveIdleScreen(slotId);
     }
 
     private void launchTextDialog(int slotId) {
@@ -1641,7 +1608,7 @@ public class StkAppService extends Service implements Runnable {
         if (!mStkContext[slotId].mCurrentCmd.geTextMessage().responseNeeded) {
             sendResponse(RES_ID_CONFIRM, slotId, true);
         } else {
-            startToObserveHomeKeyEvent(slotId);
+            startToObserveIdleScreen(slotId);
         }
     }
 
