@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3484ce66_8b714277",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-20T18:26:26Z",
+      "side": 1,
+      "message": "We\u0027re seeing issues reported by carriers that a regression has occurred between Android 10 and Android 11 when handling homekey response time. According to the report and attached logs, in Android 10 the handleIdleScreen (now handleHomeKeyPressed) would trigger right after user input, but in Android 11 the function does not trigger until about a minute later.\n\nSince this is the only change that went in to R related to this behavior, I\u0027m creating a revert as a speculative fix.",
+      "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
