@@ -70,6 +70,24 @@
       "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "555d3ee9_3a746e24",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-20T23:50:55Z",
+      "side": 1,
+      "message": "Actually one useful detail is that when lookin at the bugreport I actually see the broadcast in the broadcast history section being sent at the correct time. The issue is that the StkAppService does not print out any log like \"Process the home key pressed event\" which suggests it\u0027s not posting the OP_HOME_KEY_PRESSED message.",
+      "parentUuid": "0cb94825_03cd2e49",
+      "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
