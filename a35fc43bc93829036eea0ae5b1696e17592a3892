@@ -106,6 +106,24 @@
       "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87813570_54ac46b7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121198
+      },
+      "writtenOn": "2020-08-21T16:12:08Z",
+      "side": 1,
+      "message": "Good catch! We have an internal tracking bug (not sure if I can share it with you because it\u0027s filed for a carrier) but I will refrain from the revert and just upload the fix you described. Thanks for the help",
+      "parentUuid": "fd4b9202_ab559582",
+      "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
