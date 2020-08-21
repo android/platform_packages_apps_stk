@@ -88,6 +88,24 @@
       "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd4b9202_ab559582",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1163305
+      },
+      "writtenOn": "2020-08-21T10:19:38Z",
+      "side": 1,
+      "message": "@Jordan - Apologies for my fault. Do we already have a bug ID or should I file new issue report in Buganizer? I uploaded the following commit and now I can see the expected behavior.\n\n    Specify OP_HOME_KEY_PRESSED correctly\n    https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1406848\n\nThe cause of the issue was my careless mistake made when I rebased the following change.\n\n    Differentiate home screen from others implemented in the same activity\n    https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/940240/6..7/src/com/android/stk/StkAppService.java\n\nBetween the patch set 6 and the patch set 7, the other fix below was merged and the operation code was moved from \u0027arg1\u0027 to \u0027what\u0027. However, I did not notice it at that time and could not update this part.\n\n    Operation code should be handled with the field \u0027what\u0027 of Message class\n    https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/963551\n\nI think that you also see the invalid operation code \u00270\u0027 in the bug report you have.\n\n    08-21 15:31:47.246 2966 5845 D CAT : StkAppService: handleMessage opcode[0], sim id[0]",
+      "parentUuid": "555d3ee9_3a746e24",
+      "revId": "a35fc43bc93829036eea0ae5b1696e17592a3892",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
