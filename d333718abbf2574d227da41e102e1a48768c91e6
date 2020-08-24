@@ -1,0 +1,8 @@
+Code-Review+2: Jordan Liu <jminjie@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Open-Source-Licensing+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Submitted-by: Jordan Liu <jminjie@google.com>
+Submitted-at: Mon, 24 Aug 2020 18:26:23 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Stk/+/1406848
+Project: platform/packages/apps/Stk
+Branch: refs/heads/master
