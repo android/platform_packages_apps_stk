@@ -834,7 +834,12 @@ public class StkAppService extends Service implements Runnable {
                 // "home" so we accept both here
                 if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)
                     || SYSTEM_DIALOG_REASON_RECENTAPPS_KEY.equals(reason)) {
+<<<<<<< HEAD   (4ce835 Merge "Merge Android R")
                     Message message = mServiceHandler.obtainMessage(OP_HOME_KEY_PRESSED);
+=======
+                    Message message = mServiceHandler.obtainMessage();
+                    message.arg1 = OP_HOME_KEY_PRESSED;
+>>>>>>> BRANCH (4704b4 Merge cherrypicks of [12373238, 12372475, 12370691, 12373239)
                     mServiceHandler.sendMessage(message);
                 }
             }
