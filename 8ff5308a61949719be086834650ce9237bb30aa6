@@ -1,0 +1,30 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000009595366",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/743041?revision\u003d14",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "79434145_9ac49436",
+        "filename": "src/com/android/stk/StkAppInstaller.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2021-04-05T09:26:09Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 60,
+        "startChar": 57,
+        "endLine": 60,
+        "endChar": 73
+      },
+      "revId": "8ff5308a61949719be086834650ce9237bb30aa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
